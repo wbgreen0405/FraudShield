@@ -1,5 +1,5 @@
 import streamlit as st
-from config import supabase
+from .config import supabase
 import pandas as pd
 from datetime import datetime
 
