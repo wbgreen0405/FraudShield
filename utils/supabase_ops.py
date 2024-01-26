@@ -7,9 +7,10 @@ from datetime import datetime
 from supabase import create_client, Client
 
 # Initialize Supabase client using Streamlit secrets
-url: str = st.secrets["SUPABASE_URL"]
-key: str = st.secrets["SUPABASE_KEY"]
-supabase: Client = create_client(url, key)
+# Initialize Supabase client using Streamlit secrets
+supabase_url = st.secrets["supabase"]["url"]
+supabase_key = st.secrets["supabase"]["key"]
+supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     # Fetch transactions from Supabase
