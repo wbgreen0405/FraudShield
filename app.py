@@ -1,8 +1,8 @@
-import os
 import streamlit as st
 from pages.home import home_page
 from pages.transactions import transactions_page
-# Import other pages here if you have more
+from pages.approval_system import approval_system_page
+from pages.supervised_fraud_results import supervised_fraud_results_page
 
 def render_sidebar():
     # Get the directory where the script is located
@@ -19,15 +19,15 @@ def render_sidebar():
     # Dictionary mapping page names to their respective functions
     pages = {
         'Home': home_page,
-        'Transactions': transactions_page
-        # Add other pages as needed, e.g., 'Supervised Results': supervised_results_page
+        'Transactions': transactions_page,
+        'Supervised Fraud Results': supervised_fraud_results_page,
+        'Approval System': approval_system_page,
     }
 
-    # Radio button for page navigation
-    page = st.sidebar.radio('Select a page:', list(pages.keys()))
-    
-    # Return the function corresponding to the selected page
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Select a page:", list(pages.keys()))
     return pages[page]
+
 
 def main():
     # Render the sidebar and get the selected page function
