@@ -3,7 +3,7 @@ import streamlit as st
 # Function to render the home page
 def home_page():
     st.title('FraudShield - Fraud Detection System')
-    st.image('path_to_your_logo.png')  # Replace with the path to your logo if you have one
+    st.image('assets/logo_transparent.png')  # Replace with the path to your logo if you have one
     st.write(
         """
         Welcome to FraudShield, a robust application designed to detect and review fraudulent transactions 
