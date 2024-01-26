@@ -11,9 +11,6 @@ url: str = st.secrets["SUPABASE_URL"]
 key: str = st.secrets["SUPABASE_KEY"]
 supabase: Client = create_client(url, key)
 
-# ... rest of your supabase_ops functions ...
-
-
 def fetch_transactions():
     # Fetch transactions from Supabase
     data = supabase.table('transactions_table').select('*').execute()
