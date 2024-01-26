@@ -43,3 +43,17 @@ def save_anomaly_detection_records(transactions_data, lof_anomaly_indices, lof_n
     if response.error:
         st.error(f"Failed to save anomaly detection records: {response.error.message}")
 
+def fetch_unified_flags():
+    # Fetch unified flags from Supabase
+    data = supabase.table('unified_flags').select('*').execute()
+    if data.error:
+        st.error(f"Failed to fetch unified flags: {data.error.message}")
+        return pd.DataFrame()
+    return pd.DataFrame(data.data)
+
+def update_unified_flag(flag_id, status):
+    # Update the status of a unified flag in Supabase
+    response = supabase.table('unified_flags').update({'status': status}).eq('id', flag_id).execute()
+    if response.error:
+        st.error(f"Failed to update flag: {response.error.message}")
+
