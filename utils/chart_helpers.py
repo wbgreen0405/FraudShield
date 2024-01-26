@@ -34,3 +34,13 @@ def plot_feature_importances(model, feature_names):
     plt.xlim([-1, len(importances)])
     plt.ylabel('Importance')
     return plt
+
+def plot_lof_outlier_detection(lof_scores):
+    plt.figure(figsize=(10, 5))
+    sns.scatterplot(range(len(lof_scores)), lof_scores)
+    plt.title('LOF Outlier Detection')
+    plt.xlabel('Data Point Index')
+    plt.ylabel('LOF Score')
+    # Highlight the threshold
+    plt.axhline(y=-1.5, color='r', linestyle='--')  # Replace -1.5 with your actual threshold value
+    return plt
