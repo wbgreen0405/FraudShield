@@ -57,3 +57,18 @@ def update_unified_flag(flag_id, status):
     if response.error:
         st.error(f"Failed to update flag: {response.error.message}")
 
+
+def fetch_offline_review_transactions():
+    # Fetch transactions that require offline review from Supabase
+    data = supabase.table('offline_review_transactions').select('*').execute()
+    if data.error:
+        st.error(f"Failed to fetch transactions for offline review: {data.error.message}")
+        return pd.DataFrame()
+    return pd.DataFrame(data.data)
+
+def save_offline_review_decisions(decisions):
+    # Save the offline review decisions to Supabase
+    for index, decision in decisions.items():
+        response = supabase.table('offline_review_decisions').update({'decision': decision}).eq('transaction_id', index).execute()
+        if response.error:
+            st.error(f"Failed to save offline review decision for transaction {index}: {response.error.message}")
