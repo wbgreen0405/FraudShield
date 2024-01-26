@@ -1,9 +1,22 @@
+import os
 import streamlit as st
+
+# Get the directory where the script is located
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to the image
+image_path = os.path.join(current_dir, 'assets', 'logo.png')  # make sure the file name matches exactly
 
 # Function to render the home page
 def home_page():
     st.title('FraudShield - Fraud Detection System')
-    st.image('assets/logo.png')  # Replace with the path to your logo if you have one
+    # Try to display the image using the absolute path
+    try:
+        st.image(image_path)
+    except Exception as e:
+        st.error(f"An error occurred when loading the logo: {e}")
+    
+    # Welcome message
     st.write(
         """
         Welcome to FraudShield, a robust application designed to detect and review fraudulent transactions 
@@ -45,3 +58,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
