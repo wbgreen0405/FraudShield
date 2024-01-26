@@ -12,6 +12,9 @@ def run_inference(transactions_data):
     # Load models
     with open(RF_MODEL_PATH, 'rb') as file:
         rf_model = pickle.load(file)
+        # Store the model in the session state so it can be accessed from other pages
+        st.session_state['rf_model'] = rf_model
+        
     with open(LOF_MODEL_PATH, 'rb') as file:
         lof_model = pickle.load(file)
 
