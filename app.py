@@ -1,7 +1,7 @@
 import streamlit as st
 from pages.home import home_page
 from pages.transactions import transactions_page
-from pages.approval_system import approval_system_page
+from pages.offline_review import offline_review_page
 from pages.supervised_fraud_results import supervised_fraud_results_page
 
 def render_sidebar():
@@ -21,7 +21,7 @@ def render_sidebar():
         'Home': home_page,
         'Transactions': transactions_page,
         'Supervised Fraud Results': supervised_fraud_results_page,
-        'Approval System': approval_system_page,
+        'Offline Review': offline_review_page,
     }
 
     st.sidebar.title("Navigation")
