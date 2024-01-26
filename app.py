@@ -5,7 +5,7 @@ import streamlit as st
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Construct the path to the image for the logo in the sidebar
-logo_path = os.path.join(current_dir, 'assets', 'logo.png')  # Update the path if needed
+logo_path = os.path.join(current_dir, 'assets', 'logo_transparent.png')  # Update the path if needed
 
 # Function to render the sidebar with the logo and navigation
 def render_sidebar():
