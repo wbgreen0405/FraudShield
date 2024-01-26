@@ -2,10 +2,9 @@ import streamlit as st
 import pandas as pd
 import pickle
 from st_aggrid import AgGrid
-from datetime import datetime
 from utils.supabase_ops import fetch_transactions, save_unified_flags, save_anomaly_detection_records
 
-# File paths for the saved models
+# Paths to the model files (Update these paths to where your models are stored)
 RF_MODEL_PATH = 'path/to/random_forest_model.pkl'
 LOF_MODEL_PATH = 'path/to/lof_nonfraud.pkl'
 
@@ -35,21 +34,28 @@ def run_inference(transactions_data):
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
 
     # Prepare data for saving
-    save_unified_flags(transactions_data, rf_predictions, rf_probabilities)
-    save_anomaly_detection_records(transactions_data, lof_anomaly_indices)
+    save_unified_flags(transactions_data.iloc[potential_fraud_indices], rf_predictions, rf_probabilities)
+    save_anomaly_detection_records(transactions_data.iloc[lof_anomaly_indices], lof_anomaly_indices)
 
-    st.write("Inference complete and results saved.")
+    st.session_state['rf_predictions'] = rf_predictions
+    st.session_state['rf_probabilities'] = rf_probabilities
+    st.session_state['potential_fraud_indices'] = potential_fraud_indices
+    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
+
+    st.success("Inference complete and results saved.")
 
 def transactions_page():
     st.title('Transactions')
+    
     transactions_data = fetch_transactions()
+    
+    if not transactions_data.empty:
+        AgGrid(transactions_data)
 
     if st.button('Run Inference'):
         run_inference(transactions_data)
 
-    if not transactions_data.empty:
-        AgGrid(transactions_data)
-    else:
-        st.write("No transactions data to display.")
+# Run this page function
+transactions_page()
 
 
