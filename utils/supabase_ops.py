@@ -3,6 +3,17 @@ from config import supabase
 import pandas as pd
 from datetime import datetime
 
+
+from supabase import create_client, Client
+
+# Initialize Supabase client using Streamlit secrets
+url: str = st.secrets["SUPABASE_URL"]
+key: str = st.secrets["SUPABASE_KEY"]
+supabase: Client = create_client(url, key)
+
+# ... rest of your supabase_ops functions ...
+
+
 def fetch_transactions():
     # Fetch transactions from Supabase
     data = supabase.table('transactions_table').select('*').execute()
