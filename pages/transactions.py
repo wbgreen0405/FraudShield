@@ -51,17 +51,13 @@ def transactions_page():
     st.title('Transactions')
     transactions_data = fetch_transactions()
 
-    # Convert column names to strings if they are not
-    transactions_data.columns = transactions_data.columns.map(str)
-
     if st.button('Run Inference'):
         run_inference(transactions_data)
 
     if not transactions_data.empty:
-        AgGrid(transactions_data)
+        st.dataframe(transactions_data)  # Display using a regular Streamlit DataFrame
     else:
         st.write("No transactions data to display.")
-
 
 # Run this page function
 transactions_page()
