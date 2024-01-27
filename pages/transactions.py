@@ -93,25 +93,41 @@ def load_model(uploaded_file):
         #return None
 
 
-def fetch_transactions():
-    try:
-        response = supabase.table('transactions').select('ref_id').execute()
+#def fetch_transactions():
+    #try:
+        #response = supabase.table('transactions').select('ref_id').execute()
 
         # Checking if response is successful
-        if response.status_code == 200:
-            data = response.data
-            if data:
-                return pd.DataFrame(data)
-            else:
-                st.write("Transactions table is empty.")
-                return pd.DataFrame()
-        else:
-            st.error(f'Request failed with status code: {response.status_code}')
+        #if response.status_code == 200:
+            #data = response.data
+            #if data:
+                #return pd.DataFrame(data)
+            #else:
+                #st.write("Transactions table is empty.")
+                #return pd.DataFrame()
+        #else:
+            #st.error(f'Request failed with status code: {response.status_code}')
+            #return pd.DataFrame()
+
+    #except Exception as e:
+        #st.error(f'An error occurred: {e}')
+        #return pd.DataFrame()
+
+def fetch_transactions():
+    try:
+        # Fetch only 100 rows from the 'transactions' table
+        data, error = supabase.table('transactions').select('*').limit(100).execute()
+
+        # Check if there's an error in the response
+        if error:
+            st.error(f'Failed to retrieve data. Error: {error.message}')
             return pd.DataFrame()
 
+        return pd.DataFrame(data)
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
+
 
 
 def run_inference(transactions_data):
