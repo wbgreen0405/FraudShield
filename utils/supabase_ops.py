@@ -12,20 +12,28 @@ supabase_url = st.secrets["supabase"]["url"]
 supabase_key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(supabase_url, supabase_key)
 
-def fetch_transactions():
+#def fetch_transactions():
     # Logic to fetch transactions from Supabase
-    try:
+    #try:
         data, error = supabase.table('transactions').select('*').execute()
         
         # Check if there's an error in the response
-        if error:
+        #if error:
             st.error(f'Failed to retrieve data. Error: {error}')
-            return pd.DataFrame()
-        else:
-            return pd.DataFrame(data)
+            #return pd.DataFrame()
+        #else:
+            #return pd.DataFrame(data)
 
+    #except Exception as e:
+        #st.error(f'An error occurred: {e}')
+        #return pd.DataFrame()
+
+def fetch_transactions():
+    # Fetch transactions from Supabase
+    try:
+        data, _ = supabase.table('transactions').select('*').execute()
+        return pd.DataFrame(data)
     except Exception as e:
-        st.error(f'An error occurred: {e}')
         return pd.DataFrame()
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
