@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from pages.home import home_page
 from pages.transactions import transactions_page
