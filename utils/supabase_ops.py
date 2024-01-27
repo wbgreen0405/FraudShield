@@ -31,7 +31,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     try:
-        data, error = supabase.table('transactions').select('*').execute()
+        data, error = supabase.table('transactions').select('*').execute().limit(100).execute()
 
         # If there is an error, handle it here
         if error:
