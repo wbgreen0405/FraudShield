@@ -15,22 +15,44 @@ def load_model(uploaded_file):
         return pickle.load(file)
 
 # Function to fetch transactions from Supabase
+#def fetch_transactions():
+    #try:
+        #response = supabase.table('transactions').select('*').limit(100).execute()
+        # Check for errors in the response
+        #if hasattr(response, 'error') and response.error:
+            #st.error(f'Failed to retrieve data. Error: {str(response.error)}')
+            #return pd.DataFrame()
+        #elif hasattr(response, 'data'):
+            #return pd.DataFrame(response.data)
+        #else:
+            #st.error('Unexpected response format.')
+            #return pd.DataFrame()
+    #except Exception as e:
+        #st.error(f'An error occurred: {e}')
+        #return pd.DataFrame()
+
 def fetch_transactions():
     try:
-        response = supabase.table('transactions').select('*').limit(100).execute()
+        response = supabase.table('transactions').select('*').execute()
+        # Log the entire response for debugging
+        st.write("Response received:", response)
+
         # Check for errors in the response
         if hasattr(response, 'error') and response.error:
             st.error(f'Failed to retrieve data. Error: {str(response.error)}')
             return pd.DataFrame()
         elif hasattr(response, 'data'):
-            return pd.DataFrame(response.data)
+            if response.data:
+                return pd.DataFrame(response.data)
+            else:
+                st.warning('No data found in the transactions table.')
+                return pd.DataFrame()
         else:
             st.error('Unexpected response format.')
             return pd.DataFrame()
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
 
 
 def run_inference(transactions_data):
