@@ -75,21 +75,26 @@ def update_unified_flag(flag_id, status):
         st.error(f"Failed to update flag: {response.error.message}")
 
 
-def fetch_offline_review_transactions():
-    try:
+#def fetch_offline_review_transactions():
+    #try:
         # Attempt to fetch data from the table
-        response = supabase.table('offline_review_transactions').select('*').execute()
+        #response = supabase.table('offline_review_transactions').select('*').execute()
 
         # Check if the response is successful
-        if response.status_code == 200:
-            return pd.DataFrame(response.data)
-        else:
-            st.warning('Offline review transactions table does not exist yet.')
-            return pd.DataFrame()
+        #if response.status_code == 200:
+            #return pd.DataFrame(response.data)
+        #else:
+            #st.warning('Offline review transactions table does not exist yet.')
+            #return pd.DataFrame()
 
-    except Exception as e:
-        st.error(f'An error occurred while fetching offline review transactions: {e}')
-        return pd.DataFrame()
+   # except Exception as e:
+        #st.error(f'An error occurred while fetching offline review transactions: {e}')
+       # return pd.DataFrame()
+
+def fetch_offline_review_transactions():
+    # Temporarily bypassing this function as the table doesn't exist yet
+    # You can add the relevant code here once the table is created
+    return pd.DataFrame()
 
 
 def save_offline_review_decisions(decisions):
