@@ -5,5 +5,5 @@ supabase
 pandas
 matplotlib
 seaborn
-sklearn
+scikit-learn
 
