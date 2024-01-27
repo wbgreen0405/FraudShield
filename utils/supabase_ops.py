@@ -32,18 +32,22 @@ supabase: Client = create_client(supabase_url, supabase_key)
 def fetch_transactions():
     try:
         data, error = supabase.table('transactions').select('*').execute()
-        
-        # Check if there's an error in the response
+
         if error:
-            st.error(f'Failed to retrieve data. Error: {error}')
+            st.error(f'Failed to retrieve data. Error: {error.message}')
             return pd.DataFrame()
-        
-        # Convert the data to a DataFrame if there's no error
-        return pd.DataFrame(data)
-    
+
+        # Check if the data is in the expected format (list of dictionaries)
+        if isinstance(data, list) and all(isinstance(item, dict) for item in data):
+            return pd.DataFrame(data)
+        else:
+            st.error('Unexpected data format received from Supabase.')
+            return pd.DataFrame()
+
     except Exception as e:
-        st.error(f'An error occurred: {e}')
+        st.error(f'An exception occurred: {e}')
         return pd.DataFrame()
+
 
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
