@@ -5,3 +5,5 @@ supabase
 pandas
 matplotlib
 seaborn
+sklearn
+scipy
