@@ -15,14 +15,14 @@ supabase: Client = create_client(supabase_url, supabase_key)
 def fetch_transactions():
     # Logic to fetch transactions from Supabase
     try:
-        response = supabase.table('transactions').select('*').execute()
+        data, error = supabase.table('transactions').select('*').execute()
         
-        # Check for a successful response
-        if response.error is None:
-            return pd.DataFrame(response.data)
-        else:
-            st.error(f'Failed to retrieve data. Error: {response.error.message}')
+        # Check for errors in the response
+        if error:
+            st.error(f'Failed to retrieve data: {error.message}')
             return pd.DataFrame()
+        else:
+            return pd.DataFrame(data)
 
     except Exception as e:
         st.error(f'An error occurred: {e}')
