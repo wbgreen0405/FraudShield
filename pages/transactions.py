@@ -1,12 +1,22 @@
 import streamlit as st
 import pandas as pd
 import pickle
-from st_aggrid import AgGrid
-from utils.supabase_ops import fetch_transactions, save_unified_flags, save_anomaly_detection_records
+import gzip
+import zipfile
+import io
 
-# Paths to the model files (Update these paths to where your models are stored)
-RF_MODEL_PATH = 'path/to/random_forest_model.pkl'
-LOF_MODEL_PATH = 'path/to/lof_nonfraud.pkl'
+# Helper function to load a model from a GZIP file
+def load_model(uploaded_file):
+    with gzip.open(uploaded_file, 'rb') as file:
+        return pickle.load(file)
+
+# Helper function to read transactions data from a ZIP file
+def read_transactions_data(uploaded_file):
+    with zipfile.ZipFile(uploaded_file, 'r') as zfile:
+        # Assuming there is only one CSV file in the ZIP
+        csv_filename = zfile.namelist()[0]
+        with zfile.open(csv_filename) as csvfile:
+            return pd.read_csv(csvfile)
 
 def run_inference(transactions_data):
     # Load models
@@ -49,15 +59,25 @@ def run_inference(transactions_data):
 
 def transactions_page():
     st.title('Transactions')
-    transactions_data = fetch_transactions()
 
-    if st.button('Run Inference'):
-        run_inference(transactions_data)
+    # File uploaders for transaction data and models
+    uploaded_transactions = st.file_uploader("Upload transactions data (ZIP file)", type=['zip'])
+    uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
+    uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
 
-    if not transactions_data.empty:
-        st.dataframe(transactions_data)  # Display using a regular Streamlit DataFrame
+    # Conditional processing based on file uploads
+    if uploaded_transactions and uploaded_rf_model and uploaded_lof_model:
+        transactions_data = read_transactions_data(uploaded_transactions)
+        rf_model = load_model(uploaded_rf_model)
+        lof_model = load_model(uploaded_lof_model)
+
+        if st.button('Run Inference'):
+            run_inference(transactions_data, rf_model, lof_model)
+
+        st.dataframe(transactions_data)
     else:
-        st.write("No transactions data to display.")
+        st.write("Please upload all required files.")
+
 
 # Run this page function
 transactions_page()
