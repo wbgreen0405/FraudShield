@@ -175,14 +175,36 @@ def run_inference(transactions_data):
     #else:
        #st.write("No transactions data available.")
 
+#def transactions_page():
+    #st.title('Transactions')
+
+    # Load models from uploaded files
+    #uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
+    #uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
+
+    #rf_model, lof_model = None, None
+    #if uploaded_rf_model and uploaded_lof_model:
+        #rf_model = load_model(uploaded_rf_model)
+        #lof_model = load_model(uploaded_lof_model)
+    #else:
+        #st.write("Please upload model files to run inference.")
+
+    # Fetch transactions data from Supabase
+    #transactions_data = fetch_transactions()
+
+    #if transactions_data and not transactions_data.empty:
+        #if st.button('Run Inference'):
+            #run_inference(transactions_data, rf_model, lof_model)
+        #st.dataframe(transactions_data)
+    #else:
+        #st.write("No transactions data available or an error occurred.")
+
 def transactions_page():
     st.title('Transactions')
 
     # Load models from uploaded files
     uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
     uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
-
-    rf_model, lof_model = None, None
     if uploaded_rf_model and uploaded_lof_model:
         rf_model = load_model(uploaded_rf_model)
         lof_model = load_model(uploaded_lof_model)
@@ -192,12 +214,14 @@ def transactions_page():
     # Fetch transactions data from Supabase
     transactions_data = fetch_transactions()
 
-    if transactions_data and not transactions_data.empty:
+    # Corrected boolean check for DataFrame
+    if not transactions_data.empty:
         if st.button('Run Inference'):
             run_inference(transactions_data, rf_model, lof_model)
         st.dataframe(transactions_data)
     else:
-        st.write("No transactions data available or an error occurred.")
+        st.write("No transactions data available.")
+
 
 # Run this page function
 transactions_page()
