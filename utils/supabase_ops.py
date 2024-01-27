@@ -31,23 +31,18 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     try:
-        data, error = supabase.table('transactions').select('*').execute().limit(100).execute()
+        # Fetch only 100 rows from the 'transactions' table
+        data = supabase.table('transactions').select('*').limit(100).execute()
 
-        # If there is an error, handle it here
-        if error:
-            error_message = getattr(error, 'message', 'Unknown error')
-            st.error(f'Failed to retrieve data. Error: {error_message}')
+        # The data is the first element of the tuple
+        if data.error:
+            st.error(f'Failed to retrieve data. Error: {data.error.message}')
             return pd.DataFrame()
 
-        # Convert data to a DataFrame and return it
-        return pd.DataFrame(data)
-
+        return pd.DataFrame(data.data)
     except Exception as e:
-        # Handle other exceptions
-        st.error(f'An exception occurred: {str(e)}')
+        st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
-
 
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
