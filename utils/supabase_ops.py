@@ -13,12 +13,15 @@ supabase_key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
-    # Fetch transactions from Supabase
+    # Logic to fetch transactions from Supabase
     data = supabase.table('transactions').select('*').execute()
-    if data.error:
-        st.error('Failed to retrieve data: ' + str(data.error))
+
+    # Check if there's an error in the response
+    if data.get('error'):
+        st.error('Failed to retrieve data: ' + str(data['error']))
         return pd.DataFrame()
-    return pd.DataFrame(data.data)
+    return pd.DataFrame(data.get('data', []))
+
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
     unified_flags = []
