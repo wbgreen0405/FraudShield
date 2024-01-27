@@ -3,3 +3,5 @@ streamlit-aggrid
 st-supabase-connection
 supabase
 pandas
+matplotlib
+seaborn
