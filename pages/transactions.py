@@ -17,14 +17,17 @@ def load_model(uploaded_file):
 # Function to fetch transactions from Supabase
 def fetch_transactions():
     try:
-        data = supabase.table('transactions').select('*').limit(100).execute()
-        if data.error:
-            st.error(f'Failed to retrieve data. Error: {data.error.message}')
+        response = supabase.table('transactions').select('*').execute()
+        # Check if response is successful
+        if response.status_code == 200:
+            return pd.DataFrame(response.data)
+        else:
+            st.error(f'Failed to retrieve data. Status code: {response.status_code}')
             return pd.DataFrame()
-        return pd.DataFrame(data.data)
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
+
 
 def run_inference(transactions_data):
     # Load models
