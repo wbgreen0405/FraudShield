@@ -31,13 +31,34 @@ def load_model(uploaded_file):
         #st.error(f'An error occurred: {e}')
         #return pd.DataFrame()
 
-def fetch_transactions():
-    try:
+#def fetch_transactions():
+    #try:
         response = supabase.table('transactions').select('*').execute()
         # Log the entire response for debugging
-        st.write("Response received:", response)
+        #st.write("Response received:", response)
 
         # Check for errors in the response
+        #if hasattr(response, 'error') and response.error:
+            #st.error(f'Failed to retrieve data. Error: {str(response.error)}')
+            #return pd.DataFrame()
+        #elif hasattr(response, 'data'):
+            #if response.data:
+                #return pd.DataFrame(response.data)
+            #else:
+                #st.warning('No data found in the transactions table.')
+                #return pd.DataFrame()
+        #else:
+            #st.error('Unexpected response format.')
+            #return pd.DataFrame()
+    #except Exception as e:
+        #st.error(f'An error occurred: {e}')
+        #return pd.DataFrame()
+
+def fetch_transactions():
+    try:
+        response = supabase.table('transactions').select('ref_id').execute()  # Assuming 'id' is a column in your table
+        st.write("Response received:", response)
+
         if hasattr(response, 'error') and response.error:
             st.error(f'Failed to retrieve data. Error: {str(response.error)}')
             return pd.DataFrame()
