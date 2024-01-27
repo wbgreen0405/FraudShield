@@ -31,18 +31,30 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     try:
-        data, error = supabase.table('transactions').select('*').execute()
+        response = supabase.table('transactions').select('*').execute()
         
-        # Check if there's an error in the response
-        if error:
-            st.error(f'Failed to retrieve data. Error: {error}')
-            return pd.DataFrame()
+        # Debug: print the raw response to understand its structure
+        st.write("Raw response:", response)
+
+        # If response is a tuple, the first element should be data, the second should be the count or error
+        if isinstance(response, tuple):
+            data, count_or_error = response
+            
+            # If count_or_error is a dictionary, it might be the error
+            if isinstance(count_or_error, dict):
+                st.error(f"Failed to retrieve data. Error: {count_or_error.get('message', 'Unknown error')}")
+                return pd.DataFrame()
+            else:
+                # Assume no error and proceed with the data
+                return pd.DataFrame(data)
         else:
-            return pd.DataFrame(data)
+            st.error("Unexpected response format.")
+            return pd.DataFrame()
 
     except Exception as e:
-        st.error(f'An error occurred: {str(e)}')
+        st.error(f"An exception occurred: {e}")
         return pd.DataFrame()
+
 
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
