@@ -17,9 +17,9 @@ def fetch_transactions():
     try:
         data, error = supabase.table('transactions').select('*').execute()
         
-        # Check for errors in the response
+        # Check if there's an error in the response
         if error:
-            st.error(f'Failed to retrieve data: {error.message}')
+            st.error(f'Failed to retrieve data. Error: {error}')
             return pd.DataFrame()
         else:
             return pd.DataFrame(data)
