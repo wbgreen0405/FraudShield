@@ -31,24 +31,19 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     try:
-        # Using the directly imported 'supabase' client to execute the query
-        data = supabase.from_('transactions').select('*').execute()
-
-        # Check the result and proceed accordingly
-        if data['data']:
-            return pd.DataFrame(data['data'])
-        else:
-            if data['error']:
-                st.error(f"Failed to retrieve data. Error: {data['error']}")
-            else:
-                st.write("No transactions data to display.")
+        data, error = supabase.table('transactions').select('*').execute()
+        
+        # Check if there's an error in the response
+        if error:
+            st.error(f'Failed to retrieve data. Error: {error}')
             return pd.DataFrame()
-
+        
+        # Convert the data to a DataFrame if there's no error
+        return pd.DataFrame(data)
+    
     except Exception as e:
-        st.error(f"An exception occurred: {e}")
+        st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
-
 
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
