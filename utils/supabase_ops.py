@@ -15,7 +15,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
 def fetch_transactions():
     # Logic to fetch transactions from Supabase
     try:
-        response = supabase.table('transactions_table').select('*').execute()
+        response = supabase.table('transactions').select('*').execute()
         
         # Check for a successful response (status code 200)
         if response.status_code == 200:
