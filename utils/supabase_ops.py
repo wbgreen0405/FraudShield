@@ -33,20 +33,20 @@ def fetch_transactions():
     try:
         data, error = supabase.table('transactions').select('*').execute()
 
+        # If there is an error, handle it here
         if error:
-            st.error(f'Failed to retrieve data. Error: {error.message}')
+            error_message = getattr(error, 'message', 'Unknown error')
+            st.error(f'Failed to retrieve data. Error: {error_message}')
             return pd.DataFrame()
 
-        # Check if the data is in the expected format (list of dictionaries)
-        if isinstance(data, list) and all(isinstance(item, dict) for item in data):
-            return pd.DataFrame(data)
-        else:
-            st.error('Unexpected data format received from Supabase.')
-            return pd.DataFrame()
+        # Convert data to a DataFrame and return it
+        return pd.DataFrame(data)
 
     except Exception as e:
-        st.error(f'An exception occurred: {e}')
+        # Handle other exceptions
+        st.error(f'An exception occurred: {str(e)}')
         return pd.DataFrame()
+
 
 
 
