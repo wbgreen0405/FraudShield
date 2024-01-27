@@ -17,10 +17,10 @@ def fetch_transactions():
     data = supabase.table('transactions').select('*').execute()
 
     # Check if there's an error in the response
-    if data.get('error'):
-        st.error('Failed to retrieve data: ' + str(data['error']))
+    if response.error:
+        st.error('Failed to retrieve data: ' + str(response.error))
         return pd.DataFrame()
-    return pd.DataFrame(data.get('data', []))
+    return pd.DataFrame(response.data)
 
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
