@@ -19,7 +19,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
         
         # Check if there's an error in the response
         #if error:
-            st.error(f'Failed to retrieve data. Error: {error}')
+            #st.error(f'Failed to retrieve data. Error: {error}')
             #return pd.DataFrame()
         #else:
             #return pd.DataFrame(data)
