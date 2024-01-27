@@ -14,13 +14,20 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     # Logic to fetch transactions from Supabase
-    response = supabase.table('transactions').select('*').execute()
+    try:
+        response = supabase.table('transactions_table').select('*').execute()
+        
+        # Check for a successful response (status code 200)
+        if response.status_code == 200:
+            return pd.DataFrame(response.data)
+        else:
+            st.error(f'Failed to retrieve data. Status code: {response.status_code}')
+            return pd.DataFrame()
 
-    # Check if there's an error in the response
-    if response.error:
-        st.error('Failed to retrieve data: ' + str(response.error))
+    except Exception as e:
+        st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-    return pd.DataFrame(response.data)
+
 
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
