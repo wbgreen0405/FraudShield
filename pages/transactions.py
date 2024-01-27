@@ -17,16 +17,20 @@ def load_model(uploaded_file):
 # Function to fetch transactions from Supabase
 def fetch_transactions():
     try:
-        response = supabase.table('transactions').select('*').execute()
-        # Check if response is successful
-        if response.status_code == 200:
+        response = supabase.table('transactions').select('*').limit(100).execute()
+        # Check for errors in the response
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data. Error: {str(response.error)}')
+            return pd.DataFrame()
+        elif hasattr(response, 'data'):
             return pd.DataFrame(response.data)
         else:
-            st.error(f'Failed to retrieve data. Status code: {response.status_code}')
+            st.error('Unexpected response format.')
             return pd.DataFrame()
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
+
 
 
 def run_inference(transactions_data):
