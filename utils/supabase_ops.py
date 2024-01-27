@@ -14,7 +14,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     # Fetch transactions from Supabase
-    data = supabase.table('transactions_table').select('*').execute()
+    data = supabase.table('transactions').select('*').execute()
     if data.error:
         st.error('Failed to retrieve data: ' + str(data.error))
         return pd.DataFrame()
