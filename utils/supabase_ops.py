@@ -28,24 +28,18 @@ supabase: Client = create_client(supabase_url, supabase_key)
         #st.error(f'An error occurred: {e}')
         #return pd.DataFrame()
 
+
 def fetch_transactions():
     try:
-        response = supabase.table('transactions').select('*').execute()
-        print("Response:", response)  # Debug print
-        data = response.data
-        if data:
-            print("Data:", data)  # Debug print
-            return pd.DataFrame(data)
-        else:
-            print("No data was fetched. Error:", response.error)  # Debug print
-            st.error('Failed to retrieve data')
+        data, error = supabase.table('transactions').select('*').execute()
+        if error:
+            st.error(f'Failed to retrieve data. Error: {error.message}')  # or just {error} to print the whole error object
             return pd.DataFrame()
+        else:
+            return pd.DataFrame(data)
     except Exception as e:
-        print("An exception occurred:", e)  # Debug print
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
-
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
     unified_flags = []
