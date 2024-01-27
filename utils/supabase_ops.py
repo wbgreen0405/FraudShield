@@ -17,18 +17,16 @@ def fetch_transactions():
     try:
         response = supabase.table('transactions').select('*').execute()
         
-        # Check for a successful response (status code 200)
-        if response.status_code == 200:
+        # Check for a successful response
+        if response.error is None:
             return pd.DataFrame(response.data)
         else:
-            st.error(f'Failed to retrieve data. Status code: {response.status_code}')
+            st.error(f'Failed to retrieve data. Error: {response.error.message}')
             return pd.DataFrame()
 
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
-
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
     unified_flags = []
