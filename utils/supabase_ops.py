@@ -31,29 +31,23 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     try:
-        response = supabase.table('transactions').select('*').execute()
-        
-        # Debug: print the raw response to understand its structure
-        st.write("Raw response:", response)
+        # Using the directly imported 'supabase' client to execute the query
+        data = supabase.from_('transactions').select('*').execute()
 
-        # If response is a tuple, the first element should be data, the second should be the count or error
-        if isinstance(response, tuple):
-            data, count_or_error = response
-            
-            # If count_or_error is a dictionary, it might be the error
-            if isinstance(count_or_error, dict):
-                st.error(f"Failed to retrieve data. Error: {count_or_error.get('message', 'Unknown error')}")
-                return pd.DataFrame()
-            else:
-                # Assume no error and proceed with the data
-                return pd.DataFrame(data)
+        # Check the result and proceed accordingly
+        if data['data']:
+            return pd.DataFrame(data['data'])
         else:
-            st.error("Unexpected response format.")
+            if data['error']:
+                st.error(f"Failed to retrieve data. Error: {data['error']}")
+            else:
+                st.write("No transactions data to display.")
             return pd.DataFrame()
 
     except Exception as e:
         st.error(f"An exception occurred: {e}")
         return pd.DataFrame()
+
 
 
 
