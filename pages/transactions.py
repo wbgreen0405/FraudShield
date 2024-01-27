@@ -33,7 +33,7 @@ def load_model(uploaded_file):
 
 #def fetch_transactions():
     #try:
-        response = supabase.table('transactions').select('*').execute()
+        #response = supabase.table('transactions').select('*').execute()
         # Log the entire response for debugging
         #st.write("Response received:", response)
 
