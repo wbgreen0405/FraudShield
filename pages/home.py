@@ -18,3 +18,5 @@ def home_page():
     Inspired by innovative methodologies in fraud detection, this app offers an in-depth look at how data science can be leveraged to protect financial assets and maintain transactional integrity.
     """)
 
+home_page()
+
