@@ -30,11 +30,11 @@ supabase: Client = create_client(supabase_url, supabase_key)
 
 def fetch_transactions():
     # Fetch transactions from Supabase
-    try:
-        data = supabase.table('transactions').select('*').execute()
-        return pd.DataFrame(data)
-    except:
-        return pd.DataFrame()
+    #try:
+    data = supabase.table('transactions').select('*').execute()
+    return pd.DataFrame(data)
+    #except:
+        #return pd.DataFrame()
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
     unified_flags = []
