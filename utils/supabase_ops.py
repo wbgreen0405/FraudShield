@@ -29,12 +29,16 @@ supabase: Client = create_client(supabase_url, supabase_key)
         #return pd.DataFrame()
 
 def fetch_transactions():
-    # Fetch transactions from Supabase
-    #try:
-    data = supabase.table('transactions').select('*').execute()
-    return pd.DataFrame(data)
-    #except:
-        #return pd.DataFrame()
+    try:
+        response = supabase.table('transactions').select('*').execute()
+        # The data is the first element of the tuple
+        data = response.data
+        # Convert only the data to a DataFrame
+        return pd.DataFrame(data)
+    except Exception as e:
+        st.error(f'An error occurred: {e}')
+        return pd.DataFrame()
+
 
 def save_unified_flags(transactions_data, rf_predictions, rf_probabilities):
     unified_flags = []
