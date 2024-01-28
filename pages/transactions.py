@@ -15,119 +15,6 @@ def load_model(uploaded_file):
         return pickle.load(file)
 
 # Function to fetch transactions from Supabase
-#def fetch_transactions():
-    #try:
-        #response = supabase.table('transactions').select('*').limit(100).execute()
-        # Check for errors in the response
-        #if hasattr(response, 'error') and response.error:
-            #st.error(f'Failed to retrieve data. Error: {str(response.error)}')
-            #return pd.DataFrame()
-        #elif hasattr(response, 'data'):
-            #return pd.DataFrame(response.data)
-        #else:
-            #st.error('Unexpected response format.')
-            #return pd.DataFrame()
-    #except Exception as e:
-        #st.error(f'An error occurred: {e}')
-        #return pd.DataFrame()
-
-#def fetch_transactions():
-    #try:
-        #response = supabase.table('transactions').select('*').execute()
-        # Log the entire response for debugging
-        #st.write("Response received:", response)
-
-        # Check for errors in the response
-        #if hasattr(response, 'error') and response.error:
-            #st.error(f'Failed to retrieve data. Error: {str(response.error)}')
-            #return pd.DataFrame()
-        #elif hasattr(response, 'data'):
-            #if response.data:
-                #return pd.DataFrame(response.data)
-            #else:
-                #st.warning('No data found in the transactions table.')
-                #return pd.DataFrame()
-        #else:
-            #st.error('Unexpected response format.')
-            #return pd.DataFrame()
-    #except Exception as e:
-        #st.error(f'An error occurred: {e}')
-        #return pd.DataFrame()
-
-#def fetch_transactions():
-    #try:
-        #response = supabase.table('transactions').select('ref_id').execute()  # Assuming 'id' is a column in your table
-        #st.write("Response received:", response)
-
-        #if hasattr(response, 'error') and response.error:
-            #st.error(f'Failed to retrieve data. Error: {str(response.error)}')
-            #return pd.DataFrame()
-        #elif hasattr(response, 'data'):
-            #if response.data:
-                #return pd.DataFrame(response.data)
-            #else:
-                #st.warning('No data found in the transactions table.')
-                #return pd.DataFrame()
-        #else:
-            #st.error('Unexpected response format.')
-            #return pd.DataFrame()
-    #except Exception as e:
-        #st.error(f'An error occurred: {e}')
-        #return pd.DataFrame()
-
-#def fetch_transactions():
-    #try:
-        #response = supabase.table('transactions').select('*').limit(100).execute()
-        
-        # Check for errors in the response
-        #if hasattr(response, 'error') and response.error:
-            #st.error(f'Failed to retrieve data. Error: {str(response.error)}')
-            #return None  # Return None or appropriate placeholder if there's an error
-       # elif hasattr(response, 'data'):
-            #return response.data  # Return the raw data
-        #else:
-            #st.error('Unexpected response format.')
-            #return None
-    #except Exception as e:
-        #st.error(f'An error occurred: {e}')
-        #return None
-
-
-#def fetch_transactions():
-    #try:
-        #response = supabase.table('transactions').select('ref_id').execute()
-
-        # Checking if response is successful
-        #if response.status_code == 200:
-            #data = response.data
-            #if data:
-                #return pd.DataFrame(data)
-            #else:
-                #st.write("Transactions table is empty.")
-                #return pd.DataFrame()
-        #else:
-            #st.error(f'Request failed with status code: {response.status_code}')
-            #return pd.DataFrame()
-
-    #except Exception as e:
-        #st.error(f'An error occurred: {e}')
-        #return pd.DataFrame()
-
-#def fetch_transactions():
-    #try:
-        # Fetch only 100 rows from the 'transactions' table
-        #data, error = supabase.table('transactions').select('*').limit(100).execute()
-
-        # Check if there's an error in the response
-        #if error:
-            #st.error(f'Failed to retrieve data. Error: {error.message}')
-            #return pd.DataFrame()
-
-        #return pd.DataFrame(data)
-    #except Exception as e:
-        #st.error(f'An error occurred: {e}')
-        #return pd.DataFrame()
-
 def fetch_transactions():
     try:
         response = supabase.table('transactions').select('*').limit(100).execute()
@@ -142,9 +29,6 @@ def fetch_transactions():
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
-
-
 
 def run_inference(transactions_data):
     # Load models
@@ -185,78 +69,28 @@ def run_inference(transactions_data):
 
     st.success("Inference complete and results saved.")
 
-#def transactions_page():
-    #st.title('Transactions')
-
-    # Load models from uploaded files
-    #uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
-    #uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
-    #if uploaded_rf_model and uploaded_lof_model:
-        #rf_model = load_model(uploaded_rf_model)
-        #lof_model = load_model(uploaded_lof_model)
-    #else:
-        #st.write("Please upload model files to run inference.")
-
-    # Fetch transactions data from Supabase
-    #transactions_data = fetch_transactions()
-
-    #if not transactions_data.empty:
-        #if st.button('Run Inference'):
-            #run_inference(transactions_data, rf_model, lof_model)
-        #st.dataframe(transactions_data)
-    #else:
-       #st.write("No transactions data available.")
-
-#def transactions_page():
-    #st.title('Transactions')
-
-    # Load models from uploaded files
-    #uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
-    #uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
-
-    #rf_model, lof_model = None, None
-    #if uploaded_rf_model and uploaded_lof_model:
-        #rf_model = load_model(uploaded_rf_model)
-        #lof_model = load_model(uploaded_lof_model)
-    #else:
-        #st.write("Please upload model files to run inference.")
-
-    # Fetch transactions data from Supabase
-    #transactions_data = fetch_transactions()
-
-    #if transactions_data and not transactions_data.empty:
-        #if st.button('Run Inference'):
-            #run_inference(transactions_data, rf_model, lof_model)
-        #st.dataframe(transactions_data)
-    #else:
-        #st.write("No transactions data available or an error occurred.")
-
 def transactions_page():
     st.title('Transactions')
 
     # Load models from uploaded files
     uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
     uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
+    
+    rf_model, lof_model = None, None
     if uploaded_rf_model and uploaded_lof_model:
         rf_model = load_model(uploaded_rf_model)
         lof_model = load_model(uploaded_lof_model)
-    else:
-        st.write("Please upload model files to run inference.")
 
     # Fetch transactions data from Supabase
     transactions_data = fetch_transactions()
 
-    # Corrected boolean check for DataFrame
     if not transactions_data.empty:
-        if st.button('Run Inference'):
+        if st.button('Run Inference') and rf_model and lof_model:
             run_inference(transactions_data, rf_model, lof_model)
         st.dataframe(transactions_data)
     else:
         st.write("No transactions data available.")
 
-
 # Run this page function
 transactions_page()
-
-
 
