@@ -130,19 +130,19 @@ def load_model(uploaded_file):
 
 def fetch_transactions():
     try:
-        data, error = supabase.table('transactions').select('*').limit(1).execute()
-        if error:
-            st.error(f'Error fetching data: {error}')
+        response = supabase.table('transactions').select('*').limit(100).execute()
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data. Error: {str(response.error)}')
             return pd.DataFrame()
-        elif data:
-            st.success('Successfully fetched data.')
-            return pd.DataFrame(data)
+        elif hasattr(response, 'data'):
+            return pd.DataFrame(response.data)
         else:
-            st.warning('No data available in the transactions table.')
+            st.error('Unexpected response format.')
             return pd.DataFrame()
     except Exception as e:
-        st.error(f'An exception occurred: {e}')
+        st.error(f'An error occurred: {e}')
         return pd.DataFrame()
+
 
 
 
