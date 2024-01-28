@@ -86,19 +86,19 @@ def transactions_page():
     transactions_data = fetch_transactions()
 
     if not transactions_data.empty:
-        # Configure grid options
-        gb = GridOptionsBuilder.from_dataframe(transactions_data)
-        # You can add additional configurations here if needed
-        grid_options = gb.build()
-
         if st.button('Run Inference') and rf_model and lof_model:
             run_inference(transactions_data, rf_model, lof_model)
 
-        # Display the data using AgGrid with custom grid options
-        AgGrid(transactions_data, gridOptions=grid_options, height=300, fit_columns_on_grid_load=True)
+        # Configure and display the table using AgGrid
+        gb = GridOptionsBuilder.from_dataframe(transactions_data)
+        gb.configure_pagination(paginationAutoPageSize=True) # Enable Pagination
+        gb.configure_side_bar() # Enable Side Bar
+        gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
+        gridOptions = gb.build()
+
+        AgGrid(transactions_data, gridOptions=gridOptions, enable_enterprise_modules=True)
     else:
         st.write("No transactions data available.")
 
 # Run this page function
 transactions_page()
-
