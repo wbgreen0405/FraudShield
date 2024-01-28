@@ -130,20 +130,20 @@ def load_model(uploaded_file):
 
 def fetch_transactions():
     try:
-        # Fetch only 100 rows from the 'transactions' table
-        data, error = supabase.table('transactions').select('*').limit(100).execute()
-
-        # Check if there's an error in the response
+        data, error = supabase.table('transactions').select('*').limit(1).execute()
         if error:
-            # Extracting error message from the error object
-            error_message = getattr(error, 'message', 'Unknown error')
-            st.error(f'Failed to retrieve data. Error: {error_message}')
+            st.error(f'Error fetching data: {error}')
             return pd.DataFrame()
-
-        return pd.DataFrame(data)
+        elif data:
+            st.success('Successfully fetched data.')
+            return pd.DataFrame(data)
+        else:
+            st.warning('No data available in the transactions table.')
+            return pd.DataFrame()
     except Exception as e:
-        st.error(f'An error occurred: {e}')
+        st.error(f'An exception occurred: {e}')
         return pd.DataFrame()
+
 
 
 def run_inference(transactions_data):
