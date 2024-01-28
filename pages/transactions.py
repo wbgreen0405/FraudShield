@@ -71,21 +71,18 @@ def run_inference(transactions_data):
     st.success("Inference complete and results saved.")
 
 def transactions_page():
-
     # Set page layout to wide
     st.set_page_config(layout="wide")
     st.title('Transactions')
 
-    st.markdown(
-    """
+    # Custom styles for the AgGrid table
+    st.markdown("""
     <style>
     .ag-theme-alpine {
         width: 100% !important;
     }
     </style>
-    """,
-    unsafe_allow_html=True)
-
+    """, unsafe_allow_html=True)
 
     # Load models from uploaded files
     uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
@@ -109,16 +106,11 @@ def transactions_page():
         gb.configure_side_bar()  # Enable side bar
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         gb.configure_grid_options(enableRangeSelection=True)
-        gb.configure_auto_size_columns(True)  # Automatically adjust column widths
         grid_options = gb.build()
 
-        # Ensure that the grid takes the full width of the container
-        st.markdown("<style> .ag-theme-alpine { width: 100%; } </style>", unsafe_allow_html=True)
-        
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True, fit_columns_on_grid_load=True)
     else:
         st.write("No transactions data available.")
 
 # Run this page function
 transactions_page()
-
