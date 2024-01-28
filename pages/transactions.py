@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pickle
 import gzip
+from st_aggrid import AgGrid, GridOptionsBuilder
 from supabase import create_client, Client
 
 # Initialize Supabase client using Streamlit secrets
@@ -75,7 +76,7 @@ def transactions_page():
     # Load models from uploaded files
     uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
     uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
-    
+
     rf_model, lof_model = None, None
     if uploaded_rf_model and uploaded_lof_model:
         rf_model = load_model(uploaded_rf_model)
@@ -85,11 +86,21 @@ def transactions_page():
     transactions_data = fetch_transactions()
 
     if not transactions_data.empty:
+        # Configure grid options
+        gb = GridOptionsBuilder.from_dataframe(transactions_data)
+        gb.configure_header_style(background_color='lightblue', font_weight='bold')  # Customize the header
+        grid_options = gb.build()
+
         if st.button('Run Inference') and rf_model and lof_model:
             run_inference(transactions_data, rf_model, lof_model)
-        st.dataframe(transactions_data)
+
+        # Display the data using AgGrid with custom grid options
+        AgGrid(transactions_data, gridOptions=grid_options, height=300, fit_columns_on_grid_load=True)
     else:
         st.write("No transactions data available.")
+
+# Run this page function
+transactions_page()
 
 # Run this page function
 transactions_page()
