@@ -88,7 +88,7 @@ def transactions_page():
     if not transactions_data.empty:
         # Configure grid options
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
-        gb.configure_header_style(background_color='lightblue', font_weight='bold')  # Customize the header
+        # You can add additional configurations here if needed
         grid_options = gb.build()
 
         if st.button('Run Inference') and rf_model and lof_model:
@@ -98,9 +98,6 @@ def transactions_page():
         AgGrid(transactions_data, gridOptions=grid_options, height=300, fit_columns_on_grid_load=True)
     else:
         st.write("No transactions data available.")
-
-# Run this page function
-transactions_page()
 
 # Run this page function
 transactions_page()
