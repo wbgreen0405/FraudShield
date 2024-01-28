@@ -71,9 +71,7 @@ def run_inference(transactions_data):
     st.success("Inference complete and results saved.")
 
 def transactions_page():
-    # Set page layout to wide
     st.set_page_config(layout="wide")
-
     st.title('Transactions')
 
     # Load models from uploaded files
@@ -98,7 +96,6 @@ def transactions_page():
         gb.configure_side_bar()  # Enable side bar
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         grid_options = gb.build()
-
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
     else:
         st.write("No transactions data available.")
