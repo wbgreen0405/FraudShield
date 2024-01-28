@@ -113,6 +113,21 @@ def load_model(uploaded_file):
         #st.error(f'An error occurred: {e}')
         #return pd.DataFrame()
 
+#def fetch_transactions():
+    #try:
+        # Fetch only 100 rows from the 'transactions' table
+        #data, error = supabase.table('transactions').select('*').limit(100).execute()
+
+        # Check if there's an error in the response
+        #if error:
+            #st.error(f'Failed to retrieve data. Error: {error.message}')
+            #return pd.DataFrame()
+
+        #return pd.DataFrame(data)
+    #except Exception as e:
+        #st.error(f'An error occurred: {e}')
+        #return pd.DataFrame()
+
 def fetch_transactions():
     try:
         # Fetch only 100 rows from the 'transactions' table
@@ -120,14 +135,15 @@ def fetch_transactions():
 
         # Check if there's an error in the response
         if error:
-            st.error(f'Failed to retrieve data. Error: {error.message}')
+            # Extracting error message from the error object
+            error_message = getattr(error, 'message', 'Unknown error')
+            st.error(f'Failed to retrieve data. Error: {error_message}')
             return pd.DataFrame()
 
         return pd.DataFrame(data)
     except Exception as e:
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
-
 
 
 def run_inference(transactions_data):
