@@ -91,12 +91,12 @@ def transactions_page():
 
         # Configure and display the table using AgGrid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
-        gb.configure_pagination(paginationAutoPageSize=True) # Enable Pagination
-        gb.configure_side_bar() # Enable Side Bar
+        gb.configure_pagination(paginationAutoPageSize=True) # Enable automatic pagination
+        gb.configure_side_bar() # Enable side bar
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
-        gridOptions = gb.build()
+        grid_options = gb.build()
 
-        AgGrid(transactions_data, gridOptions=gridOptions, enable_enterprise_modules=True)
+        AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
     else:
         st.write("No transactions data available.")
 
