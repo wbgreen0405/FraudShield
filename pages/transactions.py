@@ -71,6 +71,9 @@ def run_inference(transactions_data):
     st.success("Inference complete and results saved.")
 
 def transactions_page():
+
+    # Set page layout to wide
+    st.set_page_config(layout="wide")
     st.title('Transactions')
 
     # Load models from uploaded files
@@ -91,7 +94,7 @@ def transactions_page():
 
         # Configure and display the table using AgGrid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
-        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)  # Set number of rows per page
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=25)  # Set number of rows per page
         gb.configure_side_bar()  # Enable side bar
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         grid_options = gb.build()
