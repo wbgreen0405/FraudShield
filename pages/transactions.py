@@ -72,7 +72,6 @@ def preprocess_data(df):
 
 
 def run_inference(transactions_data, rf_model, lof_model):
-
     # Preprocess the data
     preprocessed_data = preprocess_data(transactions_data)
     
@@ -83,13 +82,17 @@ def run_inference(transactions_data, rf_model, lof_model):
     # Filter out transactions flagged as potential fraud and non-fraud
     potential_fraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 1]
     potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
-    X_potential_nonfraud = transactions_data.iloc[potential_nonfraud_indices]
+    X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
-    # Apply LOF model on potential non-fraud cases
-    lof_anomaly_indices = []
-    if len(X_potential_nonfraud) > 20:
-        lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-        lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
+    # Ensure X_potential_nonfraud contains only numerical data
+    if X_potential_nonfraud.select_dtypes(include=['object']).empty:
+        # Apply LOF model on potential non-fraud cases
+        lof_anomaly_indices = []
+        if len(X_potential_nonfraud) > 20:
+            lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
+            lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
+    else:
+        raise ValueError("Non-numerical data found in input to LOF model")
 
     # Combine LOF anomalies and RF frauds for human review
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
