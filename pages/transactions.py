@@ -86,49 +86,33 @@ def run_inference(transactions_data, rf_model, lof_model):
     potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
-    st.write("X_potential_nonfraud:", X_potential_nonfraud.head())
+    #st.write("X_potential_nonfraud:", X_potential_nonfraud.head())
 
     # Check for non-numerical data
     non_numerical_data = X_potential_nonfraud.select_dtypes(include=['object'])
     if not non_numerical_data.empty:
-        st.write("Non-numerical data found:")
-        st.dataframe(non_numerical_data)
+        #st.write("Non-numerical data found:")
+        #st.dataframe(non_numerical_data)
         raise ValueError("Non-numerical data found in input to LOF model")
 
-
     # Apply LOF model on potential non-fraud cases
-     #lof_anomaly_indices = []
-     #if len(X_potential_nonfraud) > 20:
-         #try:
-             #lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-             #lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
-         #except Exception as e:
-             #print("Error applying LOF model:", e)
-             #print("X_potential_nonfraud:")
-            # print(X_potential_nonfraud)
-
-    # Rest of your function...
-
-
-
-    # Apply LOF model on potential non-fraud cases
-    #lof_anomaly_indices = []
-    #if len(X_potential_nonfraud) > 20:
-        #lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-        #lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
+    lof_anomaly_indices = []
+    if len(X_potential_nonfraud) > 20:
+        lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
+        lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
 
     # Combine LOF anomalies and RF frauds for human review
-    #offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
+    offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
 
     # Prepare data for saving
-    #save_unified_flags(transactions_data.iloc[potential_fraud_indices], rf_predictions, rf_probabilities)
-    #save_anomaly_detection_records(transactions_data.iloc[lof_anomaly_indices], lof_anomaly_indices)
+    save_unified_flags(transactions_data.iloc[potential_fraud_indices], rf_predictions, rf_probabilities)
+    save_anomaly_detection_records(transactions_data.iloc[lof_anomaly_indices], lof_anomaly_indices)
 
     # Store the results in the session state
     st.session_state['rf_predictions'] = rf_predictions
     st.session_state['rf_probabilities'] = rf_probabilities
     st.session_state['potential_fraud_indices'] = potential_fraud_indices
-    #st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
+    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
 
     # Notify the completion of the inference process
     st.success("Inference complete and results saved.")
