@@ -55,13 +55,13 @@ def preprocess_data(df):
         if col in df.columns:
             encoder = LabelEncoder()
             df[col] = encoder.fit_transform(df[col])
-    
+
     # Ensure the order of columns matches that of the training data
-    # Adjust the list below to match the column order of your training data
-    required_cols = ['feature1', 'feature2', 'payment_type', 'source', 'device_os', 'employment_status', 'housing_status', ...]
-    df = df[required_cols]
+    #required_cols = ['amount', 'transaction_type', 'payment_type', 'source', 'device_os', 'employment_status', 'housing_status']
+    #df = df[required_cols]
 
     return df
+
 
 def run_inference(transactions_data, rf_model, lof_model):
 
