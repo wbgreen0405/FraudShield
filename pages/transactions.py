@@ -49,20 +49,27 @@ def fetch_transactions():
         return pd.DataFrame()
 
 def preprocess_data(df):
-
-    # Drop the ref_id column
+    # Drop the 'ref_id' column as it's not used for predictions
     df = df.drop(columns=['ref_id'], errors='ignore')
-    
+
     # Encode categorical columns
-    categorical_cols = ['payment_type', 'source', 'device_os', 'employment_status', 'housing_status']
+    categorical_cols = [
+        'payment_type', 'bank_branch_count_8w', 'employment_status', 
+        'email_is_free', 'housing_status', 'has_other_cards', 
+        'foreign_request', 'source', 'device_os', 'keep_alive_session', 
+        'device_fraud_count', 'month'
+    ]
     for col in categorical_cols:
         if col in df.columns:
             encoder = LabelEncoder()
+            df[col] = df[col].fillna('Unknown')  # Fill NaNs with 'Unknown'
             df[col] = encoder.fit_transform(df[col])
 
-    # Ensure the order of columns matches that of the training data
-    #required_cols = ['amount', 'transaction_type', 'payment_type', 'source', 'device_os', 'employment_status', 'housing_status']
-    #df = df[required_cols]
+    # Handle any remaining missing values in numerical columns
+    # Example: Fill NaNs with the median of the column
+    for col in df.columns:
+        if df[col].dtype != 'O':  # If column is not an object (text)
+            df[col] = df[col].fillna(df[col].median())
 
     return df
 
