@@ -4,6 +4,7 @@ import pickle
 import gzip
 from st_aggrid import AgGrid, GridOptionsBuilder
 from supabase import create_client, Client
+import boto3
 
 # Initialize Supabase client using Streamlit secrets
 supabase_url = st.secrets["supabase"]["url"]
@@ -11,8 +12,17 @@ supabase_key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(supabase_url, supabase_key)
 
 # Helper function to load a model from a GZIP file
-def load_model(uploaded_file):
-    with gzip.open(uploaded_file, 'rb') as file:
+#def load_model(uploaded_file):
+    #with gzip.open(uploaded_file, 'rb') as file:
+        #return pickle.load(file)
+
+def load_model_from_s3(bucket_name, model_key):
+    s3_client = boto3.client('s3')
+    response = s3_client.get_object(Bucket=bucket_name, Key=model_key)
+    model_str = response['Body'].read()
+
+    # Assuming the model is saved in a GZIP file
+    with gzip.GzipFile(fileobj=io.BytesIO(model_str)) as file:
         return pickle.load(file)
 
 # Function to fetch transactions from Supabase
@@ -74,14 +84,22 @@ def transactions_page():
     st.set_page_config(layout="wide")
     st.title('Transactions')
 
-    # Load models from uploaded files
-    uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
-    uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
+    # Define AWS S3 bucket and model keys
+    bucket_name = 'frauddetectpred'
+    rf_model_key = 's3://frauddetectpred/random_forest_model.pkl.gz'
+    lof_model_key = 's3://frauddetectpred/lof_nonfraud.pkl.gz'
 
-    rf_model, lof_model = None, None
-    if uploaded_rf_model and uploaded_lof_model:
-        rf_model = load_model(uploaded_rf_model)
-        lof_model = load_model(uploaded_lof_model)
+    # Load models from S3 or uploaded files
+    if 'use_s3_for_models' in st.session_state and st.session_state['use_s3_for_models']:
+        rf_model = load_model_from_s3(bucket_name, rf_model_key)
+        lof_model = load_model_from_s3(bucket_name, lof_model_key)
+    else:
+        uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
+        uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
+        rf_model, lof_model = None, None
+        if uploaded_rf_model and uploaded_lof_model:
+            rf_model = load_model(uploaded_rf_model)
+            lof_model = load_model(uploaded_lof_model)
 
     # Fetch transactions data from Supabase
     transactions_data = fetch_transactions()
@@ -102,3 +120,37 @@ def transactions_page():
 
 # Run this page function
 transactions_page()
+
+
+#def transactions_page():
+    #st.set_page_config(layout="wide")
+    #st.title('Transactions')
+
+    # Load models from uploaded files
+    #uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
+    #uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
+
+    #rf_model, lof_model = None, None
+    #if uploaded_rf_model and uploaded_lof_model:
+        #rf_model = load_model(uploaded_rf_model)
+        #lof_model = load_model(uploaded_lof_model)
+
+    # Fetch transactions data from Supabase
+    #transactions_data = fetch_transactions()
+
+    #if not transactions_data.empty:
+        #if st.button('Run Inference') and rf_model and lof_model:
+            #run_inference(transactions_data, rf_model, lof_model)
+
+        # Configure and display the table using AgGrid
+        #gb = GridOptionsBuilder.from_dataframe(transactions_data)
+        #gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)  # Set number of rows per page
+        #gb.configure_side_bar()  # Enable side bar
+        #gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
+        #grid_options = gb.build()
+        #AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
+    #else:
+        #st.write("No transactions data available.")
+
+# Run this page function
+#transactions_page()
