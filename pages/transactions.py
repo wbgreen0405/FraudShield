@@ -47,16 +47,7 @@ def fetch_transactions():
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
 
-def run_inference(transactions_data):
-    # Load models
-    with open(RF_MODEL_PATH, 'rb') as file:
-        rf_model = pickle.load(file)
-        # Store the model in the session state so it can be accessed from other pages
-        st.session_state['rf_model'] = rf_model
-        
-    with open(LOF_MODEL_PATH, 'rb') as file:
-        lof_model = pickle.load(file)
-
+def run_inference(transactions_data, rf_model, lof_model):
     # Predict potential fraud cases with probabilities
     rf_probabilities = rf_model.predict_proba(transactions_data)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_probabilities]
@@ -78,6 +69,13 @@ def run_inference(transactions_data):
     # Prepare data for saving
     save_unified_flags(transactions_data.iloc[potential_fraud_indices], rf_predictions, rf_probabilities)
     save_anomaly_detection_records(transactions_data.iloc[lof_anomaly_indices], lof_anomaly_indices)
+
+    st.session_state['rf_predictions'] = rf_predictions
+    st.session_state['rf_probabilities'] = rf_probabilities
+    st.session_state['potential_fraud_indices'] = potential_fraud_indices
+    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
+
+    st.success("Inference complete and results saved.")
 
     st.session_state['rf_predictions'] = rf_predictions
     st.session_state['rf_probabilities'] = rf_probabilities
