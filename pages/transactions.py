@@ -4,6 +4,7 @@ import pickle
 import gzip
 import io
 import boto3
+from sklearn.preprocessing import LabelEncoder
 from st_aggrid import AgGrid, GridOptionsBuilder
 from supabase import create_client, Client
 
@@ -47,9 +48,28 @@ def fetch_transactions():
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
 
+def preprocess_data(df):
+    # Encode categorical columns
+    categorical_cols = ['payment_type', 'source', 'device_os', 'employment_status', 'housing_status']
+    for col in categorical_cols:
+        if col in df.columns:
+            encoder = LabelEncoder()
+            df[col] = encoder.fit_transform(df[col])
+    
+    # Ensure the order of columns matches that of the training data
+    # Adjust the list below to match the column order of your training data
+    required_cols = ['feature1', 'feature2', 'payment_type', 'source', 'device_os', 'employment_status', 'housing_status', ...]
+    df = df[required_cols]
+
+    return df
+
 def run_inference(transactions_data, rf_model, lof_model):
+
+    # Preprocess the data
+    preprocessed_data = preprocess_data(transactions_data)
+    
     # Predict potential fraud cases with probabilities
-    rf_probabilities = rf_model.predict_proba(transactions_data)[:, 1]
+    rf_probabilities = rf_model.predict_proba(preprocessed_data)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_probabilities]
 
     # Filter out transactions flagged as potential fraud and non-fraud
