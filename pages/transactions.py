@@ -90,16 +90,16 @@ def transactions_page():
     lof_model_key = 's3://frauddetectpred/lof_nonfraud.pkl.gz'
 
     # Load models from S3 or uploaded files
-    if 'use_s3_for_models' in st.session_state and st.session_state['use_s3_for_models']:
-        rf_model = load_model_from_s3(bucket_name, rf_model_key)
-        lof_model = load_model_from_s3(bucket_name, lof_model_key)
-    else:
-        uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
-        uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
-        rf_model, lof_model = None, None
-        if uploaded_rf_model and uploaded_lof_model:
-            rf_model = load_model(uploaded_rf_model)
-            lof_model = load_model(uploaded_lof_model)
+    #if 'use_s3_for_models' in st.session_state and st.session_state['use_s3_for_models']:
+    rf_model = load_model_from_s3(bucket_name, rf_model_key)
+    lof_model = load_model_from_s3(bucket_name, lof_model_key)
+    #else:
+        #uploaded_rf_model = st.file_uploader("Upload Random Forest model (GZIP file)", type=['gz'])
+        #uploaded_lof_model = st.file_uploader("Upload LOF model (GZIP file)", type=['gz'])
+        #rf_model, lof_model = None, None
+        #if uploaded_rf_model and uploaded_lof_model:
+            #rf_model = load_model(uploaded_rf_model)
+            #lof_model = load_model(uploaded_lof_model)
 
     # Fetch transactions data from Supabase
     transactions_data = fetch_transactions()
