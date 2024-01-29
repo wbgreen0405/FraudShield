@@ -49,6 +49,10 @@ def fetch_transactions():
         return pd.DataFrame()
 
 def preprocess_data(df):
+
+    # Drop the ref_id column
+    df = df.drop(columns=['ref_id'], errors='ignore')
+    
     # Encode categorical columns
     categorical_cols = ['payment_type', 'source', 'device_os', 'employment_status', 'housing_status']
     for col in categorical_cols:
