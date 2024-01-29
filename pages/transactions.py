@@ -88,6 +88,12 @@ def run_inference(transactions_data, rf_model, lof_model):
 
     st.write("X_potential_nonfraud:", X_potential_nonfraud.head())
 
+    # Check for non-numerical data
+    non_numerical_data = X_potential_nonfraud.select_dtypes(include=['object'])
+    if not non_numerical_data.empty:
+        st.write("Non-numerical data found:")
+        st.dataframe(non_numerical_data)
+        raise ValueError("Non-numerical data found in input to LOF model")
 
 
     # Apply LOF model on potential non-fraud cases
