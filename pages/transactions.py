@@ -85,14 +85,14 @@ def run_inference(transactions_data, rf_model, lof_model):
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
     # Ensure X_potential_nonfraud contains only numerical data
-    if X_potential_nonfraud.select_dtypes(include=['object']).empty:
-        # Apply LOF model on potential non-fraud cases
-        lof_anomaly_indices = []
-        if len(X_potential_nonfraud) > 20:
-            lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-            lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
-    else:
+    if not X_potential_nonfraud.select_dtypes(include=['object']).empty:
         raise ValueError("Non-numerical data found in input to LOF model")
+
+    # Apply LOF model on potential non-fraud cases
+    lof_anomaly_indices = []
+    if len(X_potential_nonfraud) > 20:
+        lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
+        lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
 
     # Combine LOF anomalies and RF frauds for human review
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
@@ -101,18 +101,13 @@ def run_inference(transactions_data, rf_model, lof_model):
     save_unified_flags(transactions_data.iloc[potential_fraud_indices], rf_predictions, rf_probabilities)
     save_anomaly_detection_records(transactions_data.iloc[lof_anomaly_indices], lof_anomaly_indices)
 
+    # Store the results in the session state
     st.session_state['rf_predictions'] = rf_predictions
     st.session_state['rf_probabilities'] = rf_probabilities
     st.session_state['potential_fraud_indices'] = potential_fraud_indices
     st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
 
-    st.success("Inference complete and results saved.")
-
-    st.session_state['rf_predictions'] = rf_predictions
-    st.session_state['rf_probabilities'] = rf_probabilities
-    st.session_state['potential_fraud_indices'] = potential_fraud_indices
-    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
-
+    # Notify the completion of the inference process
     st.success("Inference complete and results saved.")
 
 
