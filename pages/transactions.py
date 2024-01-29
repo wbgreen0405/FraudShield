@@ -86,19 +86,20 @@ def run_inference(transactions_data, rf_model, lof_model):
     potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
-    print("X_potential_nonfraud:")
-    print(X_potential_nonfraud.head())
+    st.write("X_potential_nonfraud:", X_potential_nonfraud.head())
+
+
 
     # Apply LOF model on potential non-fraud cases
-    lof_anomaly_indices = []
-    if len(X_potential_nonfraud) > 20:
-        try:
-            lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-            lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
-        except Exception as e:
-            print("Error applying LOF model:", e)
-            print("X_potential_nonfraud:")
-            print(X_potential_nonfraud)
+     #lof_anomaly_indices = []
+     #if len(X_potential_nonfraud) > 20:
+         #try:
+             #lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
+             #lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
+         #except Exception as e:
+             #print("Error applying LOF model:", e)
+             #print("X_potential_nonfraud:")
+            # print(X_potential_nonfraud)
 
     # Rest of your function...
 
