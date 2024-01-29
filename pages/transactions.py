@@ -54,11 +54,8 @@ def preprocess_data(df):
 
     # Encode categorical columns
     categorical_cols = [
-        'payment_type', 'bank_branch_count_8w', 'employment_status', 
-        'email_is_free', 'housing_status', 'has_other_cards', 
-        'foreign_request', 'source', 'device_os', 'keep_alive_session', 
-        'device_fraud_count', 'month'
-    ]
+        'payment_type', 'employment_status', 'housing_status', 
+        'source', 'device_os']
     for col in categorical_cols:
         if col in df.columns:
             encoder = LabelEncoder()
