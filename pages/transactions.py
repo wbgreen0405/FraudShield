@@ -52,14 +52,25 @@ def preprocess_data(df):
     return df
 
 def run_inference(transactions_data, rf_model, lof_model):
+    # Preprocess the data
     preprocessed_data = preprocess_data(transactions_data)
+
+    # Predict potential fraud cases with probabilities
     rf_probabilities = rf_model.predict_proba(preprocessed_data)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_probabilities]
 
+    # Filter out transactions flagged as potential fraud and non-fraud
     potential_fraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 1]
     potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
+    # Apply LOF model on potential non-fraud cases
+    lof_anomaly_indices = []
+    if len(X_potential_nonfraud) > 20:
+        lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
+        lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
+
+    # Prepare data for Unified Flags Table
     unified_flags = []
     for index in potential_fraud_indices:
         unified_flags.append({
@@ -71,7 +82,10 @@ def run_inference(transactions_data, rf_model, lof_model):
             'flag_type': 'fraud'
         })
 
+    # Mapping original indices to LOF model indices
     lof_index_mapping = {original_index: lof_index for lof_index, original_index in enumerate(X_potential_nonfraud.index)}
+
+    # Prepare data for Anomaly Detection Table
     anomaly_detection_records = []
     for original_index in lof_anomaly_indices:
         lof_model_index = lof_index_mapping.get(original_index, None)
@@ -84,11 +98,14 @@ def run_inference(transactions_data, rf_model, lof_model):
                 'threshold': 'LOF_v1'
             })
 
+    # Save unified flags and anomaly detection records (implement saving logic as needed)
+
     st.session_state['rf_predictions'] = rf_predictions
     st.session_state['rf_probabilities'] = rf_probabilities
     st.session_state['potential_fraud_indices'] = potential_fraud_indices
     st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
     st.success("Inference complete and results saved.")
+
 
 def transactions_page():
     st.set_page_config(layout="wide")
