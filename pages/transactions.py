@@ -83,10 +83,18 @@ def run_inference(transactions_data, rf_model, lof_model):
     potential_fraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 1]
     potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
+
+    # Print the X_potential_nonfraud DataFrame
     print(X_potential_nonfraud)
-    # Ensure X_potential_nonfraud contains only numerical data
+
+    # Check for non-numerical data
     if not X_potential_nonfraud.select_dtypes(include=['object']).empty:
+        print("Non-numerical data found:")
+        print(X_potential_nonfraud.select_dtypes(include=['object']))
         raise ValueError("Non-numerical data found in input to LOF model")
+
+    # Rest of your function...
+
 
     # Apply LOF model on potential non-fraud cases
     lof_anomaly_indices = []
