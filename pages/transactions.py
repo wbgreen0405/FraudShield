@@ -68,7 +68,7 @@ def run_inference(transactions_data, rf_model, lof_model):
     lof_anomaly_indices = []
     if len(X_potential_nonfraud) > 20:
         lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-        lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
+        lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
 
     # Combine LOF anomalies and RF frauds for human review
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
@@ -76,14 +76,11 @@ def run_inference(transactions_data, rf_model, lof_model):
 
     # Prepare data for Unified Flags and Anomaly Detection Tables
     unified_flags, anomaly_detection_records = [], []
-    for index, prediction in enumerate(rf_predictions):
+    for index in range(len(transactions_data)):
         ref_id = transactions_data.iloc[index]['ref_id']
-        record = {
-            'ref_id': ref_id,
-            'checked_at': datetime.datetime.now().isoformat()
-        }
+        record = {'ref_id': ref_id, 'checked_at': datetime.datetime.now().isoformat()}
 
-        if prediction == 1:
+        if index in potential_fraud_indices:
             # Add to unified flags if RF model predicts fraud
             record.update({
                 'flag_id': ref_id,
@@ -98,8 +95,9 @@ def run_inference(transactions_data, rf_model, lof_model):
             anomaly_score = -lof_model.negative_outlier_factor_[lof_predictions == -1][lof_anomaly_indices.index(index)]
             record.update({
                 'anomaly_id': ref_id,
+                'model_version': 'LOF_v1',
                 'anomaly_score': anomaly_score,
-                'threshold': 'LOF_v1',
+                'flag_type': 'fraud',  # As specified, flag type for anomaly is also 'fraud'
                 'is_anomaly': True
             })
             anomaly_detection_records.append(record)
