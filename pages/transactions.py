@@ -93,15 +93,19 @@ def run_inference(transactions_data, rf_model, lof_model):
         })
     st.session_state['unified_flags'] = unified_flags
 
-    # Prepare data for Anomaly Detection Table
+   # Prepare data for Anomaly Detection Table
     anomaly_detection_records = []
-    for original_index in lof_anomaly_indices:
-        anomaly_detection_records.append({
-            'anomaly_id': original_index,  # Assuming this is the correct reference
-            'checked_at': datetime.datetime.now().isoformat(),
-            'anomaly_score': -lof_model.negative_outlier_factor_[original_index],
-            'threshold': 'LOF_v1'
-        })
+    # Using lof_model_index ensures we're accessing the LOF model's output correctly.
+    for lof_model_index, original_index in enumerate(potential_nonfraud_indices):
+        if lof_model_index in lof_anomaly_indices:
+            anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
+            anomaly_detection_records.append({
+                'anomaly_id': transactions_data.iloc[original_index]['ref_id'],
+                'ref_id': transactions_data.iloc[original_index]['ref_id'],
+                'checked_at': datetime.datetime.now().isoformat(),
+                'anomaly_score': anomaly_score,
+                'threshold': 'LOF_v1'
+            })
     st.session_state['anomaly_detection_records'] = anomaly_detection_records
 
     # Notify the completion of the inference process
