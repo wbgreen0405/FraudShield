@@ -66,10 +66,10 @@ def run_inference(transactions_data, rf_model, lof_model):
 
     # Apply LOF model on potential non-fraud cases
     lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
-    lof_anomaly_indices = [index for index, pred in enumerate(lof_predictions) if pred == -1]
+    lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
 
     # Combine LOF anomalies and RF frauds for human review
-    offline_review_transactions = set(potential_fraud_indices + [potential_nonfraud_indices[i] for i in lof_anomaly_indices])
+    offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
     st.session_state['offline_review_transactions'] = list(offline_review_transactions)
 
     # Prepare data for Unified Flags and Anomaly Detection Tables
@@ -88,9 +88,9 @@ def run_inference(transactions_data, rf_model, lof_model):
                 **transaction_record  # Include original transaction data
             })
         
-        if index in [potential_nonfraud_indices[i] for i in lof_anomaly_indices]:
-            # Add to anomaly detection records if LOF model flags as anomaly
-            lof_model_index = lof_anomaly_indices.index(index - len(potential_fraud_indices))
+        if index in lof_anomaly_indices:
+            # Correctly identify the LOF model index
+            lof_model_index = X_potential_nonfraud.index.get_loc(index)
             anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
             anomaly_detection_record = {
                 'anomaly_id': ref_id,
