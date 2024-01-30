@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 
 def offline_review_page():
-    st.title('Offline Review')
+    st.title('Approval System')
 
     # Fetch Unified Flags transactions from session state
     unified_flags_transactions = pd.DataFrame(st.session_state.get('unified_flags', []))
@@ -15,14 +15,14 @@ def offline_review_page():
     anomaly_detection_transactions = pd.DataFrame(st.session_state.get('anomaly_detection_records', []))
 
     # Display Unified Flags transactions
-    st.subheader('Unified Flags for Review')
+    st.subheader('Marked as Fraudulent')
     if not unified_flags_transactions.empty:
         st.dataframe(unified_flags_transactions)
     else:
         st.write("No unified flag transactions available for review.")
 
     # Display Anomaly Detection transactions
-    st.subheader('Anomaly Detection for Review')
+    st.subheader('Suspected Fraud')
     if not anomaly_detection_transactions.empty:
         st.dataframe(anomaly_detection_transactions)
     else:
