@@ -78,7 +78,7 @@ def run_inference(transactions_data, rf_model, lof_model):
 
     # Combine LOF anomalies and RF frauds for human review
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
-    st.session_state['offline_review_transactions'] = list(offline_review_transactions)  # Store for later use
+    st.session_state['offline_review_transactions'] = list(offline_review_transactions)
 
     # Prepare data for Unified Flags Table
     unified_flags = []
@@ -93,28 +93,24 @@ def run_inference(transactions_data, rf_model, lof_model):
         })
     st.session_state['unified_flags'] = unified_flags
 
-# Prepare data for Anomaly Detection Table
-anomaly_detection_records = []
-for lof_model_index, original_index in enumerate(potential_nonfraud_indices):
-    # Check if the index is in the list of anomaly indices
-    is_anomaly = lof_model_index in lof_anomaly_indices
-    if is_anomaly:
-        anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
-        anomaly_detection_records.append({
-            'anomaly_id': transactions_data.iloc[original_index]['ref_id'],
-            'ref_id': transactions_data.iloc[original_index]['ref_id'],
-            'checked_at': datetime.datetime.now().isoformat(),
-            'anomaly_score': anomaly_score,
-            'threshold': 'LOF_v1',
-            'is_anomaly': is_anomaly  # This flag indicates if it was an anomaly
-        })
+    # Prepare data for Anomaly Detection Table
+    anomaly_detection_records = []
+    for lof_model_index, original_index in enumerate(potential_nonfraud_indices):
+        is_anomaly = lof_model_index in lof_anomaly_indices
+        if is_anomaly:
+            anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
+            anomaly_detection_records.append({
+                'anomaly_id': transactions_data.iloc[original_index]['ref_id'],
+                'ref_id': transactions_data.iloc[original_index]['ref_id'],
+                'checked_at': datetime.datetime.now().isoformat(),
+                'anomaly_score': anomaly_score,
+                'threshold': 'LOF_v1',
+                'is_anomaly': is_anomaly
+            })
     st.session_state['anomaly_detection_records'] = anomaly_detection_records
-
 
     # Notify the completion of the inference process
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
-
-
 
 def transactions_page():
     st.set_page_config(layout="wide")
