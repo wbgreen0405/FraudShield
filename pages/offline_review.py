@@ -5,26 +5,29 @@ import random
 def offline_review_page():
     st.title('Offline Review')
 
-    # Fetch transactions that require offline review from session state
-    if 'unified_flags' in st.session_state:
-        review_transactions = pd.DataFrame(st.session_state['unified_flags'])
-    else:
-        review_transactions = pd.DataFrame()
+    # Fetch unified flags and anomaly detection records from session state
+    unified_flags = pd.DataFrame(st.session_state.get('unified_flags', []))
+    anomaly_detection_records = pd.DataFrame(st.session_state.get('anomaly_detection_records', []))
 
-    # Display transactions to review
+    # Merge both dataframes on 'ref_id'
+    review_transactions = pd.merge(unified_flags, anomaly_detection_records, on='ref_id', how='outer')
+
+    # Display transactions for review
     st.subheader('Transactions for Offline Review')
     if not review_transactions.empty:
-        st.dataframe(review_transactions)  # Display the DataFrame
+        # Filter to show only fraud records
+        fraud_transactions = review_transactions[review_transactions['flag_type'] == 'fraud']
+        st.dataframe(fraud_transactions)
 
         # Check for required fields
         required_fields = ['customer_age', 'employment_status', 'housing_status']
-        if not all(field in review_transactions.columns for field in required_fields):
+        if not all(field in fraud_transactions.columns for field in required_fields):
             st.error('Required data for offline review is missing. Please ensure all necessary fields are included.')
             return  # Exit the function if required fields are missing
 
         # Button to simulate the offline review
         if st.button('Run Offline Review Simulation'):
-            decisions = simulate_offline_review(review_transactions)
+            decisions = simulate_offline_review(fraud_transactions)
             st.write(decisions)  # For demonstration, simply print decisions
             st.success('Offline review simulation completed and decisions simulated.')
             st.session_state['offline_review_decisions'] = decisions
