@@ -2,20 +2,17 @@ import streamlit as st
 import pandas as pd
 import random
 
+import streamlit as st
+import pandas as pd
+
 def offline_review_page():
     st.title('Offline Review')
 
     # Fetch Unified Flags transactions from session state
-    if 'unified_flags' in st.session_state:
-        unified_flags_transactions = pd.DataFrame(st.session_state['unified_flags'])
-    else:
-        unified_flags_transactions = pd.DataFrame()
+    unified_flags_transactions = pd.DataFrame(st.session_state.get('unified_flags', []))
 
     # Fetch Anomaly Detection transactions from session state
-    if 'anomaly_detection_records' in st.session_state:
-        anomaly_detection_transactions = pd.DataFrame(st.session_state['anomaly_detection_records'])
-    else:
-        anomaly_detection_transactions = pd.DataFrame()
+    anomaly_detection_transactions = pd.DataFrame(st.session_state.get('anomaly_detection_records', []))
 
     # Display Unified Flags transactions
     st.subheader('Unified Flags for Review')
@@ -30,6 +27,8 @@ def offline_review_page():
         st.dataframe(anomaly_detection_transactions)
     else:
         st.write("No anomaly detection transactions available for review.")
+
+
     
 def simulate_offline_review(transaction_data):
     # Define your thresholds and suspicious criteria
