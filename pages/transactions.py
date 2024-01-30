@@ -96,17 +96,18 @@ def run_inference(transactions_data, rf_model, lof_model):
                 'anomaly_id': ref_id,
                 'model_version': 'LOF_v1',
                 'anomaly_score': anomaly_score,
-                'flag_type': 'fraud',  # As specified, flag type for anomaly is also 'fraud'
-                'is_anomaly': True
+                'flag_type': 'fraud',  # Flag type for anomaly is also 'fraud'
+                'is_anomaly': True,
+                **transaction_record  # Include original transaction data
             }
-            # Add original transaction data to the record
-            anomaly_detection_record.update(transaction_record)
             anomaly_detection_records.append(anomaly_detection_record)
 
     st.session_state['unified_flags'] = unified_flags
     st.session_state['anomaly_detection_records'] = anomaly_detection_records
 
+    # Notify the completion of the inference process
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
+
 
 
 def transactions_page():
