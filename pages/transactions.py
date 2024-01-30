@@ -70,55 +70,43 @@ def run_inference(transactions_data, rf_model, lof_model):
         lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
         lof_anomaly_indices = [index for index, pred in zip(potential_nonfraud_indices, lof_predictions) if pred == -1]
 
+    # Store predictions in session state
+    st.session_state['rf_predictions'] = rf_predictions
+    st.session_state['rf_probabilities'] = rf_probabilities
+    st.session_state['potential_fraud_indices'] = potential_fraud_indices
+    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
+
+    # Combine LOF anomalies and RF frauds for human review
+    offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
+    st.session_state['offline_review_transactions'] = list(offline_review_transactions)  # Store for later use
+
     # Prepare data for Unified Flags Table
     unified_flags = []
     for index in potential_fraud_indices:
         unified_flags.append({
             'flag_id': transactions_data.iloc[index]['ref_id'],
             'ref_id': transactions_data.iloc[index]['ref_id'],
-            'flagged_at': datetime.datetime.now(),
+            'flagged_at': datetime.datetime.now().isoformat(),
             'model_version': 'RF_v1',
             'flag_reason': rf_probabilities[index],
             'flag_type': 'fraud'
         })
-
-    # Mapping original indices to LOF model indices
-    lof_index_mapping = {original_index: lof_index for lof_index, original_index in enumerate(X_potential_nonfraud.index)}
+    st.session_state['unified_flags'] = unified_flags
 
     # Prepare data for Anomaly Detection Table
     anomaly_detection_records = []
     for original_index in lof_anomaly_indices:
-        lof_model_index = lof_index_mapping.get(original_index, None)
-        if lof_model_index is not None:
-            anomaly_detection_records.append({
-                'anomaly_id': transactions_data.iloc[original_index]['ref_id'],
-                'ref_id': transactions_data.iloc[original_index]['ref_id'],
-                'checked_at': datetime.datetime.now(),
-                'anomaly_score': -lof_model.negative_outlier_factor_[lof_model_index],
-                'threshold': 'LOF_v1'
-            })
+        anomaly_detection_records.append({
+            'anomaly_id': original_index,  # Assuming this is the correct reference
+            'checked_at': datetime.datetime.now().isoformat(),
+            'anomaly_score': -lof_model.negative_outlier_factor_[original_index],
+            'threshold': 'LOF_v1'
+        })
+    st.session_state['anomaly_detection_records'] = anomaly_detection_records
 
-    # Save unified flags and anomaly detection records (implement saving logic as needed)
+    # Notify the completion of the inference process
+    st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
-    st.session_state['rf_predictions'] = rf_predictions
-    st.session_state['rf_probabilities'] = rf_probabilities
-    st.session_state['potential_fraud_indices'] = potential_fraud_indices
-    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
-    st.success("Inference complete and results saved.")
-
-    # Example of setting session state after inference
-    #st.session_state['rf_model'] = rf_model
-    #st.session_state['y_true'] = y_true  # This needs to come from your actual data
-    #st.session_state['y_pred'] = rf_predictions
-    # st.session_state['y_prob'] = rf_probabilities
-    #st.session_state['model_metrics'] = {
-        #'accuracy': accuracy_score(y_true, rf_predictions),
-        #'precision': precision_score(y_true, rf_predictions),
-        #'recall': recall_score(y_true, rf_predictions),
-        #'f1_score': f1_score(y_true, rf_predictions)
-    #}
-    
-    st.success("Inference complete. Go to the results page to view the results.")
 
 
 def transactions_page():
