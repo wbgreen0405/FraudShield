@@ -6,14 +6,16 @@ def offline_review_page():
     st.title('Offline Review')
 
     # Fetch transactions that require offline review from session state
-    review_transactions = pd.DataFrame()
     if 'unified_flags' in st.session_state:
-        unified_flags_df = pd.DataFrame(st.session_state['unified_flags'])
-        review_transactions = pd.concat([review_transactions, unified_flags_df], ignore_index=True)
-    
-    if 'anomaly_detection_records' in st.session_state:
-        anomaly_records_df = pd.DataFrame(st.session_state['anomaly_detection_records'])
-        review_transactions = pd.concat([review_transactions, anomaly_records_df], ignore_index=True)
+        review_transactions = pd.DataFrame(st.session_state['unified_flags'])
+    else:
+        review_transactions = pd.DataFrame()
+
+    # Check for required columns in review_transactions
+    required_columns = ['ref_id', 'customer_age', 'employment_status', 'housing_status', 'flag_reason']
+    if not all(col in review_transactions.columns for col in required_columns):
+        st.error("Required data for offline review is missing. Please ensure all necessary fields are included.")
+        return
 
     # If there are transactions to review
     if not review_transactions.empty:
@@ -43,8 +45,8 @@ def simulate_offline_review(transaction_data):
 
     decisions = {}
     for index, transaction in transaction_data.iterrows():
-        is_unusually_high_income = transaction['flag_reason'] > INCOME_THRESHOLD  # Assuming 'flag_reason' is income
-        is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD  # Make sure 'customer_age' is included
+        is_unusually_high_income = transaction['flag_reason'] > INCOME_THRESHOLD
+        is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
         is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
         is_suspicious_housing = transaction['housing_status'] == HOUSING_STATUS_SUSPICIOUS
 
@@ -53,7 +55,6 @@ def simulate_offline_review(transaction_data):
         else:
             decision = 'legitimate'
 
-        # Simulate random errors in decision making
         if random.random() < ERROR_RATE:
             decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
 
@@ -62,3 +63,4 @@ def simulate_offline_review(transaction_data):
 
 # Run this page function
 offline_review_page()
+
