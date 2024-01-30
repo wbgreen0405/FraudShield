@@ -6,10 +6,14 @@ def offline_review_page():
     st.title('Offline Review')
 
     # Fetch transactions that require offline review from session state
+    review_transactions = pd.DataFrame()
     if 'unified_flags' in st.session_state:
-        review_transactions = pd.DataFrame(st.session_state['unified_flags'])
-    else:
-        review_transactions = pd.DataFrame()
+        unified_flags_df = pd.DataFrame(st.session_state['unified_flags'])
+        review_transactions = pd.concat([review_transactions, unified_flags_df], ignore_index=True)
+    
+    if 'anomaly_detection_records' in st.session_state:
+        anomaly_records_df = pd.DataFrame(st.session_state['anomaly_detection_records'])
+        review_transactions = pd.concat([review_transactions, anomaly_records_df], ignore_index=True)
 
     # If there are transactions to review
     if not review_transactions.empty:
