@@ -90,7 +90,8 @@ def run_inference(transactions_data, rf_model, lof_model):
         
         if index in lof_anomaly_indices:
             # Add to anomaly detection records if LOF model flags as anomaly
-            lof_model_index = lof_predictions == -1][lof_anomaly_indices.index(index)]
+            lof_model_index = lof_predictions == -1[lof_anomaly_indices.index(index)]
+
             anomaly_detection_records.append({
                 'anomaly_id': ref_id,
                 'model_version': 'LOF_v1',
