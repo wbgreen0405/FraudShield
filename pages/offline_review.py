@@ -17,27 +17,27 @@ def offline_review_page():
         st.error("Error: 'ref_id' column is missing in unified flags or anomaly detection records.")
         return
 
-    # Display transactions for review
-    st.subheader('Transactions for Offline Review')
-    if not review_transactions.empty:
-        # Filter to show only fraud records
-        fraud_transactions = review_transactions[review_transactions['flag_type'] == 'fraud']
-        st.dataframe(fraud_transactions)
+# Display transactions for review
+st.subheader('Transactions for Offline Review')
+if not review_transactions.empty:
+    # Filter to show only fraud records
+    fraud_transactions = review_transactions[review_transactions['flag_type'] == 'fraud']
+    st.dataframe(fraud_transactions)
 
-        # Check for required fields
-        required_fields = ['customer_age', 'employment_status', 'housing_status']
-        if not all(field in fraud_transactions.columns for field in required fields):
-            st.error('Required data for offline review is missing. Please ensure all necessary fields are included.')
-            return  # Exit the function if required fields are missing
+    # Check for required fields
+    required_fields = ['customer_age', 'employment_status', 'housing_status']
+    if not all(field in fraud_transactions.columns for field in required_fields):
+        st.error('Required data for offline review is missing. Please ensure all necessary fields are included.')
+        return  # Exit the function if required fields are missing
 
-        # Button to simulate the offline review
-        if st.button('Run Offline Review Simulation'):
-            decisions = simulate_offline_review(fraud_transactions)
-            st.write(decisions)  # For demonstration, simply print decisions
-            st.success('Offline review simulation completed and decisions simulated.')
-            st.session_state['offline_review_decisions'] = decisions
-    else:
-        st.write("No transactions require offline review.")
+    # Button to simulate the offline review
+    if st.button('Run Offline Review Simulation'):
+        decisions = simulate_offline_review(fraud_transactions)
+        st.write(decisions)  # For demonstration, simply print decisions
+        st.success('Offline review simulation completed and decisions simulated.')
+        st.session_state['offline_review_decisions'] = decisions
+else:
+    st.write("No transactions require offline review.")
 
 
 def simulate_offline_review(transaction_data):
