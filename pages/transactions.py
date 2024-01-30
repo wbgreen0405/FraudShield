@@ -25,7 +25,7 @@ def load_model_from_s3(bucket_name, model_key):
 
 def fetch_transactions():
     try:
-        response = supabase.table('transactions').select('*').limit(100).execute()
+        response = supabase.table('transactions').select('*').execute()
         if hasattr(response, 'error') and response.error:
             st.error(f'Failed to retrieve data. Error: {str(response.error)}')
             return pd.DataFrame()
