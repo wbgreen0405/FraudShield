@@ -83,8 +83,8 @@ def run_inference(transactions_data, rf_model, lof_model):
             unified_flags.append({
                 'flag_id': ref_id,
                 'model_version': 'RF_v1',
-                'flag_reason': rf_probabilities[index],
-                'flag_type': 'fraud',
+                'prob_score': rf_probabilities[index],
+                'flag_type': 'possible fraud',
                 **transaction_record  # Include original transaction data
             })
         
@@ -96,7 +96,7 @@ def run_inference(transactions_data, rf_model, lof_model):
                 'anomaly_id': ref_id,
                 'model_version': 'LOF_v1',
                 'anomaly_score': anomaly_score,
-                'flag_type': 'fraud',  # Flag type for anomaly is also 'fraud'
+                'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
                 'is_anomaly': True,
                 **transaction_record  # Include original transaction data
             }
