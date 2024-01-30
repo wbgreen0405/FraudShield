@@ -64,7 +64,7 @@ def run_inference(transactions_data, rf_model, lof_model):
     potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
-    # Apply LOF model on potential non-fraud cases and obtain the predictions
+    # Apply LOF model on potential non-fraud cases
     lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
     lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
 
@@ -90,16 +90,18 @@ def run_inference(transactions_data, rf_model, lof_model):
         
         if index in lof_anomaly_indices:
             # Add to anomaly detection records if LOF model flags as anomaly
-            lof_model_index = lof_predictions == -1[lof_anomaly_indices.index(index)]
-
-            anomaly_detection_records.append({
+            lof_model_index = lof_anomaly_indices.index(index)
+            anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
+            anomaly_detection_record = {
                 'anomaly_id': ref_id,
                 'model_version': 'LOF_v1',
-                'anomaly_score': -lof_model.negative_outlier_factor_[lof_model_index],
+                'anomaly_score': anomaly_score,
                 'flag_type': 'fraud',  # As specified, flag type for anomaly is also 'fraud'
-                'is_anomaly': True,
-                **transaction_record  # Include original transaction data
-            })
+                'is_anomaly': True
+            }
+            # Add original transaction data to the record
+            anomaly_detection_record.update(transaction_record)
+            anomaly_detection_records.append(anomaly_detection_record)
 
     st.session_state['unified_flags'] = unified_flags
     st.session_state['anomaly_detection_records'] = anomaly_detection_records
