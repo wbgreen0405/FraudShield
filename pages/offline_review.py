@@ -11,29 +11,26 @@ def offline_review_page():
     else:
         review_transactions = pd.DataFrame()
 
-    # Check for required columns in review_transactions
-    required_columns = ['ref_id', 'customer_age', 'employment_status', 'housing_status', 'flag_reason']
-    if not all(col in review_transactions.columns for col in required_columns):
-        st.error("Required data for offline review is missing. Please ensure all necessary fields are included.")
-        return
-
-    # If there are transactions to review
+    # Display transactions to review
+    st.subheader('Transactions for Offline Review')
     if not review_transactions.empty:
-        # Display transactions to review
-        st.subheader('Transactions for Offline Review')
-        st.dataframe(review_transactions)
+        st.dataframe(review_transactions)  # Display the DataFrame
+
+        # Check for required fields
+        required_fields = ['customer_age', 'employment_status', 'housing_status']
+        if not all(field in review_transactions.columns for field in required_fields):
+            st.error('Required data for offline review is missing. Please ensure all necessary fields are included.')
+            return  # Exit the function if required fields are missing
 
         # Button to simulate the offline review
         if st.button('Run Offline Review Simulation'):
             decisions = simulate_offline_review(review_transactions)
-            # For demonstration, simply print decisions
-            st.write(decisions)
+            st.write(decisions)  # For demonstration, simply print decisions
             st.success('Offline review simulation completed and decisions simulated.')
-
-            # Optionally, store the decisions in the session state or elsewhere
             st.session_state['offline_review_decisions'] = decisions
     else:
         st.write("No transactions require offline review.")
+
 
 def simulate_offline_review(transaction_data):
     # Define your thresholds and suspicious criteria
