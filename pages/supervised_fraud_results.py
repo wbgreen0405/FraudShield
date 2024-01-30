@@ -1,15 +1,12 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.chart_helpers import plot_confusion_matrix, plot_roc_curve
-
-# Import the plot_feature_importances function
-from utils.chart_helpers import plot_feature_importances
+from utils.chart_helpers import plot_confusion_matrix, plot_roc_curve, plot_feature_importances
 
 def supervised_fraud_results_page():
     st.title('Supervised Fraud Model Results')
     
-    if 'rf_model' in st.session_state and 'y_true' in st.session_state:
+    if 'rf_model' in st.session_state and 'y_true' in st.session_state and 'y_pred' in st.session_state and 'y_prob' in st.session_state:
         rf_model = st.session_state['rf_model']
         y_true = st.session_state['y_true']
         y_pred = st.session_state['y_pred']
@@ -23,8 +20,13 @@ def supervised_fraud_results_page():
         # Generate and display feature importances chart if the model has the attribute
         st.subheader('Feature Importances')
         if hasattr(rf_model, 'feature_importances_'):
-            plt = plot_feature_importances(rf_model, rf_model.feature_names_in_)
-            st.pyplot(plt)
+            # Check if feature_names_in_ is available
+            feature_names = getattr(rf_model, 'feature_names_in_', None)
+            if feature_names is None:
+                st.warning("Feature names are not available. Feature importances cannot be displayed.")
+            else:
+                plt = plot_feature_importances(rf_model, feature_names)
+                st.pyplot(plt)
         else:
             st.error('Model does not have feature importances.')
 
