@@ -106,6 +106,20 @@ def run_inference(transactions_data, rf_model, lof_model):
     st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
     st.success("Inference complete and results saved.")
 
+    # Example of setting session state after inference
+    st.session_state['rf_model'] = rf_model
+    st.session_state['y_true'] = y_true  # This needs to come from your actual data
+    st.session_state['y_pred'] = rf_predictions
+    st.session_state['y_prob'] = rf_probabilities
+    st.session_state['model_metrics'] = {
+        'accuracy': accuracy_score(y_true, rf_predictions),
+        'precision': precision_score(y_true, rf_predictions),
+        'recall': recall_score(y_true, rf_predictions),
+        'f1_score': f1_score(y_true, rf_predictions)
+    }
+    
+    st.success("Inference complete. Go to the results page to view the results.")
+
 
 def transactions_page():
     st.set_page_config(layout="wide")
