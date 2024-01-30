@@ -108,7 +108,7 @@ for lof_model_index, original_index in enumerate(potential_nonfraud_indices):
             'threshold': 'LOF_v1',
             'is_anomaly': is_anomaly  # This flag indicates if it was an anomaly
         })
-st.session_state['anomaly_detection_records'] = anomaly_detection_records
+    st.session_state['anomaly_detection_records'] = anomaly_detection_records
 
 
     # Notify the completion of the inference process
