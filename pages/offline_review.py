@@ -9,8 +9,13 @@ def offline_review_page():
     unified_flags = pd.DataFrame(st.session_state.get('unified_flags', []))
     anomaly_detection_records = pd.DataFrame(st.session_state.get('anomaly_detection_records', []))
 
-    # Merge both dataframes on 'ref_id'
-    review_transactions = pd.merge(unified_flags, anomaly_detection_records, on='ref_id', how='outer')
+    # Ensure 'ref_id' column is present in both dataframes
+    if 'ref_id' in unified_flags.columns and 'ref_id' in anomaly_detection_records.columns:
+        # Merge both dataframes on 'ref_id'
+        review_transactions = pd.merge(unified_flags, anomaly_detection_records, on='ref_id', how='outer')
+    else:
+        st.error("Error: 'ref_id' column is missing in unified flags or anomaly detection records.")
+        return
 
     # Display transactions for review
     st.subheader('Transactions for Offline Review')
@@ -21,7 +26,7 @@ def offline_review_page():
 
         # Check for required fields
         required_fields = ['customer_age', 'employment_status', 'housing_status']
-        if not all(field in fraud_transactions.columns for field in required_fields):
+        if not all(field in fraud_transactions.columns for field in required fields):
             st.error('Required data for offline review is missing. Please ensure all necessary fields are included.')
             return  # Exit the function if required fields are missing
 
