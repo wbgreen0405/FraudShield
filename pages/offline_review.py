@@ -7,24 +7,21 @@ def offline_review_page():
 
     # Check if the necessary data is in the session state
     if 'unified_flags' in st.session_state and 'anomaly_detection_records' in st.session_state:
-        # Convert lists to DataFrames
         unified_flags_df = pd.DataFrame(st.session_state['unified_flags'])
         anomaly_detection_df = pd.DataFrame(st.session_state['anomaly_detection_records'])
 
-        # Merge the two DataFrames on 'ref_id'
+        # Merge unified flags and anomaly detection records
         review_transactions = pd.merge(unified_flags_df, anomaly_detection_df, on='ref_id', how='outer', suffixes=('_rf', '_lof'))
 
         # Display transactions to review
         st.subheader('Transactions for Offline Review')
         if not review_transactions.empty:
             st.dataframe(review_transactions)
-            
-            # Rest of your code for offline review simulation...
+            # ... [rest of your offline review simulation code] ...
         else:
             st.write("No transactions require offline review.")
     else:
         st.write("Data for offline review is not available. Please run the inference first.")
-
     
 def simulate_offline_review(transaction_data):
     # Define your thresholds and suspicious criteria
