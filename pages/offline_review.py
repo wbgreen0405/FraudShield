@@ -5,23 +5,31 @@ import random
 def offline_review_page():
     st.title('Offline Review')
 
-    # Check if the necessary data is in the session state
-    if 'unified_flags' in st.session_state and 'anomaly_detection_records' in st.session_state:
-        unified_flags_df = pd.DataFrame(st.session_state['unified_flags'])
-        anomaly_detection_df = pd.DataFrame(st.session_state['anomaly_detection_records'])
-
-        # Merge unified flags and anomaly detection records
-        review_transactions = pd.merge(unified_flags_df, anomaly_detection_df, on='ref_id', how='outer', suffixes=('_rf', '_lof'))
-
-        # Display transactions to review
-        st.subheader('Transactions for Offline Review')
-        if not review_transactions.empty:
-            st.dataframe(review_transactions)
-            # ... [rest of your offline review simulation code] ...
-        else:
-            st.write("No transactions require offline review.")
+    # Fetch Unified Flags transactions from session state
+    if 'unified_flags' in st.session_state:
+        unified_flags_transactions = pd.DataFrame(st.session_state['unified_flags'])
     else:
-        st.write("Data for offline review is not available. Please run the inference first.")
+        unified_flags_transactions = pd.DataFrame()
+
+    # Fetch Anomaly Detection transactions from session state
+    if 'anomaly_detection_records' in st.session_state:
+        anomaly_detection_transactions = pd.DataFrame(st.session_state['anomaly_detection_records'])
+    else:
+        anomaly_detection_transactions = pd.DataFrame()
+
+    # Display Unified Flags transactions
+    st.subheader('Unified Flags for Review')
+    if not unified_flags_transactions.empty:
+        st.dataframe(unified_flags_transactions)
+    else:
+        st.write("No unified flag transactions available for review.")
+
+    # Display Anomaly Detection transactions
+    st.subheader('Anomaly Detection for Review')
+    if not anomaly_detection_transactions.empty:
+        st.dataframe(anomaly_detection_transactions)
+    else:
+        st.write("No anomaly detection transactions available for review.")
     
 def simulate_offline_review(transaction_data):
     # Define your thresholds and suspicious criteria
