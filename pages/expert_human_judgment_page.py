@@ -42,17 +42,19 @@ def expert_human_judgment_page():
         st.empty()
 
         # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
+        # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
         human_review_records = []
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
-            original_decision = transaction['original_decision']  # Replace with the actual column name
-            model_type = transaction['model_type']  # Replace with the actual column name
+            original_decision = "Possible Fraud"  # Replace with the actual original decision
+            model_type = transaction['flag_type']  # Replace with the correct column name 'flag_type'
             row = {
                 'Transaction ID': index,
-                'Original Decision': original_decision,
-                'Model Type': model_type,
+                'Original Decision': model_type = transaction['flag_type'] ,
+                'Model Type': model_type = transaction['model_version'] ,
             }
             human_review_records.append(row)
+
 
         # Create a DataFrame for the combined human review results
         combined_human_review_df = pd.DataFrame(human_review_records)
