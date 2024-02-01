@@ -1,16 +1,6 @@
 import os
 import streamlit as st
-from pages import home
-from pages import transactions
-from pages import supervised_fraud_results_page
-from pages import fraud_rules_page
-from pages import anomaly_detection_system_page
-from pages import test_and_learn_page
-from pages import settings_configuration_page
-from pages import audit_logs_history_page
-from pages import model_performance_metrics_page
-from pages import help_documentation_page
-from pages import expert_human_judgment_page  # Import the expert_human_judgment_page function
+import datetime
 
 # Define an empty list to store audit logs
 audit_logs = []
@@ -25,6 +15,20 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
         'Decision': decision,
     }
     audit_logs.append(audit_entry)
+
+# Import other necessary functions and pages
+from pages import home
+from pages import transactions
+from pages import supervised_fraud_results_page
+from pages import fraud_rules_page
+from pages import anomaly_detection_system_page
+from pages import test_and_learn_page
+from pages import settings_configuration_page
+from pages import audit_logs_history_page
+from pages import model_performance_metrics_page
+from pages import help_documentation_page
+from pages import expert_human_judgment_page
+
 
 def render_sidebar():
     # Your existing sidebar rendering code
