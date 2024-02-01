@@ -112,6 +112,10 @@ def run_inference(transactions_data, rf_model, lof_model):
     #st.session_state['unified_flags'] = unified_flags
     #st.session_state['anomaly_detection_records'] = anomaly_detection_records
 
+                    
+    # Set the 'offline_review_transactions' variable in the session_state
+    st.session_state['offline_review_transactions'] = offline_review_transactions  # Pass it to session_state
+
     # After running models, store results in session_state
     st.session_state['transactions_data'] = transactions_data
     st.session_state['preprocessed_data'] = preprocessed_data
@@ -148,9 +152,6 @@ def transactions_page():
                 # Run inference with the preprocessed data and loaded models
                 run_inference(preprocessed_data, rf_model, lof_model)
                 
-        # Set the 'offline_review_transactions' variable in the session_state
-        st.session_state['offline_review_transactions'] = offline_review_transactions  # Pass it to session_state
-
         # Display transaction data in an interactive grid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)
