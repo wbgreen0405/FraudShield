@@ -88,6 +88,9 @@ def run_inference(transactions_data, rf_model, lof_model):
     lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
     lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
 
+    # Print LOF anomaly indices for debugging
+    print("LOF Anomaly Indices:", lof_anomaly_indices)
+
     # Store results in session_state for later access in expert_human_judgment_page.py
     st.session_state['potential_fraud_indices'] = potential_fraud_indices
     st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
