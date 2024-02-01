@@ -43,3 +43,5 @@ def fetch_supabase_table(table_name):
 
 
 
+if __name__ == '__main__':
+    supervised_fraud_results_page()
