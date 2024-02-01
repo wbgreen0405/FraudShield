@@ -42,19 +42,24 @@ def expert_human_judgment_page():
         st.empty()
 
         # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
-        # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
         human_review_records = []
+        unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
             original_decision = "Possible Fraud"  # Replace with the actual original decision
-            model_type = transaction['flag_type']  # Replace with the correct column name 'flag_type'
+            model_type = "LOF"  # Replace with the correct model type based on the data
+            # Find the corresponding unified_flags entry
+            for flag in unified_flags:
+                if flag['flag_id'] == transaction['ref_id']:
+                    original_decision = flag['flag_type']
+                    model_type = flag['model_version']
+                    break
             row = {
                 'Transaction ID': index,
-                'Original Decision': model_type = transaction['flag_type'] ,
-                'Model Type': model_type = transaction['model_version'] ,
+                'Original Decision': original_decision,
+                'Model Type': model_type,
             }
             human_review_records.append(row)
-
 
         # Create a DataFrame for the combined human review results
         combined_human_review_df = pd.DataFrame(human_review_records)
@@ -126,3 +131,4 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
