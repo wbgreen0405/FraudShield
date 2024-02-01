@@ -29,4 +29,6 @@ def approval_system_page():
     else:
         st.write("No flagged transactions are available for approval at the moment.")
 
-# Add this page function to your app.py pages dictionary
+
+if __name__ == '__main__':
+    approval_system_page()
