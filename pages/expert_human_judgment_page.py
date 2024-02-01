@@ -41,8 +41,9 @@ def expert_human_judgment_page():
 
     if not simulate_button:
         # Display the original table
-        # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
-        human_review_records = []
+        # Create separate lists for RF_v1 and LOF
+        human_review_records_rf = []
+        human_review_records_lof = []
         unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
@@ -51,28 +52,39 @@ def expert_human_judgment_page():
                 if flag['flag_id'] == transaction['ref_id']:
                     original_decision = flag['flag_type']
                     model_type = flag['model_version']
+                    if model_type == 'RF_v1':
+                        row = {
+                            'Transaction ID': index,
+                            'Original Decision (RF_v1)': original_decision,
+                        }
+                        human_review_records_rf.append(row)
+                    elif model_type == 'LOF_v1':
+                        row = {
+                            'Transaction ID': index,
+                            'Original Decision (LOF_v1)': original_decision,
+                        }
+                        human_review_records_lof.append(row)
                     break
-            row = {
-                'Transaction ID': index,
-                'Original Decision': original_decision,
-                'Model Type': model_type,
-            }
-            human_review_records.append(row)
-
-        # Create a DataFrame for the combined human review results
-        combined_human_review_df = pd.DataFrame(human_review_records)
-
-        # Display the original table
-        st.write(combined_human_review_df)
+    
+        # Create DataFrames for RF_v1 and LOF
+        combined_human_review_df_rf = pd.DataFrame(human_review_records_rf)
+        combined_human_review_df_lof = pd.DataFrame(human_review_records_lof)
+    
+        # Display the original tables for RF_v1 and LOF
+        st.write("Before (RF_v1):")
+        st.write(combined_human_review_df_rf)
+    
+        st.write("Before (LOF_v1):")
+        st.write(combined_human_review_df_lof)
     else:
         # Clear the current content on the page
         st.empty()
-
+    
         # Create a DataFrame to display the simulated human review decisions
         simulated_human_review_records = []
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
-
+            
             # Function to simulate offline review
             def simulate_offline_review(transaction):
                 INCOME_THRESHOLD = 100000
@@ -101,7 +113,7 @@ def expert_human_judgment_page():
 
             # Simulate offline review for the transaction
             updated_decision = simulate_offline_review(transaction)
-
+    
             # Add a row to simulated_human_review_records
             row = {
                 'Transaction ID': index,
@@ -113,21 +125,22 @@ def expert_human_judgment_page():
                 'Comments': 'Simulated review decision',
             }
             simulated_human_review_records.append(row)
-
+    
         # Create a DataFrame for the simulated human review results
         simulated_human_review_df = pd.DataFrame(simulated_human_review_records)
-
+    
         # Apply background color to changed rows
         def highlight_changed_cells(s):
             changed_rows = s['Original Decision'] != s['Updated Decision']
             df = pd.DataFrame('', index=s.index, columns=s.columns)
             df.loc[changed_rows, :] = 'background-color: #FFC000'
             return df
-
+    
         # Apply the highlight function to the DataFrame
         styled_simulated_human_review_df = simulated_human_review_df.style.apply(highlight_changed_cells, axis=None)
-
+    
         # Display the simulated human review decisions in a table with background color
+        st.write("After:")
         st.write(styled_simulated_human_review_df)
 
 if __name__ == '__main__':
