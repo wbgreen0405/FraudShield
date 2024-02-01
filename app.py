@@ -19,7 +19,6 @@ def render_sidebar():
         'Home': home_page,
         'Transactions': transactions_page,
         'Supervised Fraud Results': supervised_fraud_results_page,
-        'Offline Review': offline_review_page,
         'Fraud Rules': fraud_rules_page,
         'Anomaly Detection': anomaly_detection_system_page,
         'Expert Human Judgment': expert_human_judgment_page,
