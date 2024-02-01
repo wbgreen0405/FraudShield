@@ -1,32 +1,45 @@
-# supervised_fraud_results_page.py
-
 import streamlit as st
-from your_model_module import run_supervised_fraud_model  # You need to create this function
+import pandas as pd
+from supabase import create_client, Client
+
+# Initialize Supabase client using Streamlit secrets
+supabase_url = st.secrets["supabase"]["url"]
+supabase_key = st.secrets["supabase"]["key"]
+supabase: Client = create_client(supabase_url, supabase_key)
 
 def supervised_fraud_results_page():
     st.title('Supervised Fraud Model Results')
 
-    # Placeholder or function to load the data
-    transactions_data = st.session_state.get('transactions_data', None)
+    # Fetch model results from Supabase tables
+    rf_confusion_matrix = fetch_supabase_table("rf_confusion_matrix")
+    rf_feature_importance = fetch_supabase_table("rf_feature_importance")
+    rf_model_metrics = fetch_supabase_table("rf_model_metrics")
 
-    # Placeholder for running the supervised fraud model
-    if st.button('Run Fraud Model'):
-        if transactions_data is not None:
-            model_results = run_supervised_fraud_model(transactions_data)
-            st.session_state['model_results'] = model_results
-            st.write("Model has flagged the following transactions as potentially fraudulent:")
-            st.dataframe(model_results)
+    # Display the fetched results
+    st.subheader("Random Forest Confusion Matrix:")
+    st.dataframe(rf_confusion_matrix)
+
+    st.subheader("Random Forest Feature Importance:")
+    st.dataframe(rf_feature_importance)
+
+    st.subheader("Random Forest Model Metrics:")
+    st.dataframe(rf_model_metrics)
+
+# Helper function to fetch data from Supabase tables
+def fetch_supabase_table(table_name):
+    try:
+        response = supabase.table(table_name).select('*').execute()
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
+            return pd.DataFrame()
+        elif hasattr(response, 'data'):
+            return pd.DataFrame(response.data)
         else:
-            st.error("Please upload data on the Transactions page first.")
+            st.error(f'Unexpected response format from {table_name}.')
+            return pd.DataFrame()
+    except Exception as e:
+        st.error(f'An error occurred while fetching data from {table_name}: {e}')
+        return pd.DataFrame()
 
-    # Allow user to set and adjust thresholds
-    threshold = st.slider("Set fraud probability threshold", 0.0, 1.0, 0.5)
-    st.session_state['fraud_threshold'] = threshold
 
-    # Display transactions flagged by the model
-    if 'model_results' in st.session_state:
-        flagged_transactions = st.session_state['model_results'][st.session_state['model_results']['fraud_probability'] >= threshold]
-        st.write("Transactions flagged as fraudulent based on the current threshold:")
-        st.dataframe(flagged_transactions)
 
-# Add this page function to your app.py pages dictionary
