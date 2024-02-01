@@ -5,8 +5,6 @@ import random
 from pages.transactions import log_audit_entry
 
 
-# ...
-
 def expert_human_judgment_page():
     st.title("Expert Human Judgment")
 
@@ -49,7 +47,7 @@ def expert_human_judgment_page():
             transaction = transactions_data.iloc[index]
             original_decision_rf = None
             original_decision_lof = None
-
+    
             # Find the corresponding unified_flags entry
             for flag in unified_flags:
                 if flag['flag_id'] == transaction['ref_id']:
@@ -57,20 +55,24 @@ def expert_human_judgment_page():
                         original_decision_rf = flag['flag_type']
                     elif flag['model_version'] == 'LOF_v1':
                         original_decision_lof = flag['flag_type']
-
+    
             row = {
                 'Transaction ID': index,
                 'Original Decision (RF_v1)': original_decision_rf,
                 'Original Decision (LOF_v1)': original_decision_lof,
             }
             human_review_records.append(row)
-
+    
         # Create a DataFrame for the combined human review results
         combined_human_review_df = pd.DataFrame(human_review_records)
-
+    
+        # Fill any empty LOF_v1 decisions with "Not Reviewed"
+        combined_human_review_df['Original Decision (LOF_v1)'].fillna("Not Reviewed", inplace=True)
+    
         # Display the original table with both RF_v1 and LOF_v1
         st.write("Before (Both RF_v1 and LOF_v1):")
         st.write(combined_human_review_df)
+
     else:
         # Clear the current content on the page
         st.empty()
