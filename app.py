@@ -2,20 +2,6 @@ import os
 import streamlit as st
 import datetime
 
-# Define an empty list to store audit logs
-audit_logs = []
-
-# Function to log an entry in the audit logs
-def log_audit_entry(transaction_id, reviewer_id, decision):
-    timestamp = datetime.datetime.now()
-    audit_entry = {
-        'Timestamp': timestamp,
-        'Transaction ID': transaction_id,
-        'Reviewer ID': reviewer_id,
-        'Decision': decision,
-    }
-    audit_logs.append(audit_entry)
-
 # Import other necessary functions and pages
 from pages import home
 from pages import transactions
