@@ -45,8 +45,8 @@ def expert_human_judgment_page():
         human_review_records = []
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
-            original_decision = "Possible Fraud"  # Replace with actual original decision
-            model_type = "LOF"  # Change this based on the model that flagged the transaction
+            original_decision = transaction['original_decision']  # Replace with the actual column name
+            model_type = transaction['model_type']  # Replace with the actual column name
             row = {
                 'Transaction ID': index,
                 'Original Decision': original_decision,
