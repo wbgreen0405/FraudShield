@@ -25,4 +25,5 @@ def anomaly_detection_system_page():
     else:
         st.write("No results are available from the anomaly detection system at the moment.")
 
-# Add this page function to your app.py pages dictionary
+if __name__ == '__main__':
+    anomaly_detection_system_page()
