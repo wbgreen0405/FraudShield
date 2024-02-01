@@ -39,109 +39,111 @@ def expert_human_judgment_page():
     # Create a button to trigger the simulation
     simulate_button = st.button("Simulate Review")
 
-    if not simulate_button:
-        # Display the original table
-        # Create separate lists for RF_v1 and LOF
-        human_review_records_rf = []
-        human_review_records_lof = []
-        unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
-        for index in offline_review_transactions:
-            transaction = transactions_data.iloc[index]
-            # Find the corresponding unified_flags entry
-            for flag in unified_flags:
-                if flag['flag_id'] == transaction['ref_id']:
-                    original_decision = flag['flag_type']
-                    model_type = flag['model_version']
-                    if model_type == 'RF_v1':
-                        row = {
-                            'Transaction ID': index,
-                            'Original Decision (RF_v1)': original_decision,
-                        }
-                        human_review_records_rf.append(row)
-                    elif model_type == 'LOF_v1':
-                        row = {
-                            'Transaction ID': index,
-                            'Original Decision (LOF_v1)': original_decision,
-                        }
-                        human_review_records_lof.append(row)
-                    break
-    
-        # Create DataFrames for RF_v1 and LOF
-        combined_human_review_df_rf = pd.DataFrame(human_review_records_rf)
-        combined_human_review_df_lof = pd.DataFrame(human_review_records_lof)
-    
-        # Display the original tables for RF_v1 and LOF
-        st.write("Before (RF_v1):")
-        st.write(combined_human_review_df_rf)
-    
-        st.write("Before (LOF_v1):")
-        st.write(combined_human_review_df_lof)
-    else:
-        # Clear the current content on the page
-        st.empty()
-    
-        # Create a DataFrame to display the simulated human review decisions
-        simulated_human_review_records = []
-        for index in offline_review_transactions:
-            transaction = transactions_data.iloc[index]
-            
-            # Function to simulate offline review
-            def simulate_offline_review(transaction):
-                INCOME_THRESHOLD = 100000
-                AGE_THRESHOLD = 50
-                EMPLOYMENT_STATUS_SUSPICIOUS = 3
-                HOUSING_STATUS_SUSPICIOUS = 2
-                ERROR_RATE = 0.1
+# ...
 
-                is_unusually_high_income = transaction['income'] > INCOME_THRESHOLD
-                is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
-                is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
-                is_suspicious_housing = transaction['housing_status'] == HOUSING_STATUS_SUSPICIOUS
+if not simulate_button:
+    # Display the original table
+    # Create separate lists for RF_v1 and LOF
+    human_review_records_rf = []
+    human_review_records_lof = []
+    unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
+    for index in offline_review_transactions:
+        transaction = transactions_data.iloc[index]
+        # Find the corresponding unified_flags entry
+        for flag in unified_flags:
+            if flag['flag_id'] == transaction['ref_id']:
+                original_decision = flag['flag_type']
+                model_type = flag['model_version']
+                if model_type == 'RF_v1':
+                    row = {
+                        'Transaction ID': index,
+                        'Original Decision (RF_v1)': original_decision,
+                    }
+                    human_review_records_rf.append(row)
+                elif model_type == 'LOF_v1':
+                    row = {
+                        'Transaction ID': index,
+                        'Original Decision (LOF_v1)': original_decision,
+                    }
+                    human_review_records_lof.append(row)
+                break
 
-                if is_unusually_high_income and (is_age_above_threshold or is_suspicious_employment or is_suspicious_housing):
-                    decision = 'fraudulent'
-                else:
-                    decision = 'legitimate'
+    # Create DataFrames for RF_v1 and LOF
+    combined_human_review_df_rf = pd.DataFrame(human_review_records_rf)
+    combined_human_review_df_lof = pd.DataFrame(human_review_records_lof)
 
-                if random.random() < ERROR_RATE:
-                    decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
+    # Display the original tables for RF_v1 and LOF
+    st.write("Before (RF_v1):")
+    st.write(combined_human_review_df_rf)
 
-                # Log an entry in the audit logs for this decision
-                log_audit_entry(transaction_id=index, reviewer_id='simulated_reviewer', decision=decision)
+    st.write("Before (LOF_v1):")
+    st.write(combined_human_review_df_lof)
+else:
+    # Clear the current content on the page
+    st.empty()
 
-                return decision
+    # Create a DataFrame to display the simulated human review decisions
+    simulated_human_review_records = []
+    for index in offline_review_transactions:
+        transaction = transactions_data.iloc[index]
 
-            # Simulate offline review for the transaction
-            updated_decision = simulate_offline_review(transaction)
-    
-            # Add a row to simulated_human_review_records
-            row = {
-                'Transaction ID': index,
-                'Original Decision': original_decision,
-                'Updated Decision': updated_decision,
-                'Model Type': model_type,
-                'Review ID': index,
-                'Reviewed At': datetime.datetime.now(),
-                'Comments': 'Simulated review decision',
-            }
-            simulated_human_review_records.append(row)
-    
-        # Create a DataFrame for the simulated human review results
-        simulated_human_review_df = pd.DataFrame(simulated_human_review_records)
-    
-        # Apply background color to changed rows
-        def highlight_changed_cells(s):
-            changed_rows = s['Original Decision'] != s['Updated Decision']
-            df = pd.DataFrame('', index=s.index, columns=s.columns)
-            df.loc[changed_rows, :] = 'background-color: #FFC000'
-            return df
-    
-        # Apply the highlight function to the DataFrame
-        styled_simulated_human_review_df = simulated_human_review_df.style.apply(highlight_changed_cells, axis=None)
-    
-        # Display the simulated human review decisions in a table with background color
-        st.write("After:")
-        st.write(styled_simulated_human_review_df)
+        # Function to simulate offline review
+        def simulate_offline_review(transaction):
+            INCOME_THRESHOLD = 100000
+            AGE_THRESHOLD = 50
+            EMPLOYMENT_STATUS_SUSPICIOUS = 3
+            HOUSING_STATUS_SUSPICIOUS = 2
+            ERROR_RATE = 0.1
+
+            is_unusually_high_income = transaction['income'] > INCOME_THRESHOLD
+            is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
+            is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
+            is_suspicious_housing = transaction['housing_status'] == HOUSING_STATUS_SUSPICIOUS
+
+            if is_unusually_high_income and (is_age_above_threshold or is_suspicious_employment or is_suspicious_housing):
+                decision = 'fraudulent'
+            else:
+                decision = 'legitimate'
+
+            if random.random() < ERROR_RATE:
+                decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
+
+            # Log an entry in the audit logs for this decision
+            log_audit_entry(transaction_id=index, reviewer_id='simulated_reviewer', decision=decision)
+
+            return decision
+
+        # Simulate offline review for the transaction
+        updated_decision = simulate_offline_review(transaction)
+
+        # Add a row to simulated_human_review_records
+        row = {
+            'Transaction ID': index,
+            'Original Decision': original_decision,
+            'Updated Decision': updated_decision,
+            'Model Type': model_type,
+            'Review ID': index,
+            'Reviewed At': datetime.datetime.now(),
+            'Comments': 'Simulated review decision',
+        }
+        simulated_human_review_records.append(row)
+
+    # Create a DataFrame for the simulated human review results
+    simulated_human_review_df = pd.DataFrame(simulated_human_review_records)
+
+    # Apply background color to changed rows
+    def highlight_changed_cells(s):
+        changed_rows = s['Original Decision'] != s['Updated Decision']
+        df = pd.DataFrame('', index=s.index, columns=s.columns)
+        df.loc[changed_rows, :] = 'background-color: #FFC000'
+        return df
+
+    # Apply the highlight function to the DataFrame
+    styled_simulated_human_review_df = simulated_human_review_df.style.apply(highlight_changed_cells, axis=None)
+
+    # Display the simulated human review decisions in a table with background color
+    st.write("After (Both RF_v1 and LOF_v1):")
+    st.write(styled_simulated_human_review_df)
 
 if __name__ == '__main__':
     expert_human_judgment_page()
