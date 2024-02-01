@@ -181,6 +181,10 @@ def transactions_page():
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         grid_options = gb.build()
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
+         # Display LOF anomaly indices separately
+        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+        if lof_anomaly_indices:
+            st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
     else:
         st.error("No transactions data available.")
