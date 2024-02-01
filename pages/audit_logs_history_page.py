@@ -2,6 +2,20 @@ import streamlit as st
 import pandas as pd
 import datetime
 
+# Define an empty list to store audit logs
+audit_logs = []
+
+# Function to log an entry in the audit logs
+def log_audit_entry(transaction_id, reviewer_id, decision):
+    timestamp = datetime.datetime.now()
+    audit_entry = {
+        'Timestamp': timestamp,
+        'Transaction ID': transaction_id,
+        'Reviewer ID': reviewer_id,
+        'Decision': decision,
+    }
+    audit_logs.append(audit_entry)
+
 def audit_logs_history_page(audit_logs):
     st.title("Audit Logs / History")
     st.write("View detailed transaction audit logs and the history of changes made through the UI.")
