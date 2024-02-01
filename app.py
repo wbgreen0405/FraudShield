@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-from pages.home import home_page
+from pages.home import home
 from pages.transactions import transactions_page
 from pages.supervised_fraud_results_page import supervised_fraud_results_page
 from pages.fraud_rules_page import fraud_rules_page
