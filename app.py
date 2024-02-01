@@ -2,7 +2,6 @@ import os
 import streamlit as st
 from pages.home import home_page
 from pages.transactions import transactions_page
-from pages.offline_review import offline_review_page
 from pages.supervised_fraud_results import supervised_fraud_results_page
 from pages.fraud_rules_page import fraud_rules_page
 from pages.anomaly_detection_system_page import anomaly_detection_system_page
