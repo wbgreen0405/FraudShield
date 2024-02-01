@@ -37,10 +37,10 @@ def expert_human_judgment_page():
         return
 
     # Create a button to trigger the simulation
-    if st.button("Simulate Review"):
-        # Clear the current content on the page
-        st.empty()
+    simulate_button = st.button("Simulate Review")
 
+    if not simulate_button:
+        # Display the original table
         # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
         human_review_records = []
         unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
@@ -64,8 +64,11 @@ def expert_human_judgment_page():
         # Create a DataFrame for the combined human review results
         combined_human_review_df = pd.DataFrame(human_review_records)
 
-        # Display the combined human review results in a table
+        # Display the original table
         st.write(combined_human_review_df)
+    else:
+        # Clear the current content on the page
+        st.empty()
 
         # Create a DataFrame to display the simulated human review decisions
         simulated_human_review_records = []
@@ -131,4 +134,5 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
