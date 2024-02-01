@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import datetime
 import random
-from pages import audit_logs_history_page  # Import the audit_logs_history_page function
 
 # Define an empty list to store audit logs
 audit_logs = []
@@ -30,17 +29,27 @@ def expert_human_judgment_page():
 
     st.write("Here you can simulate the expert human judgment process.")
 
-    # Function to simulate offline review
-    def simulate_offline_review(transaction_data, flagged_indices):
-        INCOME_THRESHOLD = 100000
-        AGE_THRESHOLD = 50
-        EMPLOYMENT_STATUS_SUSPICIOUS = 3
-        HOUSING_STATUS_SUSPICIOUS = 2
-        ERROR_RATE = 0.1
+    # Retrieve transactions_data from session_state
+    transactions_data = st.session_state.get('transactions_data', None)
 
-        decisions = {}
-        for index in flagged_indices:
-            transaction = transaction_data.iloc[index]
+    if transactions_data is None:
+        st.error("Transactions data is missing. Please run preprocessing and inference first.")
+        return
+
+    # Create a DataFrame to display the simulated human review decisions
+    human_review_records = []
+    for index in offline_review_transactions:
+        transaction = transactions_data.iloc[index]
+        original_decision = st.session_state.get(f'original_decision_{index}', 'N/A')
+        
+        # Function to simulate offline review
+        def simulate_offline_review(transaction):
+            INCOME_THRESHOLD = 100000
+            AGE_THRESHOLD = 50
+            EMPLOYMENT_STATUS_SUSPICIOUS = 3
+            HOUSING_STATUS_SUSPICIOUS = 2
+            ERROR_RATE = 0.1
+
             is_unusually_high_income = transaction['income'] > INCOME_THRESHOLD
             is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
             is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
@@ -54,44 +63,41 @@ def expert_human_judgment_page():
             if random.random() < ERROR_RATE:
                 decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
 
-            decisions[index] = decision
-
             # Log an entry in the audit logs for this decision
             log_audit_entry(transaction_id=index, reviewer_id='simulated_reviewer', decision=decision)
 
-        return decisions
+            return decision
 
-    # Retrieve transactions_data from session_state
-    transactions_data = st.session_state.get('transactions_data', None)
+        # Simulate offline review for the transaction
+        updated_decision = simulate_offline_review(transaction)
 
-    if transactions_data is None:
-        st.error("Transactions data is missing. Please run preprocessing and inference first.")
-        return
+        # Store the original decision in session_state
+        st.session_state[f'original_decision_{index}'] = updated_decision
 
-    # Simulate offline review for flagged transactions
-    offline_review_decisions = simulate_offline_review(transactions_data, offline_review_transactions)
+        # Add a row to human_review_records
+        row = {
+            'Transaction ID': index,
+            'Original Decision': original_decision,
+            'Updated Decision': updated_decision,
+            'Model Type': 'Simulated',
+            'Reviewer ID': 'simulated_reviewer',
+            'Reviewed At': datetime.datetime.now(),
+            'Comments': 'Simulated review decision',
+        }
+        human_review_records.append(row)
 
-    # Prepare data for Human Review Table
-    human_review_records = []
-    for index, decision in offline_review_decisions.items():
-        human_review_records.append({
-            'review_id': index,  # Assuming index as review_id for simplicity
-            'ref_id': index,
-            'reviewed_at': datetime.datetime.now(),
-            'reviewer_id': 'simulated_reviewer',
-            'decision': decision,
-            'comments': 'Simulated review decision'
-        })
-
-    # Create a DataFrame to display the simulated human review decisions
+    # Create a DataFrame from human_review_records
     human_review_df = pd.DataFrame(human_review_records)
 
-    # Display the human review decisions in a table
-    st.write("Simulated Human Review Decisions:")
-    st.write(human_review_df)
+    # Add a column to show the background color for changed records
+    def background_color(row):
+        if row['Original Decision'] != row['Updated Decision']:
+            return 'background-color: #FFC000'
+        return ''
+    styled_human_review_df = human_review_df.style.applymap(background_color, subset=['Original Decision', 'Updated Decision'])
 
-    # Call the audit_logs_history_page function (without parentheses) to display audit logs
-    audit_logs_history_page.audit_logs_history_page(audit_logs)
+    # Display the human review decisions in a table
+    st.dataframe(styled_human_review_df, unsafe_allow_html=True)
 
 if __name__ == '__main__':
     expert_human_judgment_page()
