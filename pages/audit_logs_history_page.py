@@ -20,6 +20,14 @@ def audit_logs_history_page(audit_logs):
     st.title("Audit Logs / History")
     st.write("View detailed transaction audit logs and the history of changes made through the UI.")
 
+    # Retrieve offline_review_transactions from session_state
+    offline_review_transactions = st.session_state.get('offline_review_transactions', set())
+
+    # Log these transactions in the audit_logs list
+    for transaction_id in offline_review_transactions:
+        # Log each transaction with relevant information
+        log_audit_entry(transaction_id, 'simulated_reviewer', 'offline review')
+
     # Load audit logs and change history data (you may need to fetch this from your data source)
     audit_logs_df = load_audit_logs_data(audit_logs)
     change_history_df = load_change_history_data()  # Replace with your data source
