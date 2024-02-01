@@ -21,11 +21,8 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
 def expert_human_judgment_page():
     st.title("Expert Human Judgment")
 
-    # Access the offline_review_transactions from session state
+    # Access the offline_review_transactions from session_state
     offline_review_transactions = st.session_state.get('offline_review_transactions', [])
-
-    # After simulating offline review and getting offline_review_transactions
-    st.session_state['offline_review_transactions'] = offline_review_transactions
 
     if not offline_review_transactions:
         st.info("No transactions available for expert human judgment.")
@@ -64,8 +61,15 @@ def expert_human_judgment_page():
 
         return decisions
 
+    # Retrieve transactions_data from session_state
+    transactions_data = st.session_state.get('transactions_data', None)
+
+    if transactions_data is None:
+        st.error("Transactions data is missing. Please run preprocessing and inference first.")
+        return
+
     # Simulate offline review for flagged transactions
-    offline_review_decisions = simulate_offline_review(X, offline_review_transactions)
+    offline_review_decisions = simulate_offline_review(transactions_data, offline_review_transactions)
 
     # Prepare data for Human Review Table
     human_review_records = []
