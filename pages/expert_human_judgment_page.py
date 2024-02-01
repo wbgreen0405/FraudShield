@@ -36,6 +36,10 @@ def expert_human_judgment_page():
         st.error("Transactions data is missing. Please run preprocessing and inference first.")
         return
 
+    # Initialize original_decision
+    original_decision = "Possible Fraud"  # Replace with the actual original decision
+    model_type = "LOF"  # Replace with the correct model type based on the data
+
     # Create a button to trigger the simulation
     simulate_button = st.button("Simulate Review")
 
@@ -46,8 +50,6 @@ def expert_human_judgment_page():
         unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
-            original_decision = "Possible Fraud"  # Replace with the actual original decision
-            model_type = "LOF"  # Replace with the correct model type based on the data
             # Find the corresponding unified_flags entry
             for flag in unified_flags:
                 if flag['flag_id'] == transaction['ref_id']:
