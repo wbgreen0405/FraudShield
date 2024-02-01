@@ -36,15 +36,34 @@ def expert_human_judgment_page():
         st.error("Transactions data is missing. Please run preprocessing and inference first.")
         return
 
-    # Create a DataFrame to display the simulated human review decisions
+    # Create a DataFrame to display the original human review decisions
     human_review_records = []
-    
+    for index in offline_review_transactions:
+        transaction = transactions_data.iloc[index]
+        original_decision = "Original Decision"  # Replace with actual original decision
+        row = {
+            'Transaction ID': index,
+            'Original Decision': original_decision,
+            'Model Type': 'Original',
+            'Reviewer ID': 'N/A',
+            'Reviewed At': datetime.datetime.now(),
+            'Comments': 'Original decision before simulation',
+        }
+        human_review_records.append(row)
+
+    # Create a DataFrame from human_review_records for original decisions
+    original_human_review_df = pd.DataFrame(human_review_records)
+
+    # Display the original human review decisions in a table
+    st.write(original_human_review_df)
+
     # Create a button to trigger the simulation
     if st.button("Simulate Review"):
+        # Create a DataFrame to display the simulated human review decisions
+        simulated_human_review_records = []
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
-            original_decision = st.session_state.get(f'original_decision_{index}', 'N/A')
-            
+
             # Function to simulate offline review
             def simulate_offline_review(transaction):
                 INCOME_THRESHOLD = 100000
@@ -74,10 +93,7 @@ def expert_human_judgment_page():
             # Simulate offline review for the transaction
             updated_decision = simulate_offline_review(transaction)
 
-            # Store the original decision in session_state
-            st.session_state[f'original_decision_{index}'] = updated_decision
-
-            # Add a row to human_review_records
+            # Add a row to simulated_human_review_records
             row = {
                 'Transaction ID': index,
                 'Original Decision': original_decision,
@@ -87,22 +103,17 @@ def expert_human_judgment_page():
                 'Reviewed At': datetime.datetime.now(),
                 'Comments': 'Simulated review decision',
             }
-            human_review_records.append(row)
+            simulated_human_review_records.append(row)
 
-    # Create a DataFrame from human_review_records
-    human_review_df = pd.DataFrame(human_review_records)
+        # Create a DataFrame from simulated_human_review_records for updated decisions
+        simulated_human_review_df = pd.DataFrame(simulated_human_review_records)
 
-    # Apply background color to the DataFrame
-    def background_color(s):
-        return ['background-color: #FFC000' if s['Original Decision'] != s['Updated Decision'] else '' for _ in s]
-
-    human_review_df_styled = human_review_df.style.apply(background_color, axis=1)
-
-    # Display the human review decisions in a table
-    st.write(human_review_df_styled)
+        # Display the updated human review decisions in a table
+        st.write(simulated_human_review_df)
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
 
 
