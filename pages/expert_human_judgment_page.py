@@ -24,6 +24,9 @@ def expert_human_judgment_page():
     # Access the offline_review_transactions from session state
     offline_review_transactions = st.session_state.get('offline_review_transactions', [])
 
+    # After simulating offline review and getting offline_review_transactions
+    st.session_state['offline_review_transactions'] = offline_review_transactions
+
     if not offline_review_transactions:
         st.info("No transactions available for expert human judgment.")
         return
@@ -88,3 +91,4 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
