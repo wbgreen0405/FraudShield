@@ -89,15 +89,14 @@ def expert_human_judgment_page():
     # Create a DataFrame from human_review_records
     human_review_df = pd.DataFrame(human_review_records)
 
-    # Add a column to show the background color for changed records
-    def background_color(row):
-        if row['Original Decision'] != row['Updated Decision']:
-            return 'background-color: #FFC000'
-        return ''
-    styled_human_review_df = human_review_df.style.applymap(background_color, subset=['Original Decision', 'Updated Decision'])
+    # Apply background color to the DataFrame
+    def background_color(s):
+        return ['background-color: #FFC000' if s['Original Decision'] != s['Updated Decision'] else '' for _ in s]
+
+    human_review_df_styled = human_review_df.style.apply(background_color, axis=1)
 
     # Display the human review decisions in a table
-    st.dataframe(styled_human_review_df, unsafe_allow_html=True)
+    st.write(human_review_df_styled)
 
 if __name__ == '__main__':
     expert_human_judgment_page()
