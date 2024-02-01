@@ -60,8 +60,6 @@ def run_inference(transactions_data, rf_model, lof_model):
     
     # Retrieve user-defined settings
     fraud_threshold = st.session_state.get('fraud_threshold', 0.5)  # Default to 0.5 if not set
-    
- 
 
     # Predict potential fraud cases with probabilities
     rf_probabilities = rf_model.predict_proba(preprocessed_data)[:, 1]
@@ -76,8 +74,6 @@ def run_inference(transactions_data, rf_model, lof_model):
     lof_predictions = lof_model.fit_predict(X_potential_nonfraud)
     lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
 
-
-
     # Combine LOF anomalies and RF frauds for human review
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
     st.session_state['offline_review_transactions'] = list(offline_review_transactions)
@@ -86,8 +82,14 @@ def run_inference(transactions_data, rf_model, lof_model):
     unified_flags, anomaly_detection_records = [], []
     for index in range(len(transactions_data)):
         transaction_record = transactions_data.iloc[index].to_dict()
-        ref_id = transaction_record['ref_id']
-
+        
+        # Check the structure of transaction_record
+        if 'ref_id' in transaction_record:
+            ref_id = transaction_record['ref_id']
+        else:
+            # Handle the case where 'ref_id' is not present in the dictionary
+            ref_id = None  # Or use an appropriate default value
+        
         if index in potential_fraud_indices:
             # Add to unified flags if RF model predicts fraud
             unified_flags.append({
@@ -112,10 +114,6 @@ def run_inference(transactions_data, rf_model, lof_model):
             }
             anomaly_detection_records.append(anomaly_detection_record)
 
-    #st.session_state['unified_flags'] = unified_flags
-    #st.session_state['anomaly_detection_records'] = anomaly_detection_records
-
-                    
     # Set the 'offline_review_transactions' variable in the session_state
     st.session_state['offline_review_transactions'] = offline_review_transactions  # Pass it to session_state
 
@@ -153,7 +151,7 @@ def transactions_page():
                 preprocessed_data = preprocess_data(transactions_data[selected_features])
                 
                 # Run inference with the preprocessed data and loaded models
-                run_inference(preprocessed_data, rf_model, lof_model)
+                run_inference(transactions_data, rf_model, lof_model)  # Pass transactions_data here
                 
         # Display transaction data in an interactive grid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
