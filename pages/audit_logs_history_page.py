@@ -43,7 +43,7 @@ def load_change_history_data():
 
 # You can call the audit_logs_history_page function in your main app file
 # Example:
-if pages == 'Audit Logs / History':
-    audit_logs_history_page()
+#if pages == 'Audit Logs / History':
+    #audit_logs_history_page()
 
-
+audit_logs_history_page(audit_logs)
