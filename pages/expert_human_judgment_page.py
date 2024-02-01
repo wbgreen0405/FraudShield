@@ -36,29 +36,29 @@ def expert_human_judgment_page():
         st.error("Transactions data is missing. Please run preprocessing and inference first.")
         return
 
-    # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
-    human_review_records = []
-    for index in offline_review_transactions:
-        transaction = transactions_data.iloc[index]
-        original_decision = "Possible Fraud"  # Replace with actual original decision
-        model_type = "LOF"  # Change this based on the model that flagged the transaction
-        row = {
-            'Transaction ID': index,
-            'Original Decision': original_decision,
-            'Model Type': model_type,
-        }
-        human_review_records.append(row)
-
-    # Create a DataFrame for the combined human review results
-    combined_human_review_df = pd.DataFrame(human_review_records)
-
-    # Display the combined human review results in a table
-    st.write(combined_human_review_df)
-
     # Create a button to trigger the simulation
     if st.button("Simulate Review"):
-        # Clear the table
-        st.clear()
+        # Clear the current content on the page
+        st.text("")  # A workaround to clear the content
+
+        # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
+        human_review_records = []
+        for index in offline_review_transactions:
+            transaction = transactions_data.iloc[index]
+            original_decision = "Possible Fraud"  # Replace with actual original decision
+            model_type = "LOF"  # Change this based on the model that flagged the transaction
+            row = {
+                'Transaction ID': index,
+                'Original Decision': original_decision,
+                'Model Type': model_type,
+            }
+            human_review_records.append(row)
+
+        # Create a DataFrame for the combined human review results
+        combined_human_review_df = pd.DataFrame(human_review_records)
+
+        # Display the combined human review results in a table
+        st.write(combined_human_review_df)
 
         # Create a DataFrame to display the simulated human review decisions
         simulated_human_review_records = []
@@ -111,9 +111,9 @@ def expert_human_judgment_page():
 
         # Apply background color to changed rows
         def highlight_changed_cells(s):
-            changed_rows = s.ne(s.shift(-1, axis=0))
+            changed_rows = s['Original Decision'] != s['Updated Decision']
             df = pd.DataFrame('', index=s.index, columns=s.columns)
-            df[changed_rows] = f'background-color: #FFC000'
+            df.loc[changed_rows, :] = 'background-color: #FFC000'
             return df
 
         # Apply the highlight function to the DataFrame
@@ -124,6 +124,7 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
 
 
