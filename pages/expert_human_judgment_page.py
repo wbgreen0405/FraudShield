@@ -36,29 +36,30 @@ def expert_human_judgment_page():
         st.error("Transactions data is missing. Please run preprocessing and inference first.")
         return
 
-    # Create a DataFrame to display the original human review decisions
+    # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
     human_review_records = []
     for index in offline_review_transactions:
         transaction = transactions_data.iloc[index]
-        original_decision = "Original Decision"  # Replace with actual original decision
+        original_decision = "Possible Fraud"  # Replace with actual original decision
+        model_type = "LOF"  # Change this based on the model that flagged the transaction
         row = {
             'Transaction ID': index,
             'Original Decision': original_decision,
-            'Model Type': 'Original',
-            'Reviewer ID': 'N/A',
-            'Reviewed At': datetime.datetime.now(),
-            'Comments': 'Original decision before simulation',
+            'Model Type': model_type,
         }
         human_review_records.append(row)
 
-    # Create a DataFrame from human_review_records for original decisions
-    original_human_review_df = pd.DataFrame(human_review_records)
+    # Create a DataFrame for the combined human review results
+    combined_human_review_df = pd.DataFrame(human_review_records)
 
-    # Display the original human review decisions in a table
-    st.write(original_human_review_df)
+    # Display the combined human review results in a table
+    st.write(combined_human_review_df)
 
     # Create a button to trigger the simulation
     if st.button("Simulate Review"):
+        # Clear the table
+        st.clear()
+
         # Create a DataFrame to display the simulated human review decisions
         simulated_human_review_records = []
         for index in offline_review_transactions:
@@ -98,21 +99,32 @@ def expert_human_judgment_page():
                 'Transaction ID': index,
                 'Original Decision': original_decision,
                 'Updated Decision': updated_decision,
-                'Model Type': 'Simulated',
-                'Reviewer ID': 'simulated_reviewer',
+                'Model Type': model_type,
+                'Review ID': index,
                 'Reviewed At': datetime.datetime.now(),
                 'Comments': 'Simulated review decision',
             }
             simulated_human_review_records.append(row)
 
-        # Create a DataFrame from simulated_human_review_records for updated decisions
+        # Create a DataFrame for the simulated human review results
         simulated_human_review_df = pd.DataFrame(simulated_human_review_records)
 
-        # Display the updated human review decisions in a table
-        st.write(simulated_human_review_df)
+        # Apply background color to changed rows
+        def highlight_changed_cells(s):
+            changed_rows = s.ne(s.shift(-1, axis=0))
+            df = pd.DataFrame('', index=s.index, columns=s.columns)
+            df[changed_rows] = f'background-color: #FFC000'
+            return df
+
+        # Apply the highlight function to the DataFrame
+        styled_simulated_human_review_df = simulated_human_review_df.style.apply(highlight_changed_cells, axis=None)
+
+        # Display the simulated human review decisions in a table with background color
+        st.write(styled_simulated_human_review_df)
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
 
 
