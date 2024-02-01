@@ -12,7 +12,7 @@ def supervised_fraud_results_page():
 
     # Fetch model results from Supabase tables
     rf_confusion_matrix = fetch_supabase_table("rf_confusion_matrix")
-    rf_feature_importance = fetch_supabase_table("rf_feature_importance")
+    rf_feature_importance = fetch_supabase_table("rf_feature_importances")
     rf_model_metrics = fetch_supabase_table("rf_model_metrics")
 
     # Display the fetched results
