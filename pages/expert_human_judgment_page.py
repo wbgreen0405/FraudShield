@@ -36,9 +36,26 @@ def expert_human_judgment_page():
         st.error("Transactions data is missing. Please run preprocessing and inference first.")
         return
 
-    # Initialize original_decision
-    original_decision = "Possible Fraud"  # Replace with the actual original decision
-    model_type = "LOF"  # Replace with the correct model type based on the data
+    # Initialize original_decision and model_type for each transaction
+    original_decision = []  # Replace with the actual original decision for each transaction
+    model_type = []  # Replace with the correct model type for each transaction based on the data
+
+    for index in range(len(transactions_data)):
+        transaction_record = transactions_data.iloc[index].to_dict()
+
+        # Initialize original_decision and model_type based on the data for each transaction
+        if index in potential_fraud_indices:
+            # For transactions flagged as potential fraud by RF_v1
+            original_decision.append("Possible Fraud")  # Replace with the actual original decision
+            model_type.append("RF_v1")
+        elif index in lof_anomaly_indices:
+            # For transactions identified as LOF anomalies
+            original_decision.append("Possible Fraud")  # Replace with the actual original decision
+            model_type.append("LOF_v1")
+        else:
+            # For other transactions
+            original_decision.append("Legitimate")  # Replace with the actual original decision
+            model_type.append("Unknown")  # Replace with the correct model type based on the data
 
     # Create a button to trigger the simulation
     simulate_button = st.button("Simulate Review")
@@ -109,9 +126,9 @@ def expert_human_judgment_page():
             # Add a row to simulated_human_review_records
             row = {
                 'Transaction ID': index,
-                'Original Decision': original_decision,
+                'Original Decision': original_decision[index],  # Use the initialized original_decision
                 'Updated Decision': updated_decision,
-                'Model Type': model_type,
+                'Model Type': model_type[index],  # Use the initialized model_type
                 'Review ID': index,
                 'Reviewed At': datetime.datetime.now(),
                 'Comments': 'Simulated review decision',
@@ -136,6 +153,4 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
-
-
 
