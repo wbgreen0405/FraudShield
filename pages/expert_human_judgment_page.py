@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 import random
-import audit_logs_history_page  # Import the audit_logs_history_page function
+from pages import audit_logs_history_page  # Import the audit_logs_history_page function
 
 # Define an empty list to store audit logs
 audit_logs = []
