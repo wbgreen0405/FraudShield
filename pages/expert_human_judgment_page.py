@@ -3,20 +3,6 @@ import pandas as pd
 import datetime
 import random
 
-# Define an empty list to store audit logs
-audit_logs = []
-
-# Function to log an entry in the audit logs
-def log_audit_entry(transaction_id, reviewer_id, decision):
-    timestamp = datetime.datetime.now()
-    audit_entry = {
-        'Timestamp': timestamp,
-        'Transaction ID': transaction_id,
-        'Reviewer ID': reviewer_id,
-        'Decision': decision,
-    }
-    audit_logs.append(audit_entry)
-
 def expert_human_judgment_page():
     st.title("Expert Human Judgment")
 
@@ -36,30 +22,17 @@ def expert_human_judgment_page():
         st.error("Transactions data is missing. Please run preprocessing and inference first.")
         return
 
-    # Initialize original_decision and model_type for each transaction
-    original_decision = []  # Replace with the actual original decision for each transaction
-    model_type = []  # Replace with the correct model type for each transaction based on the data
-
-    # Retrieve potential_fraud_indices and lof_anomaly_indices from session state
-    potential_fraud_indices = st.session_state.get('rf_predictions', [])
+    # Retrieve potential fraud and LOF anomaly indices from session_state
+    potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
     lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
 
-    for index in range(len(transactions_data)):
-        transaction_record = transactions_data.iloc[index].to_dict()
+    # Combine LOF anomalies and RF frauds for human review
+    offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
+    st.session_state['offline_review_transactions'] = list(offline_review_transactions)
 
-        # Initialize original_decision and model_type based on the data for each transaction
-        if index in potential_fraud_indices:
-            # For transactions flagged as potential fraud by RF_v1
-            original_decision.append("Possible Fraud")  # Replace with the actual original decision
-            model_type.append("RF_v1")
-        elif index in lof_anomaly_indices:
-            # For transactions identified as LOF anomalies
-            original_decision.append("Possible Fraud")  # Replace with the actual original decision
-            model_type.append("LOF_v1")
-        else:
-            # For other transactions
-            original_decision.append("Legitimate")  # Replace with the actual original decision
-            model_type.append("Unknown")  # Replace with the correct model type based on the data
+    # Initialize original_decision
+    original_decision = "Possible Fraud"  # Replace with the actual original decision
+    model_type = "LOF"  # Replace with the correct model type based on the data
 
     # Create a button to trigger the simulation
     simulate_button = st.button("Simulate Review")
@@ -130,9 +103,9 @@ def expert_human_judgment_page():
             # Add a row to simulated_human_review_records
             row = {
                 'Transaction ID': index,
-                'Original Decision': original_decision[index],  # Use the initialized original_decision
+                'Original Decision': original_decision,
                 'Updated Decision': updated_decision,
-                'Model Type': model_type[index],  # Use the initialized model_type
+                'Model Type': model_type,
                 'Review ID': index,
                 'Reviewed At': datetime.datetime.now(),
                 'Comments': 'Simulated review decision',
