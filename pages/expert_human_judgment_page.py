@@ -90,9 +90,10 @@ def expert_human_judgment_page():
     st.write("Simulated Human Review Decisions:")
     st.write(human_review_df)
 
-    # Call the audit_logs_history_page function and pass the audit_logs list
-    audit_logs_history_page(audit_logs)
+    # Call the audit_logs_history_page function (without parentheses) to display audit logs
+    audit_logs_history_page.audit_logs_history_page(audit_logs)
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
