@@ -40,6 +40,10 @@ def expert_human_judgment_page():
     original_decision = []  # Replace with the actual original decision for each transaction
     model_type = []  # Replace with the correct model type for each transaction based on the data
 
+    # Retrieve potential_fraud_indices and lof_anomaly_indices from session state
+    potential_fraud_indices = st.session_state.get('rf_predictions', [])
+    lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+
     for index in range(len(transactions_data)):
         transaction_record = transactions_data.iloc[index].to_dict()
 
@@ -153,4 +157,5 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
