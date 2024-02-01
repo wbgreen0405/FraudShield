@@ -38,53 +38,56 @@ def expert_human_judgment_page():
 
     # Create a DataFrame to display the simulated human review decisions
     human_review_records = []
-    for index in offline_review_transactions:
-        transaction = transactions_data.iloc[index]
-        original_decision = st.session_state.get(f'original_decision_{index}', 'N/A')
-        
-        # Function to simulate offline review
-        def simulate_offline_review(transaction):
-            INCOME_THRESHOLD = 100000
-            AGE_THRESHOLD = 50
-            EMPLOYMENT_STATUS_SUSPICIOUS = 3
-            HOUSING_STATUS_SUSPICIOUS = 2
-            ERROR_RATE = 0.1
+    
+    # Create a button to trigger the simulation
+    if st.button("Simulate Review"):
+        for index in offline_review_transactions:
+            transaction = transactions_data.iloc[index]
+            original_decision = st.session_state.get(f'original_decision_{index}', 'N/A')
+            
+            # Function to simulate offline review
+            def simulate_offline_review(transaction):
+                INCOME_THRESHOLD = 100000
+                AGE_THRESHOLD = 50
+                EMPLOYMENT_STATUS_SUSPICIOUS = 3
+                HOUSING_STATUS_SUSPICIOUS = 2
+                ERROR_RATE = 0.1
 
-            is_unusually_high_income = transaction['income'] > INCOME_THRESHOLD
-            is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
-            is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
-            is_suspicious_housing = transaction['housing_status'] == HOUSING_STATUS_SUSPICIOUS
+                is_unusually_high_income = transaction['income'] > INCOME_THRESHOLD
+                is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
+                is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
+                is_suspicious_housing = transaction['housing_status'] == HOUSING_STATUS_SUSPICIOUS
 
-            if is_unusually_high_income and (is_age_above_threshold or is_suspicious_employment or is_suspicious_housing):
-                decision = 'fraudulent'
-            else:
-                decision = 'legitimate'
+                if is_unusually_high_income and (is_age_above_threshold or is_suspicious_employment or is_suspicious_housing):
+                    decision = 'fraudulent'
+                else:
+                    decision = 'legitimate'
 
-            if random.random() < ERROR_RATE:
-                decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
+                if random.random() < ERROR_RATE:
+                    decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
 
-            # Log an entry in the audit logs for this decision
-            log_audit_entry(transaction_id=index, reviewer_id='simulated_reviewer', decision=decision)
+                # Log an entry in the audit logs for this decision
+                log_audit_entry(transaction_id=index, reviewer_id='simulated_reviewer', decision=decision)
 
-            return decision
+                return decision
 
-        # Simulate offline review for the transaction
-        updated_decision = simulate_offline_review(transaction)
+            # Simulate offline review for the transaction
+            updated_decision = simulate_offline_review(transaction)
 
-        # Store the original decision in session_state
-        st.session_state[f'original_decision_{index}'] = updated_decision
+            # Store the original decision in session_state
+            st.session_state[f'original_decision_{index}'] = updated_decision
 
-        # Add a row to human_review_records
-        row = {
-            'Transaction ID': index,
-            'Original Decision': original_decision,
-            'Updated Decision': updated_decision,
-            'Model Type': 'Simulated',
-            'Reviewer ID': 'simulated_reviewer',
-            'Reviewed At': datetime.datetime.now(),
-            'Comments': 'Simulated review decision',
-        }
-        human_review_records.append(row)
+            # Add a row to human_review_records
+            row = {
+                'Transaction ID': index,
+                'Original Decision': original_decision,
+                'Updated Decision': updated_decision,
+                'Model Type': 'Simulated',
+                'Reviewer ID': 'simulated_reviewer',
+                'Reviewed At': datetime.datetime.now(),
+                'Comments': 'Simulated review decision',
+            }
+            human_review_records.append(row)
 
     # Create a DataFrame from human_review_records
     human_review_df = pd.DataFrame(human_review_records)
@@ -100,5 +103,6 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
+
 
 
