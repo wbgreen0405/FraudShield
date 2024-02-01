@@ -10,7 +10,21 @@ from pages import settings_configuration_page
 from pages import audit_logs_history_page
 from pages import model_performance_metrics_page
 from pages import help_documentation_page
-from pages import expert_human_judgment_page
+from pages import expert_human_judgment_page  # Import the expert_human_judgment_page function
+
+# Define an empty list to store audit logs
+audit_logs = []
+
+# Function to log an entry in the audit logs
+def log_audit_entry(transaction_id, reviewer_id, decision):
+    timestamp = datetime.datetime.now()
+    audit_entry = {
+        'Timestamp': timestamp,
+        'Transaction ID': transaction_id,
+        'Reviewer ID': reviewer_id,
+        'Decision': decision,
+    }
+    audit_logs.append(audit_entry)
 
 def render_sidebar():
     # Your existing sidebar rendering code
@@ -38,6 +52,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
