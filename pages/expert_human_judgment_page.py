@@ -39,7 +39,7 @@ def expert_human_judgment_page():
     # Create a button to trigger the simulation
     if st.button("Simulate Review"):
         # Clear the current content on the page
-        st.text("")  # A workaround to clear the content
+        st.empty()
 
         # Create a DataFrame to display the combined human review results (LOF anomalies and RF frauds)
         human_review_records = []
@@ -124,9 +124,3 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
-
-
-
-
-
-
