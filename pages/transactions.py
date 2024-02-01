@@ -14,6 +14,9 @@ supabase_url = st.secrets["supabase"]["url"]
 supabase_key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(supabase_url, supabase_key)
 
+# Initialize offline_review_transactions variable
+offline_review_transactions = set()
+
 def load_model_from_s3(bucket_name, model_key):
     aws_access_key_id = st.secrets["aws"]["aws_access_key_id"]
     aws_secret_access_key = st.secrets["aws"]["aws_secret_access_key"]
