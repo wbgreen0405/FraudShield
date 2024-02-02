@@ -237,10 +237,9 @@ def transactions_page():
     
             # Set the 'display_combined_flags_table' session state variable to True
             st.session_state.display_combined_flags_table = True
-    
      # Use st.experimental_set_query_params to navigate to the expert_human_judgment_page
-     if 'display_combined_flags_table' in st.session_state and st.session_state.display_combined_flags_table:
-        st.experimental_set_query_params(page='expert_human_judgment_page')
+      #if 'display_combined_flags_table' in st.session_state and st.session_state.display_combined_flags_table:
+         #st.experimental_set_query_params(page='expert_human_judgment_page')
 
 
                 
