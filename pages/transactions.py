@@ -220,6 +220,9 @@ def transactions_page():
     # Initialize offline_review_transactions variable here
     offline_review_transactions = set()
 
+    # Define combined_flags_table and initialize it as None
+    combined_flags_table = None  # Add this line
+
     # Button to run preprocessing and inference
     if not transactions_data.empty:
         if st.button('Run Preprocessing and Inference'):
