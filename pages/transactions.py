@@ -221,7 +221,7 @@ def transactions_page():
     offline_review_transactions = set()
 
     # Define combined_flags_table and initialize it as None
-    combined_flags_table = None  # Add this line
+    combined_flags_table = None
 
     # Button to run preprocessing and inference
     if not transactions_data.empty:
@@ -268,13 +268,6 @@ def transactions_page():
             st.write("Combined Flags Table:")
             st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
 
-        # Display the offline review transactions table
-        #offline_review_indices = st.session_state.get('offline_review_transactions', [])
-        #if offline_review_indices:
-            #st.write("Offline Review Transactions:")
-            #offline_review_table = create_combined_flags_table(offline_review_indices, transactions_data, selected_features)
-            #st.write(offline_review_table)
-
         # Display the Unified Flags table and the Anomaly Detection table
         unified_flags = st.session_state.get('unified_flags', [])
         anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
@@ -283,12 +276,12 @@ def transactions_page():
             st.write("Combined Flags and Anomaly Detection Table:")
             combined_table = pd.concat([pd.DataFrame(unified_flags), pd.DataFrame(anomaly_detection_records)], ignore_index=True)
             st.write(combined_table)
+            
+        # Store the combined flags table in session_state
+        st.session_state['combined_flags_table'] = combined_flags_table
 
     else:
         st.error("No transactions data available.")
-        
-    # Store the combined flags table in session_state
-    st.session_state['combined_flags_table'] = combined_flags_table
 
 if __name__ == '__main__':
     transactions_page()
