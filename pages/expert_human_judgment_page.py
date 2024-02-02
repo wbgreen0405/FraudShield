@@ -1,3 +1,10 @@
+import streamlit as st
+import pandas as pd
+import datetime
+import random
+#from pages.transactions import log_audit_entry
+from pages.transactions import log_audit_entry, unified_flags, anomaly_detection_records  # Add these import statements
+
 def expert_human_judgment_page():
     st.title("Expert Human Judgment")
 
@@ -129,8 +136,6 @@ def expert_human_judgment_page():
         # Display the simulated human review decisions in a table with background color
         st.write("After (Both RF_v1 and LOF_v1):")
         st.write(styled_simulated_human_review_df)
-
-# Rest of the code remains unchanged
 
 if __name__ == '__main__':
     expert_human_judgment_page()
