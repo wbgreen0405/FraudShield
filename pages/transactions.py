@@ -238,37 +238,30 @@ def transactions_page():
         if lof_anomaly_indices:
             st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
-        # Display the combined list of flagged transactions
-        if st.session_state.get('offline_review_transactions'):
-            combined_flags_indices = list(st.session_state['offline_review_transactions'])  # Convert set to list
-            st.write("Combined Flags (Possible Fraud) Indices:", combined_flags_indices)
+        # Combine LOF anomalies and RF frauds for human review
+        potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
+        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+        
+        # Convert potential_fraud_indices and lof_anomaly_indices to sets
+        potential_fraud_set = set(potential_fraud_indices)
+        lof_anomaly_set = set(lof_anomaly_indices)
+        
+        # Find the intersection of sets to get combined_flags_set
+        combined_flags_set = potential_fraud_set.intersection(lof_anomaly_set)
+        
+        # Convert combined_flags_set back to a list for display
+        combined_flags_indices = list(combined_flags_set)
+
+        if combined_flags_indices:
+            st.write("Combined Flags (Possible Fraud):", combined_flags_indices)
             
-            # Create and display the combined flags table with both RF_v1 and LOF_v1 model types
-            combined_flags_table = transactions_data.loc[combined_flags_indices].copy()
-            combined_flags_table['model_type'] = 'RF_v1'  # Assign 'RF_v1' as model type initially
-            combined_flags_table['score'] = None  # Initialize score as None
-            
-            # Calculate RF_v1 scores for flagged transactions
-            rf_probabilities = rf_model.predict_proba(preprocess_data(combined_flags_table[selected_features]))[:, 1]
-            combined_flags_table.loc[combined_flags_table.index, 'score'] = rf_probabilities
-            
-            # Convert LOF anomaly indices to a list
-            lof_flags_indices = list(lof_anomaly_indices.intersection(combined_flags_indices))
-            
-            if lof_flags_indices:
-                # Calculate LOF_v1 scores for LOF flagged transactions
-                lof_flags = preprocess_data(transactions_data.loc[lof_flags_indices][selected_features])
-                lof_scores = -lof_model.negative_outlier_factor_
-                
-                # Update model_type and score for LOF flagged transactions
-                combined_flags_table.loc[lof_flags_indices, 'model_type'] = 'LOF_v1'
-                combined_flags_table.loc[lof_flags_indices, 'score'] = lof_scores
-            
+            # Create and display the combined flags table with modified columns
+            combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
             st.write("Combined Flags Table:")
-            st.write(combined_flags_table)
+            st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
+
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
-
