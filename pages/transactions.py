@@ -224,7 +224,6 @@ def transactions_page():
     combined_flags_table = None
 
     # Button to run preprocessing and inference
-    # Button to run preprocessing and inference
     if not transactions_data.empty:
         if st.button('Run Preprocessing and Inference'):
             with st.spinner('Running preprocessing and inference...'):
@@ -234,15 +233,10 @@ def transactions_page():
                 
                 # Run inference with the preprocessed data and loaded models
                 run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
-    
+
             # Set the 'display_combined_flags_table' session state variable to True
             st.session_state.display_combined_flags_table = True
-     # Use st.experimental_set_query_params to navigate to the expert_human_judgment_page
-      #if 'display_combined_flags_table' in st.session_state and st.session_state.display_combined_flags_table:
-         #st.experimental_set_query_params(page='expert_human_judgment_page')
 
-
-                
         # Display transaction data in an interactive grid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
         gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)
@@ -250,47 +244,44 @@ def transactions_page():
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         grid_options = gb.build()
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
-        
-        # Debug: Print offline_review_indices
-        #offline_review_indices = st.session_state.get('offline_review_transactions', [])
-        #st.write("Debug: Offline Review Indices:", offline_review_indices)
 
         # Combine LOF anomalies and RF frauds for human review
         potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
         lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
-        
+
         # Convert potential_fraud_indices and lof_anomaly_indices to sets
         potential_fraud_set = set(potential_fraud_indices)
         lof_anomaly_set = set(lof_anomaly_indices)
-        
+
         # Find the intersection of sets to get combined_flags_set
         combined_flags_set = potential_fraud_set.intersection(lof_anomaly_set)
-        
+
         # Convert combined_flags_set back to a list for display
         combined_flags_indices = list(combined_flags_set)
 
         if combined_flags_indices:
             st.write("Combined Flags (Possible Fraud):", combined_flags_indices)
-            
+
             # Create and display the combined flags table with modified columns
             combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
             st.write("Combined Flags Table:")
             st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
 
-        # Display the Unified Flags table and the Anomaly Detection table
-        unified_flags = st.session_state.get('unified_flags', [])
-        anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
-        
-        if unified_flags or anomaly_detection_records:
-            st.write("Combined Flags and Anomaly Detection Table:")
-            combined_table = pd.concat([pd.DataFrame(unified_flags), pd.DataFrame(anomaly_detection_records)], ignore_index=True)
-            st.write(combined_table)
-            
-        # Store the combined flags table in session_state
-        st.session_state['combined_flags_table'] = combined_flags_table
-
     else:
         st.error("No transactions data available.")
 
+def expert_human_judgment_page():
+    st.set_page_config(layout="wide")
+    st.title('Expert Human Judgment')
+
+    # Check if the flag to display the table is set in session_state
+    if hasattr(st.session_state, 'display_combined_flags_table') and st.session_state.display_combined_flags_table:
+        # Display the "Combined Flags and Anomaly Detection Table" here
+        combined_flags_table = st.session_state.get('combined_flags_table', None)
+        if combined_flags_table is not None:
+            st.write("Combined Flags and Anomaly Detection Table:")
+            st.write(combined_flags_table)
+
 if __name__ == '__main__':
     transactions_page()
+
