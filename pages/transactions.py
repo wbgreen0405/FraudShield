@@ -243,10 +243,9 @@ def transactions_page():
         grid_options = gb.build()
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
         
-        # Display LOF anomaly indices separately
-        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
-        if lof_anomaly_indices:
-            st.write("LOF Anomaly Indices:", lof_anomaly_indices)
+        # Debug: Print offline_review_indices
+        offline_review_indices = st.session_state.get('offline_review_transactions', [])
+        st.write("Debug: Offline Review Indices:", offline_review_indices)
 
         # Combine LOF anomalies and RF frauds for human review
         potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
