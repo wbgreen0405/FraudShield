@@ -143,6 +143,34 @@ def run_inference(transactions_data, rf_model, lof_model):
                 **transaction_record # Include original transaction data
             }
             anomaly_detection_records.append(anomaly_detection_record)
+    # Create a combined list for transactions flagged as possible fraud
+    combined_flags = []
+    for index in range(len(transactions_data)):
+        transaction_record = transactions_data.iloc[index].to_dict()
+        
+        # Check the structure of transaction_record
+        if 'ref_id' in transaction_record:
+            ref_id = transaction_record['ref_id']
+        else:
+            # Handle the case where 'ref_id' is not present in the dictionary
+            ref_id = None  # Or use an appropriate default value
+        
+        if index in potential_fraud_indices or index in lof_anomaly_indices:
+            # Determine the model version
+            model_version = 'RF_v1' if index in potential_fraud_indices else 'LOF_v1'
+            
+            # Create a combined flag entry
+            combined_flag = {
+                'Transaction ID': ref_id,
+                'model_version': model_version,
+                'flag_type': 'possible fraud'
+            }
+            
+            combined_flags.append(combined_flag)
+    
+    # Display the combined list
+    st.write("Combined Flags (Possible Fraud):", combined_flags)
+
 
     # Set the 'offline_review_transactions' variable in the session_state
     st.session_state['offline_review_transactions'] = offline_review_transactions  # Pass it to session_state
@@ -195,8 +223,14 @@ def transactions_page():
         if lof_anomaly_indices:
             st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
+        # Display the combined list of flagged transactions
+        if st.session_state.get('offline_review_transactions'):
+            combined_flags = st.session_state['offline_review_transactions']
+            st.write("Combined Flags (Possible Fraud):", combined_flags)
+
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
+
