@@ -20,9 +20,10 @@ def expert_human_judgment_page():
 
     # Use offline_review_transactions for expert human judgment
     if offline_review_transactions:
-        # Expert Human Judgment page code here
-    else:
-        st.info("No transactions available for expert human judgment.")
+    
+    # Expert Human Judgment page code here
+     else:
+            st.info("No transactions available for expert human judgment.")
 
     st.write("Here you can simulate the expert human judgment process.")
 
