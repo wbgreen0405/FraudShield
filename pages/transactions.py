@@ -120,41 +120,6 @@ def run_inference(transactions_data, rf_model, lof_model):
             # Handle the case where 'ref_id' is not present in the dictionary
             ref_id = None  # Or use an appropriate default value
         
-        if index in potential_fraud_indices:
-            # Add to unified flags if RF model predicts fraud
-            unified_flags.append({
-                'flag_id': ref_id,
-                'model_version': 'RF_v1',
-                'prob_score': rf_probabilities[index],
-                'flag_type': 'possible fraud',
-                **transaction_record  # Include original transaction data
-            })
-        
-        if index in lof_anomaly_indices:
-            # Correctly identify the LOF model index
-            lof_model_index = X_potential_nonfraud.index.get_loc(index)
-            anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
-            anomaly_detection_record = {
-                'anomaly_id': ref_id,
-                'model_version': 'LOF_v1',
-                'anomaly_score': anomaly_score,
-                'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
-                'is_anomaly': True,
-                **transaction_record # Include original transaction data
-            }
-            anomaly_detection_records.append(anomaly_detection_record)
-    # Create a combined list for transactions flagged as possible fraud
-    combined_flags = []
-    for index in range(len(transactions_data)):
-        transaction_record = transactions_data.iloc[index].to_dict()
-        
-        # Check the structure of transaction_record
-        if 'ref_id' in transaction_record:
-            ref_id = transaction_record['ref_id']
-        else:
-            # Handle the case where 'ref_id' is not present in the dictionary
-            ref_id = None  # Or use an appropriate default value
-        
         if index in potential_fraud_indices or index in lof_anomaly_indices:
             # Determine the model version
             model_version = 'RF_v1' if index in potential_fraud_indices else 'LOF_v1'
@@ -167,14 +132,21 @@ def run_inference(transactions_data, rf_model, lof_model):
             }
             
             combined_flags.append(combined_flag)
-    
-    # Display the combined list
-    st.write("Combined Flags (Possible Fraud):", combined_flags)
-
 
     # Set the 'offline_review_transactions' variable in the session_state
     st.session_state['offline_review_transactions'] = offline_review_transactions  # Pass it to session_state
 
+    # After running models, store results in session_state
+    st.session_state['transactions_data'] = transactions_data
+    st.session_state['preprocessed_data'] = preprocessed_data
+    st.session_state['rf_predictions'] = rf_predictions
+    st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
+
+    # Assuming 'unified_flags' and 'anomaly_detection_records' are your final outputs
+    st.session_state['unified_flags'] = unified_flags
+    st.session_state['anomaly_detection_records'] = anomaly_detection_records
+
+    st.success("Inference complete. Go to the offline review page to view transactions for review.")
     # After running models, store results in session_state
     st.session_state['transactions_data'] = transactions_data
     st.session_state['preprocessed_data'] = preprocessed_data
