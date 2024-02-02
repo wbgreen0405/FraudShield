@@ -178,7 +178,7 @@ def create_offline_review_table(offline_review_indices, transactions_data, rf_mo
             unified_flags.append({
                 'flag_id': ref_id,
                 'model_version': 'RF_v1',
-                'prob_score': rf_probabilities[index],
+                'score': rf_probabilities[index],
                 'flag_type': 'possible fraud',
                 **transaction_record  # Include original transaction data
             })
@@ -188,11 +188,11 @@ def create_offline_review_table(offline_review_indices, transactions_data, rf_mo
             lof_model_index = X_potential_nonfraud.index.get_loc(index)
             anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
             anomaly_detection_record = {
-                'anomaly_id': ref_id,
+                'flag_id': ref_id,
                 'model_version': 'LOF_v1',
-                'anomaly_score': anomaly_score,
+                'score': anomaly_score,
                 'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
-                'is_anomaly': True,
+                #'is_anomaly': True,
                 **transaction_record  # Include original transaction data
             }
             anomaly_detection_records.append(anomaly_detection_record)
