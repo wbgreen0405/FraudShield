@@ -1,10 +1,3 @@
-import streamlit as st
-import pandas as pd
-import datetime
-import random
-#from pages.transactions import log_audit_entry
-from pages.transactions import log_audit_entry, unified_flags, anomaly_detection_records  # Add these import statements
-
 def expert_human_judgment_page():
     st.title("Expert Human Judgment")
 
@@ -36,44 +29,44 @@ def expert_human_judgment_page():
     original_decision = "Possible Fraud"  # Replace with the actual original decision
     model_type = "LOF"  # Replace with the correct model type based on the data
 
+    # Display the original table with both RF_v1 and LOF_v1
+    human_review_records = []
+    for index in offline_review_transactions:
+        transaction = transactions_data.iloc[index]
+        original_decision_rf = None
+        original_decision_lof = None
+
+        # Find the corresponding entry in possible_frauds
+        for fraud in unified_flags:
+            if fraud['flag_id'] == transaction['ref_id'] and fraud['model_version'] == 'RF_v1':
+                flag_type = 'fraud'
+
+        # Find the corresponding entry in anomalies
+        for anomaly in anomaly_detection_records:
+            if anomaly['anomaly_id'] == transaction['ref_id'] and anomaly['model_version'] == 'LOF_v1':
+                original_decision_lof = 'fraud'
+
+        row = {
+            'Transaction ID': index,
+            'Original Decision (RF_v1)': original_decision_rf,
+            'Original Decision (LOF_v1)': original_decision_lof,
+        }
+        human_review_records.append(row)
+
+    # Create a DataFrame for the combined human review results
+    combined_human_review_df = pd.DataFrame(human_review_records)
+
+    # Fill any empty LOF_v1 decisions with "Not Reviewed"
+    combined_human_review_df['Original Decision (LOF_v1)'].fillna("Not Reviewed", inplace=True)
+
+    # Display the original table with both RF_v1 and LOF_v1
+    st.write("Before (Both RF_v1 and LOF_v1):")
+    st.write(combined_human_review_df)
+
     # Create a button to trigger the simulation
     simulate_button = st.button("Simulate Review")  # Define the simulate_button variable here
 
-    if not simulate_button:
-        # Display the original table with both RF_v1 and LOF_v1
-        human_review_records = []
-        for index in offline_review_transactions:
-            transaction = transactions_data.iloc[index]
-            original_decision_rf = None
-            original_decision_lof = None
-    
-            # Find the corresponding entry in possible_frauds
-            for fraud in unified_flags:
-                if fraud['flag_id'] == transaction['ref_id'] and fraud['model_version'] == 'RF_v1':
-                    flag_type = 'fraud'
-    
-            # Find the corresponding entry in anomalies
-            for anomaly in anomaly_detection_records:
-                if anomaly['anomaly_id'] == transaction['ref_id'] and anomaly['model_version'] == 'LOF_v1':
-                    original_decision_lof = 'fraud'
-    
-            row = {
-                'Transaction ID': index,
-                'Original Decision (RF_v1)': original_decision_rf,
-                'Original Decision (LOF_v1)': original_decision_lof,
-            }
-            human_review_records.append(row)
-    
-        # Create a DataFrame for the combined human review results
-        combined_human_review_df = pd.DataFrame(human_review_records)
-    
-        # Fill any empty LOF_v1 decisions with "Not Reviewed"
-        combined_human_review_df['Original Decision (LOF_v1)'].fillna("Not Reviewed", inplace=True)
-    
-        # Display the original table with both RF_v1 and LOF_v1
-        st.write("Before (Both RF_v1 and LOF_v1):")
-        st.write(combined_human_review_df)
-    else:
+    if simulate_button:
         # Clear the current content on the page
         st.empty()
 
@@ -136,6 +129,8 @@ def expert_human_judgment_page():
         # Display the simulated human review decisions in a table with background color
         st.write("After (Both RF_v1 and LOF_v1):")
         st.write(styled_simulated_human_review_df)
+
+# Rest of the code remains unchanged
 
 if __name__ == '__main__':
     expert_human_judgment_page()
