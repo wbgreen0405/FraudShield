@@ -283,6 +283,9 @@ def transactions_page():
 
     else:
         st.error("No transactions data available.")
+        
+    # Store the combined flags table in session_state
+    st.session_state['combined_flags_table'] = combined_flags_table
 
 if __name__ == '__main__':
     transactions_page()
