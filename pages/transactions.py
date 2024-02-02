@@ -127,7 +127,7 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
             lof_model_index = X_potential_nonfraud.index.get_loc(index)
             anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
             anomaly_detection_record = {
-                'anomaly_id': ref_id,
+                'flag_id': ref_id,
                 'model_version': 'LOF_v1',
                 'score': anomaly_score,
                 'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
