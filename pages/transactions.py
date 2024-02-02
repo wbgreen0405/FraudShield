@@ -233,6 +233,8 @@ def transactions_page():
                 
                 # Run inference with the preprocessed data and loaded models
                 run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
+        # Set the 'display_combined_flags_table' flag to True
+        st.session_state['display_combined_flags_table'] = True
                 
         # Display transaction data in an interactive grid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
