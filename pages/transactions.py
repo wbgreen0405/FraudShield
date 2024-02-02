@@ -159,34 +159,55 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
 
-def create_offline_review_table(offline_review_indices, transactions_data, rf_probabilities, lof_model, selected_features):
-    offline_review_data = []
-    
+def create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features):
+    table_data = []
+
+    # Retrieve RF probabilities once
+    rf_probabilities = rf_model.predict_proba(transactions_data[selected_features])[:, 1]
+
     for index in offline_review_indices:
         transaction_record = transactions_data.iloc[index].to_dict()
-        ref_id = transaction_record.get('ref_id', None)
-        
-        # Check if the index is in the potential_fraud_indices
-        if index in st.session_state.get('potential_fraud_indices', []):
-            model_type = 'RF_v1'
-            score = rf_probabilities[index]
+
+        # Check if 'ref_id' key exists in the dictionary
+        if 'ref_id' in transaction_record:
+            ref_id = transaction_record['ref_id']
         else:
-            # Calculate LOF anomaly score for this record
-            X_potential_nonfraud = st.session_state.get('preprocessed_data')
+            ref_id = None  # Handle the case where 'ref_id' is not present
+
+        if index in potential_fraud_indices:
+            # Add to unified flags if RF model predicts fraud
+            unified_flags.append({
+                'flag_id': ref_id,
+                'model_version': 'RF_v1',
+                'prob_score': rf_probabilities[index],
+                'flag_type': 'possible fraud',
+                **transaction_record  # Include original transaction data
+            })
+
+        if index in lof_anomaly_indices:
+            # Correctly identify the LOF model index
             lof_model_index = X_potential_nonfraud.index.get_loc(index)
             anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
-            model_type = 'LOF_v1'
-            score = anomaly_score
-        
-        offline_review_data.append({
-            'ref_id': ref_id,
-            'model_type': model_type,
-            'score': score,
-            **transaction_record
-        })
-    
-    offline_review_table = pd.DataFrame(offline_review_data)
-    return offline_review_table
+            anomaly_detection_record = {
+                'anomaly_id': ref_id,
+                'model_version': 'LOF_v1',
+                'anomaly_score': anomaly_score,
+                'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
+                'is_anomaly': True,
+                **transaction_record  # Include original transaction data
+            }
+            anomaly_detection_records.append(anomaly_detection_record)
+
+    # Set the 'offline_review_transactions' variable in the session_state
+    st.session_state['offline_review_transactions'] = offline_review_indices  # Pass it to session_state
+
+    # Assuming 'unified_flags' and 'anomaly_detection_records' are your final outputs
+    st.session_state['unified_flags'] = unified_flags
+    st.session_state['anomaly_detection_records'] = anomaly_detection_records
+
+    # Return the table data
+    return table_data
+
     
 def transactions_page():
     st.set_page_config(layout="wide")
