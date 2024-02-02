@@ -145,5 +145,4 @@ def expert_human_judgment_page():
         st.write(styled_simulated_human_review_df)
 
 if __name__ == '__main__':
-    transactions_page()
     expert_human_judgment_page()
