@@ -169,7 +169,7 @@ def create_combined_flags_table(combined_flags, transactions_data):
                 flag_id = combined_flag['flag_id']
             else:
                 flag_id = None  # Handle the case where 'flag_id' is not present
-        
+            
             model_type = combined_flag['model_version']
             
             if model_type == 'RF_v1':
@@ -190,16 +190,14 @@ def create_combined_flags_table(combined_flags, transactions_data):
             if original_transaction_record:
                 table_data.append({
                     'flag_id': flag_id,
-                    'model_type': model_type,
-                    'score': score,
+                    'model_type': model_type,  # Correctly record model_type
+                    'score': score,  # Correctly record score
                     **original_transaction_record
                 })
     
     table_df = pd.DataFrame(table_data)
     return table_df
-
-
-
+    
 def transactions_page():
     st.set_page_config(layout="wide")
     st.title('Transactions')
