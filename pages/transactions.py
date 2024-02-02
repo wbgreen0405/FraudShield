@@ -161,7 +161,12 @@ def create_combined_flags_table(combined_flags, transactions_data):
     table_data = []
     
     for combined_flag in combined_flags:
-        flag_id = combined_flag['flag_id']
+        # Check if 'flag_id' key exists in the dictionary
+        if 'flag_id' in combined_flag:
+            flag_id = combined_flag['flag_id']
+        else:
+            flag_id = None  # Handle the case where 'flag_id' is not present
+        
         model_type = combined_flag['model_version']
         score = combined_flag['prob_score'] if model_type == 'RF_v1' else combined_flag['anomaly_score']
         
@@ -183,6 +188,7 @@ def create_combined_flags_table(combined_flags, transactions_data):
     
     table_df = pd.DataFrame(table_data)
     return table_df
+
 
 def transactions_page():
     st.set_page_config(layout="wide")
