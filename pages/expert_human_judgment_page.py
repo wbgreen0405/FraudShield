@@ -8,13 +8,13 @@ def expert_human_judgment_page():
     st.title("Expert Human Judgment")
 
     # Check if the flag to display the table is set in session_state
-    if st.session_state.get('display_combined_flags_table', False):
+    if hasattr(st.session_state, 'display_combined_flags_table') and st.session_state.display_combined_flags_table:
         # Display the "Combined Flags and Anomaly Detection Table" here
         combined_flags_table = st.session_state.get('combined_flags_table', None)
         if combined_flags_table is not None:
             st.write("Combined Flags and Anomaly Detection Table:")
             st.write(combined_flags_table)
-
+            
     # Access the offline_review_transactions from session_state
     offline_review_transactions = st.session_state.get('offline_review_transactions', [])
 
