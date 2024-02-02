@@ -171,7 +171,13 @@ def create_combined_flags_table(combined_flags, transactions_data):
                 flag_id = None  # Handle the case where 'flag_id' is not present
         
             model_type = combined_flag['model_version']
-            score = combined_flag['prob_score'] if model_type == 'RF_v1' else combined_flag['anomaly_score']
+            
+            if model_type == 'RF_v1':
+                score = combined_flag['prob_score']
+            elif model_type == 'LOF_v1':
+                score = combined_flag['anomaly_score']
+            else:
+                score = None  # Handle unknown model versions
             
             # Find the original transaction record by flag_id
             original_transaction_record = None
@@ -191,6 +197,7 @@ def create_combined_flags_table(combined_flags, transactions_data):
     
     table_df = pd.DataFrame(table_data)
     return table_df
+
 
 
 def transactions_page():
