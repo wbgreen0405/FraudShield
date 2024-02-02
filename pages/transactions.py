@@ -72,9 +72,9 @@ def preprocess_data(df):
             df[col] = df[col].fillna(df[col].median())
     return df
 
-def run_inference(transactions_data, rf_model, lof_model):
+def run_inference(transactions_data, rf_model, lof_model, selected_features):
     # Preprocess the data
-    preprocessed_data = preprocess_data(transactions_data)
+    preprocessed_data = preprocess_data(transactions_data[selected_features])
     
     # Retrieve user-defined settings
     fraud_threshold = st.session_state.get('fraud_threshold', 0.5)  # Default to 0.5 if not set
@@ -157,6 +157,9 @@ def run_inference(transactions_data, rf_model, lof_model):
     st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
+
+# Rest of the code remains the same
+
 
 def create_combined_flags_table(combined_flags, transactions_data):
     table_data = []
