@@ -14,7 +14,7 @@ def expert_human_judgment_page():
         if combined_flags_table is not None:
             st.write("Combined Flags and Anomaly Detection Table:")
             st.write(combined_flags_table)
-            
+
     # Access the offline_review_transactions from session_state
     offline_review_transactions = st.session_state.get('offline_review_transactions', [])
 
