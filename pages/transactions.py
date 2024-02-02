@@ -148,8 +148,8 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
     # Assuming 'unified_flags' and 'anomaly_detection_records' are your final outputs
     st.session_state['unified_flags'] = unified_flags
     st.session_state['anomaly_detection_records'] = anomaly_detection_records
-    st.write("Potential Fraud Indices:", potential_fraud_indices)
-    st.write("LOF Anomaly Indices:", lof_anomaly_indices)
+    #st.write("Potential Fraud Indices:", potential_fraud_indices)
+    #st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
