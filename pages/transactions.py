@@ -18,7 +18,7 @@ supabase: Client = create_client(supabase_url, supabase_key)
 offline_review_transactions = set()
 
 # Define an empty list to store audit logs
-#audit_logs = []
+audit_logs = []
 
 # Define unified_flags and anomaly_detection_records
 unified_flags = []
