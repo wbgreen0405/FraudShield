@@ -18,7 +18,11 @@ supabase: Client = create_client(supabase_url, supabase_key)
 offline_review_transactions = set()
 
 # Define an empty list to store audit logs
-audit_logs = []
+#audit_logs = []
+
+# Define unified_flags and anomaly_detection_records
+unified_flags = []
+anomaly_detection_records = []
 
 # Function to log an entry in the audit logs
 def log_audit_entry(transaction_id, reviewer_id, decision):
@@ -30,6 +34,9 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
         'Decision': decision,
     }
     audit_logs.append(audit_entry)
+
+# ... (rest of the code)
+
 
 def load_model_from_s3(bucket_name, model_key):
     aws_access_key_id = st.secrets["aws"]["aws_access_key_id"]
