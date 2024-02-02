@@ -266,11 +266,11 @@ def transactions_page():
             st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
 
         # Display the offline review transactions table
-        offline_review_indices = st.session_state.get('offline_review_transactions', [])
-        if offline_review_indices:
-            st.write("Offline Review Transactions:")
-            offline_review_table = create_combined_flags_table(offline_review_indices, transactions_data, selected_features)
-            st.write(offline_review_table)
+        #offline_review_indices = st.session_state.get('offline_review_transactions', [])
+        #if offline_review_indices:
+            #st.write("Offline Review Transactions:")
+            #offline_review_table = create_combined_flags_table(offline_review_indices, transactions_data, selected_features)
+            #st.write(offline_review_table)
 
         # Display the Unified Flags table and the Anomaly Detection table
         unified_flags = st.session_state.get('unified_flags', [])
