@@ -161,6 +161,10 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
 
 
 def create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features):
+    
+    # Exclude 'ref_id' from selected features
+    selected_features = [feat for feat in selected_features if feat != 'ref_id']
+    
     table_data = []
 
     # Retrieve RF probabilities once
