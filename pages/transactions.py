@@ -236,17 +236,34 @@ def transactions_page():
             st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
         # Display the combined list of flagged transactions
-        if st.session_state.get('unified_flags'):
-            combined_flags = st.session_state['unified_flags']
-            st.write("Combined Flags (Possible Fraud):", combined_flags)
+        if st.session_state.get('offline_review_transactions'):
+            combined_flags_indices = st.session_state['offline_review_transactions']
+            st.write("Combined Flags (Possible Fraud) Indices:", combined_flags_indices)
             
-            # Create and display the combined flags table with modified columns
-            combined_flags_table = create_combined_flags_table(combined_flags, transactions_data)
+            # Create and display the combined flags table with both RF_v1 and LOF_v1 model types
+            combined_flags_table = transactions_data.loc[combined_flags_indices].copy()
+            combined_flags_table['model_type'] = 'RF_v1'  # Assign 'RF_v1' as model type initially
+            combined_flags_table['score'] = None  # Initialize score as None
+            
+            # Calculate RF_v1 scores for flagged transactions
+            rf_probabilities = rf_model.predict_proba(preprocess_data(combined_flags_table[selected_features]))[:, 1]
+            combined_flags_table.loc[combined_flags_table.index, 'score'] = rf_probabilities
+            
+            # Calculate LOF_v1 scores for LOF anomaly indices
+            lof_indices = set(lof_anomaly_indices)
+            lof_flags_indices = lof_indices.intersection(combined_flags_indices)
+            lof_flags = preprocess_data(transactions_data.loc[lof_flags_indices][selected_features])
+            lof_scores = -lof_model.negative_outlier_factor_
+            
+            # Update model_type and score for LOF flagged transactions
+            combined_flags_table.loc[lof_flags_indices, 'model_type'] = 'LOF_v1'
+            combined_flags_table.loc[lof_flags_indices, 'score'] = lof_scores
+            
             st.write("Combined Flags Table:")
-            st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
-
+            st.write(combined_flags_table)
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
+
