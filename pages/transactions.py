@@ -95,7 +95,7 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
     lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
 
     # Display LOF anomaly indices in Streamlit app
-    st.write("LOF Anomaly Indices:", lof_anomaly_indices)
+    #st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
     # Store results in session_state for later access in expert_human_judgment_page
     st.session_state['potential_fraud_indices'] = potential_fraud_indices
