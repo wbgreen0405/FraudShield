@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
+import datetime
+import random
+import boto3
 import pickle
 import gzip
 import io
-import datetime
-import boto3
 from sklearn.preprocessing import LabelEncoder
 from st_aggrid import AgGrid, GridOptionsBuilder
 from supabase import create_client, Client
@@ -96,7 +97,7 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
     # Display LOF anomaly indices in Streamlit app
     st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
-    # Store results in session_state for later access in expert_human_judgment_page.py
+    # Store results in session_state for later access in expert_human_judgment_page
     st.session_state['potential_fraud_indices'] = potential_fraud_indices
     st.session_state['lof_anomaly_indices'] = lof_anomaly_indices
 
@@ -131,7 +132,6 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
                 'model_version': 'LOF_v1',
                 'score': anomaly_score,
                 'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
-                #'is_anomaly': True,
                 **transaction_record  # Include original transaction data
             }
             anomaly_detection_records.append(anomaly_detection_record)
@@ -153,9 +153,7 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
 
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
-
-def create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features):
-    
+def create_combined_flags_table(combined_flags_indices, transactions_data, selected_features):
     # Exclude 'ref_id' from selected features
     selected_features = [feat for feat in selected_features if feat != 'ref_id']
     
@@ -164,7 +162,7 @@ def create_offline_review_table(offline_review_indices, transactions_data, rf_mo
     # Retrieve RF probabilities once
     rf_probabilities = rf_model.predict_proba(transactions_data[selected_features])[:, 1]
 
-    for index in offline_review_indices:
+    for index in combined_flags_indices:
         transaction_record = transactions_data.iloc[index].to_dict()
 
         # Check if 'ref_id' key exists in the dictionary
@@ -192,7 +190,6 @@ def create_offline_review_table(offline_review_indices, transactions_data, rf_mo
                 'model_version': 'LOF_v1',
                 'score': anomaly_score,
                 'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
-                #'is_anomaly': True,
                 **transaction_record  # Include original transaction data
             }
             anomaly_detection_records.append(anomaly_detection_record)
@@ -207,7 +204,6 @@ def create_offline_review_table(offline_review_indices, transactions_data, rf_mo
     # Return the table data
     return table_data
 
-    
 def transactions_page():
     st.set_page_config(layout="wide")
     st.title('Transactions')
@@ -273,7 +269,7 @@ def transactions_page():
         offline_review_indices = st.session_state.get('offline_review_transactions', [])
         if offline_review_indices:
             st.write("Offline Review Transactions:")
-            offline_review_table = create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features)
+            offline_review_table = create_combined_flags_table(offline_review_indices, transactions_data, selected_features)
             st.write(offline_review_table)
 
         # Display the Unified Flags table and the Anomaly Detection table
