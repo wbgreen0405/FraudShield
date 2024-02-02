@@ -2,19 +2,10 @@ import streamlit as st
 import pandas as pd
 import datetime
 import random
-from pages.transactions import log_audit_entry, unified_flags, anomaly_detection_records
+from pages.transactions import log_audit_entry, unified_flags, anomaly_detection_records  # Add these import statements
 
 def expert_human_judgment_page():
     st.title("Expert Human Judgment")
-
-    # Retrieve the combined flags table from session_state
-    combined_flags_table = st.session_state.get('combined_flags_table')
-
-    if combined_flags_table is not None:
-        st.write("Combined Flags Table:")
-        st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
-    else:
-        st.error("Combined Flags Table not available.")
 
     # Access the offline_review_transactions from session_state
     offline_review_transactions = st.session_state.get('offline_review_transactions', [])
@@ -147,4 +138,3 @@ def expert_human_judgment_page():
 
 if __name__ == '__main__':
     expert_human_judgment_page()
-
