@@ -80,6 +80,7 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
     fraud_threshold = st.session_state.get('fraud_threshold', 0.5)  # Default to 0.5 if not set
 
     # Predict potential fraud cases with probabilities
+    selected_features = [feat for feat in selected_features if feat != 'ref_id']
     rf_probabilities = rf_model.predict_proba(preprocessed_data)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_probabilities]
 
