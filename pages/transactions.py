@@ -240,12 +240,12 @@ def transactions_page():
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
         
         # Debug: Print offline_review_indices
-        offline_review_indices = st.session_state.get('offline_review_transactions', [])
-        st.write("Debug: Offline Review Indices:", offline_review_indices)
+        #offline_review_indices = st.session_state.get('offline_review_transactions', [])
+        #st.write("Debug: Offline Review Indices:", offline_review_indices)
 
         # Combine LOF anomalies and RF frauds for human review
-        potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
-        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+        #potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
+        #lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
         
         # Convert potential_fraud_indices and lof_anomaly_indices to sets
         potential_fraud_set = set(potential_fraud_indices)
