@@ -50,12 +50,12 @@ def expert_human_judgment_page():
             # Find the corresponding entry in possible_frauds
             for fraud in possible_frauds:
                 if fraud['flag_id'] == transaction['ref_id'] and fraud['model_version'] == 'RF_v1':
-                    original_decision_rf = 'possible fraud'
+                    original_decision_rf = 'fraud'
     
             # Find the corresponding entry in anomalies
             for anomaly in anomalies:
                 if anomaly['anomaly_id'] == transaction['ref_id'] and anomaly['model_version'] == 'LOF_v1':
-                    original_decision_lof = 'possible fraud'
+                    original_decision_lof = 'fraud'
     
             row = {
                 'Transaction ID': index,
