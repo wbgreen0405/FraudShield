@@ -158,48 +158,35 @@ def run_inference(transactions_data, rf_model, lof_model, selected_features):
 
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
-# Rest of the code remains the same
 
-
-def create_combined_flags_table(combined_flags, transactions_data):
-    table_data = []
+def create_offline_review_table(offline_review_indices, transactions_data, rf_probabilities, lof_model, selected_features):
+    offline_review_data = []
     
-    for combined_flag in combined_flags:
-        # Check if 'combined_flag' is a dictionary
-        if isinstance(combined_flag, dict):
-            # Check if 'flag_id' key exists in the dictionary
-            if 'flag_id' in combined_flag:
-                flag_id = combined_flag['flag_id']
-            else:
-                flag_id = None  # Handle the case where 'flag_id' is not present
-            
-            model_type = combined_flag['model_version']
-            
-            if model_type == 'RF_v1':
-                score = combined_flag['prob_score']
-            elif model_type == 'LOF_v1':
-                score = combined_flag['anomaly_score']
-            else:
-                score = None  # Handle unknown model versions
-            
-            # Find the original transaction record by flag_id
-            original_transaction_record = None
-            for index in range(len(transactions_data)):
-                transaction_record = transactions_data.iloc[index].to_dict()
-                if 'ref_id' in transaction_record and transaction_record['ref_id'] == flag_id:
-                    original_transaction_record = transaction_record
-                    break
-            
-            if original_transaction_record:
-                table_data.append({
-                    'flag_id': flag_id,
-                    'model_type': model_type,  # Correctly record model_type
-                    'score': score,  # Correctly record score
-                    **original_transaction_record
-                })
+    for index in offline_review_indices:
+        transaction_record = transactions_data.iloc[index].to_dict()
+        ref_id = transaction_record.get('ref_id', None)
+        
+        # Check if the index is in the potential_fraud_indices
+        if index in st.session_state.get('potential_fraud_indices', []):
+            model_type = 'RF_v1'
+            score = rf_probabilities[index]
+        else:
+            # Calculate LOF anomaly score for this record
+            X_potential_nonfraud = st.session_state.get('preprocessed_data')
+            lof_model_index = X_potential_nonfraud.index.get_loc(index)
+            anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
+            model_type = 'LOF_v1'
+            score = anomaly_score
+        
+        offline_review_data.append({
+            'ref_id': ref_id,
+            'model_type': model_type,
+            'score': score,
+            **transaction_record
+        })
     
-    table_df = pd.DataFrame(table_data)
-    return table_df
+    offline_review_table = pd.DataFrame(offline_review_data)
+    return offline_review_table
     
 def transactions_page():
     st.set_page_config(layout="wide")
@@ -260,8 +247,16 @@ def transactions_page():
             st.write("Combined Flags Table:")
             st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
 
+        # Display the offline review transactions table
+        offline_review_indices = st.session_state.get('offline_review_transactions', [])
+        if offline_review_indices:
+            st.write("Offline Review Transactions:")
+            offline_review_table = create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features)
+            st.write(offline_review_table)
+
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
+
