@@ -109,7 +109,6 @@ def run_inference(transactions_data, rf_model, lof_model):
     st.write("Offline Review Transactions:", offline_review_transactions)
 
     # Prepare data for Unified Flags and Anomaly Detection Tables
-    # Prepare data for Unified Flags and Anomaly Detection Tables
     unified_flags, anomaly_detection_records = [], []
     for index in range(len(transactions_data)):
         transaction_record = transactions_data.iloc[index].to_dict()
@@ -141,7 +140,7 @@ def run_inference(transactions_data, rf_model, lof_model):
                 'anomaly_score': anomaly_score,
                 'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
                 'is_anomaly': True,
-                **transaction_record # Include original transaction data
+                **transaction_record  # Include original transaction data
             }
             anomaly_detection_records.append(anomaly_detection_record)
 
