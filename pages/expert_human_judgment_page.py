@@ -50,7 +50,7 @@ def expert_human_judgment_page():
             # Find the corresponding entry in possible_frauds
             for fraud in unified_flags:
                 if fraud['flag_id'] == transaction['ref_id'] and fraud['model_version'] == 'RF_v1':
-                    original_decision_rf = 'fraud'
+                    flag_type = 'fraud'
     
             # Find the corresponding entry in anomalies
             for anomaly in anomaly_detection_records:
