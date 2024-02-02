@@ -223,6 +223,9 @@ def transactions_page():
 
     transactions_data = fetch_transactions()
 
+    # Initialize offline_review_transactions variable here
+    offline_review_transactions = set()
+
     # Button to run preprocessing and inference
     if not transactions_data.empty:
         if st.button('Run Preprocessing and Inference'):
@@ -281,4 +284,3 @@ def transactions_page():
 
 if __name__ == '__main__':
     transactions_page()
-
