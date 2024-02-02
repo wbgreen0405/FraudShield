@@ -276,19 +276,14 @@ def transactions_page():
             offline_review_table = create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features)
             st.write(offline_review_table)
 
-        # Display the Unified Flags table
+        # Display the Unified Flags table and the Anomaly Detection table
         unified_flags = st.session_state.get('unified_flags', [])
-        if unified_flags:
-            st.write("Unified Flags Table:")
-            unified_flags_table = pd.DataFrame(unified_flags)
-            st.write(unified_flags_table)
-
-        # Display the Anomaly Detection table
         anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
-        if anomaly_detection_records:
-            st.write("Anomaly Detection Table:")
-            anomaly_detection_table = pd.DataFrame(anomaly_detection_records)
-            st.write(anomaly_detection_table)
+        
+        if unified_flags or anomaly_detection_records:
+            st.write("Combined Flags and Anomaly Detection Table:")
+            combined_table = pd.concat([pd.DataFrame(unified_flags), pd.DataFrame(anomaly_detection_records)], ignore_index=True)
+            st.write(combined_table)
 
     else:
         st.error("No transactions data available.")
