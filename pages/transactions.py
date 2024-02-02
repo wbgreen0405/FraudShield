@@ -249,15 +249,17 @@ def transactions_page():
             rf_probabilities = rf_model.predict_proba(preprocess_data(combined_flags_table[selected_features]))[:, 1]
             combined_flags_table.loc[combined_flags_table.index, 'score'] = rf_probabilities
             
-            # Calculate LOF_v1 scores for LOF anomaly indices
-            lof_indices = set(lof_anomaly_indices)
-            lof_flags_indices = lof_indices.intersection(combined_flags_indices)
-            lof_flags = preprocess_data(transactions_data.loc[lof_flags_indices][selected_features])
-            lof_scores = -lof_model.negative_outlier_factor_
+            # Convert LOF anomaly indices to a list
+            lof_flags_indices = list(lof_anomaly_indices.intersection(combined_flags_indices))
             
-            # Update model_type and score for LOF flagged transactions
-            combined_flags_table.loc[lof_flags_indices, 'model_type'] = 'LOF_v1'
-            combined_flags_table.loc[lof_flags_indices, 'score'] = lof_scores
+            if lof_flags_indices:
+                # Calculate LOF_v1 scores for LOF flagged transactions
+                lof_flags = preprocess_data(transactions_data.loc[lof_flags_indices][selected_features])
+                lof_scores = -lof_model.negative_outlier_factor_
+                
+                # Update model_type and score for LOF flagged transactions
+                combined_flags_table.loc[lof_flags_indices, 'model_type'] = 'LOF_v1'
+                combined_flags_table.loc[lof_flags_indices, 'score'] = lof_scores
             
             st.write("Combined Flags Table:")
             st.write(combined_flags_table)
@@ -266,4 +268,3 @@ def transactions_page():
 
 if __name__ == '__main__':
     transactions_page()
-
