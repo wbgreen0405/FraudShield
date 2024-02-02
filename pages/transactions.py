@@ -106,7 +106,7 @@ def run_inference(transactions_data, rf_model, lof_model):
     offline_review_transactions = set(potential_fraud_indices + lof_anomaly_indices)
     st.session_state['offline_review_transactions'] = list(offline_review_transactions)
     # Display the value of offline_review_transactions
-    st.write("Offline Review Transactions:", offline_review_transactions
+    st.write("Offline Review Transactions:", offline_review_transactions)
 
     # Prepare data for Unified Flags and Anomaly Detection Tables
     unified_flags, anomaly_detection_records = [], []
