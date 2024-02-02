@@ -273,8 +273,8 @@ def transactions_page():
             st.write(offline_review_table)
 
         # Display the Unified Flags table and the Anomaly Detection table
-        #unified_flags = st.session_state.get('unified_flags', [])
-        #anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
+        unified_flags = st.session_state.get('unified_flags', [])
+        anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
         
         if unified_flags or anomaly_detection_records:
             st.write("Combined Flags and Anomaly Detection Table:")
