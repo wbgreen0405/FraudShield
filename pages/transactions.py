@@ -224,6 +224,7 @@ def transactions_page():
     combined_flags_table = None
 
     # Button to run preprocessing and inference
+    # Button to run preprocessing and inference
     if not transactions_data.empty:
         if st.button('Run Preprocessing and Inference'):
             with st.spinner('Running preprocessing and inference...'):
@@ -234,11 +235,13 @@ def transactions_page():
                 # Run inference with the preprocessed data and loaded models
                 run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
     
-            # Set the 'display_combined_flags_table' flag to True
-            st.session_state['display_combined_flags_table'] = True
-            
-            # Use st.experimental_set_query_params to navigate to the expert_human_judgment_page
-            st.experimental_set_query_params(page='expert_human_judgment_page')
+            # Set the 'display_combined_flags_table' session state variable to True
+            st.session_state.display_combined_flags_table = True
+    
+    # Use st.experimental_set_query_params to navigate to the expert_human_judgment_page
+    if 'display_combined_flags_table' in st.session_state and st.session_state.display_combined_flags_table:
+        st.experimental_set_query_params(page='expert_human_judgment_page')
+
 
                 
         # Display transaction data in an interactive grid
