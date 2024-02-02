@@ -53,7 +53,7 @@ def expert_human_judgment_page():
                     original_decision_rf = 'fraud'
     
             # Find the corresponding entry in anomalies
-            for anomaly in anomalies:
+            for anomaly in anomaly_detection_records:
                 if anomaly['anomaly_id'] == transaction['ref_id'] and anomaly['model_version'] == 'LOF_v1':
                     original_decision_lof = 'fraud'
     
