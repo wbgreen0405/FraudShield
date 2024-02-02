@@ -42,19 +42,20 @@ def expert_human_judgment_page():
     if not simulate_button:
         # Display the original table with both RF_v1 and LOF_v1
         human_review_records = []
-        unified_flags = st.session_state.get('unified_flags', [])  # Retrieve unified_flags from session_state
         for index in offline_review_transactions:
             transaction = transactions_data.iloc[index]
             original_decision_rf = None
             original_decision_lof = None
     
-            # Find the corresponding unified_flags entry
-            for flag in unified_flags:
-                if flag['flag_id'] == transaction['ref_id']:
-                    if flag['model_version'] == 'RF_v1':
-                        original_decision_rf = flag['flag_type']
-                    elif flag['model_version'] == 'LOF_v1':
-                        original_decision_lof = flag['flag_type']
+            # Find the corresponding entry in possible_frauds
+            for fraud in possible_frauds:
+                if fraud['flag_id'] == transaction['ref_id'] and fraud['model_version'] == 'RF_v1':
+                    original_decision_rf = 'possible fraud'
+    
+            # Find the corresponding entry in anomalies
+            for anomaly in anomalies:
+                if anomaly['anomaly_id'] == transaction['ref_id'] and anomaly['model_version'] == 'LOF_v1':
+                    original_decision_lof = 'possible fraud'
     
             row = {
                 'Transaction ID': index,
@@ -72,7 +73,6 @@ def expert_human_judgment_page():
         # Display the original table with both RF_v1 and LOF_v1
         st.write("Before (Both RF_v1 and LOF_v1):")
         st.write(combined_human_review_df)
-
     else:
         # Clear the current content on the page
         st.empty()
