@@ -235,13 +235,13 @@ def transactions_page():
             combined_flags = st.session_state['unified_flags']
             st.write("Combined Flags (Possible Fraud):", combined_flags)
             
-            # Create and display the combined flags table
-            combined_flags_df = pd.DataFrame(combined_flags)
-            st.write("Combined Flags Table:", combined_flags_df)
+            # Create and display the combined flags table with modified columns
+            combined_flags_table = create_combined_flags_table(combined_flags, transactions_data)
+            st.write("Combined Flags Table:")
+            st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
 
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
-
