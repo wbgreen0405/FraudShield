@@ -231,16 +231,17 @@ def transactions_page():
             st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
         # Display the combined list of flagged transactions
-        if st.session_state.get('offline_review_transactions'):
-            combined_flags = st.session_state['offline_review_transactions']
+        if st.session_state.get('unified_flags'):
+            combined_flags = st.session_state['unified_flags']
             st.write("Combined Flags (Possible Fraud):", combined_flags)
             
             # Create and display the combined flags table
-            combined_flags_table = create_combined_flags_table(combined_flags, transactions_data)
-            st.write("Combined Flags Table:", combined_flags_table)
+            combined_flags_df = pd.DataFrame(combined_flags)
+            st.write("Combined Flags Table:", combined_flags_df)
 
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
+
