@@ -237,7 +237,7 @@ def transactions_page():
 
         # Display the combined list of flagged transactions
         if st.session_state.get('offline_review_transactions'):
-            combined_flags_indices = st.session_state['offline_review_transactions']
+            combined_flags_indices = list(st.session_state['offline_review_transactions'])  # Convert set to list
             st.write("Combined Flags (Possible Fraud) Indices:", combined_flags_indices)
             
             # Create and display the combined flags table with both RF_v1 and LOF_v1 model types
