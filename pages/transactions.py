@@ -48,8 +48,12 @@ def preprocess_data(df):
     return df
 
 def run_inference(transactions_data, rf_model, lof_model):
-    # Preprocess the data
-    preprocessed_data = preprocess_data(transactions_data)
+
+    # Store 'ref_id' in a separate Series to preserve the order
+    ref_ids = transactions_data['ref_id'].copy()
+    
+    # Preprocess the data, excluding 'ref_id' for the prediction
+    preprocessed_data = preprocess_data(transactions_data.drop(columns=['ref_id']))
     
     # Retrieve user-defined settings
     fraud_threshold = st.session_state.get('fraud_threshold', 0.5)  # Default to 0.5 if not set
@@ -187,4 +191,5 @@ def transactions_page():
 
 if __name__ == '__main__':
     transactions_page()
+
 
