@@ -281,12 +281,21 @@ def transactions_page():
         st.session_state['combined_flags_table'] = combined_flags_table
 
         # Store the combined flags table in session_state after ensuring it's a DataFrame
-        if isinstance(combined_table, pd.DataFrame):
-            st.session_state['combined_flags_table'] = combined_table
-            st.write("Combined Flags Table:")
-            st.dataframe(combined_table)  # Example of direct display for testing
-        else:
-            st.error('combined_flags_table is not a DataFrame')
+        #if isinstance(combined_table, pd.DataFrame):
+            #st.session_state['combined_flags_table'] = combined_table
+            #st.write("Combined Flags Table:")
+            #st.dataframe(combined_table)  # Example of direct display for testing
+        #else:
+            #st.error('combined_flags_table is not a DataFrame')
+
+        if isinstance(combined_flags_table, pd.DataFrame):
+            st.session_state['combined_flags_table'] = combined_flags_table
+            # Immediately verify
+            if isinstance(st.session_state['combined_flags_table'], pd.DataFrame):
+                st.write("DataFrame stored correctly in session state.")
+            else:
+                st.error("Failed to store DataFrame correctly in session state.")
+
 
 
         
