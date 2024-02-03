@@ -92,7 +92,7 @@ def transactions_page():
     lof_model_key = 'lof_nonfraud.pkl.gz'
     rf_model = load_model_from_s3(bucket_name, rf_model_key)
     #lof_model = load_model_from_s3(bucket_name, lof_model_key)
-    lof_model = load_lof_model_from_s3(bucket_name, lof_model_key, novelty=True)
+    lof_model = load_model_from_s3(bucket_name, lof_model_key, novelty=True)
 
     transactions_data = fetch_transactions()
 
