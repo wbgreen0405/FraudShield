@@ -1,5 +1,3 @@
-import streamlit as st
-
 def expert_human_judgment_page():
     st.set_page_config(layout="wide")
     st.title('Expert Human Judgment')
@@ -13,8 +11,5 @@ def expert_human_judgment_page():
             st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
     else:
         st.info("No transactions available for expert human judgment.")
-
-if __name__ == '__main__':
-    expert_human_judgment_page()
 
 
