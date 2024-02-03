@@ -37,6 +37,44 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
 
 # ... (rest of the code)
 
+
+def load_model_from_s3(bucket_name, model_key):
+    aws_access_key_id = st.secrets["aws"]["aws_access_key_id"]
+    aws_secret_access_key = st.secrets["aws"]["aws_secret_access_key"]
+    s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+    response = s3_client.get_object(Bucket=bucket_name, Key=model_key)
+    model_str = response['Body'].read()
+    with gzip.GzipFile(fileobj=io.BytesIO(model_str)) as file:
+        return pickle.load(file)
+
+def fetch_transactions():
+    try:
+        response = supabase.table('transactions').select('*').execute()
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data. Error: {str(response.error)}')
+            return pd.DataFrame()
+        elif hasattr(response, 'data'):
+            return pd.DataFrame(response.data)
+        else:
+            st.error('Unexpected response format.')
+            return pd.DataFrame()
+    except Exception as e:
+        st.error(f'An error occurred: {e}')
+        return pd.DataFrame()
+
+def preprocess_data(df):
+    df = df.drop(columns=['ref_id'], errors='ignore')
+    categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
+    for col in categorical_cols:
+        if col in df.columns:
+            encoder = LabelEncoder()
+            df[col] = df[col].fillna('Unknown')
+            df[col] = encoder.fit_transform(df[col])
+    for col in df.columns:
+        if df[col].dtype != 'O':
+            df[col] = df[col].fillna(df[col].median())
+    return df
+
 def run_inference(transactions_data, rf_model, lof_model):
     # Preprocess the data
     preprocessed_data = preprocess_data(transactions_data)
@@ -121,33 +159,6 @@ def run_inference(transactions_data, rf_model, lof_model):
 
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
-# Function to create a table from the combined flags
-def create_combined_flags_table(combined_flags, transactions_data):
-    table_data = []
-    
-    for combined_flag in combined_flags:
-        flag_id = combined_flag['flag_id']
-        model_type = combined_flag['model_version']
-        score = combined_flag['prob_score'] if model_type == 'RF_v1' else combined_flag['anomaly_score']
-        
-        # Find the original transaction record by flag_id
-        original_transaction_record = None
-        for index in range(len(transactions_data)):
-            transaction_record = transactions_data.iloc[index].to_dict()
-            if 'ref_id' in transaction_record and transaction_record['ref_id'] == flag_id:
-                original_transaction_record = transaction_record
-                break
-        
-        if original_transaction_record:
-            table_data.append({
-                'flag_id': flag_id,
-                'model_type': model_type,
-                'score': score,
-                **original_transaction_record
-            })
-    
-    table_df = pd.DataFrame(table_data)
-    return table_df
 
 def transactions_page():
     st.set_page_config(layout="wide")
@@ -180,8 +191,7 @@ def transactions_page():
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         grid_options = gb.build()
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
-        
-        # Display LOF anomaly indices separately
+         # Display LOF anomaly indices separately
         lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
         if lof_anomaly_indices:
             st.write("LOF Anomaly Indices:", lof_anomaly_indices)
@@ -190,14 +200,9 @@ def transactions_page():
         if st.session_state.get('offline_review_transactions'):
             combined_flags = st.session_state['offline_review_transactions']
             st.write("Combined Flags (Possible Fraud):", combined_flags)
-            
-            # Create and display the combined flags table
-            combined_flags_table = create_combined_flags_table(combined_flags, transactions_data)
-            st.write("Combined Flags Table:", combined_flags_table)
 
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
-
