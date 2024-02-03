@@ -35,9 +35,6 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
     }
     audit_logs.append(audit_entry)
 
-# ... (rest of the code)
-
-
 def load_model_from_s3(bucket_name, model_key):
     aws_access_key_id = st.secrets["aws"]["aws_access_key_id"]
     aws_secret_access_key = st.secrets["aws"]["aws_secret_access_key"]
@@ -75,14 +72,15 @@ def preprocess_data(df):
             df[col] = df[col].fillna(df[col].median())
     return df
 
-def run_inference(transactions_data, rf_model, lof_model):
+def run_inference(transactions_data, rf_model, lof_model, selected_features):
     # Preprocess the data
-    preprocessed_data = preprocess_data(transactions_data)
+    preprocessed_data = preprocess_data(transactions_data[selected_features])
     
     # Retrieve user-defined settings
     fraud_threshold = st.session_state.get('fraud_threshold', 0.5)  # Default to 0.5 if not set
 
     # Predict potential fraud cases with probabilities
+    selected_features = [feat for feat in selected_features if feat != 'ref_id']
     rf_probabilities = rf_model.predict_proba(preprocessed_data)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_probabilities]
 
@@ -156,10 +154,66 @@ def run_inference(transactions_data, rf_model, lof_model):
     # Assuming 'unified_flags' and 'anomaly_detection_records' are your final outputs
     st.session_state['unified_flags'] = unified_flags
     st.session_state['anomaly_detection_records'] = anomaly_detection_records
+    st.write("Potential Fraud Indices:", potential_fraud_indices)
+    st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
     st.success("Inference complete. Go to the offline review page to view transactions for review.")
 
 
+def create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features):
+    
+    # Exclude 'ref_id' from selected features
+    selected_features = [feat for feat in selected_features if feat != 'ref_id']
+    
+    table_data = []
+
+    # Retrieve RF probabilities once
+    rf_probabilities = rf_model.predict_proba(transactions_data[selected_features])[:, 1]
+
+    for index in offline_review_indices:
+        transaction_record = transactions_data.iloc[index].to_dict()
+
+        # Check if 'ref_id' key exists in the dictionary
+        if 'ref_id' in transaction_record:
+            ref_id = transaction_record['ref_id']
+        else:
+            ref_id = None  # Handle the case where 'ref_id' is not present
+
+        if index in potential_fraud_indices:
+            # Add to unified flags if RF model predicts fraud
+            unified_flags.append({
+                'flag_id': ref_id,
+                'model_version': 'RF_v1',
+                'prob_score': rf_probabilities[index],
+                'flag_type': 'possible fraud',
+                **transaction_record  # Include original transaction data
+            })
+
+        if index in lof_anomaly_indices:
+            # Correctly identify the LOF model index
+            lof_model_index = X_potential_nonfraud.index.get_loc(index)
+            anomaly_score = -lof_model.negative_outlier_factor_[lof_model_index]
+            anomaly_detection_record = {
+                'anomaly_id': ref_id,
+                'model_version': 'LOF_v1',
+                'anomaly_score': anomaly_score,
+                'flag_type': 'possible fraud',  # Flag type for anomaly is also 'fraud'
+                'is_anomaly': True,
+                **transaction_record  # Include original transaction data
+            }
+            anomaly_detection_records.append(anomaly_detection_record)
+
+    # Set the 'offline_review_transactions' variable in the session_state
+    st.session_state['offline_review_transactions'] = offline_review_indices  # Pass it to session_state
+
+    # Assuming 'unified_flags' and 'anomaly_detection_records' are your final outputs
+    st.session_state['unified_flags'] = unified_flags
+    st.session_state['anomaly_detection_records'] = anomaly_detection_records
+
+    # Return the table data
+    return table_data
+
+    
 def transactions_page():
     st.set_page_config(layout="wide")
     st.title('Transactions')
@@ -173,6 +227,9 @@ def transactions_page():
 
     transactions_data = fetch_transactions()
 
+    # Initialize offline_review_transactions variable here
+    offline_review_transactions = set()
+
     # Button to run preprocessing and inference
     if not transactions_data.empty:
         if st.button('Run Preprocessing and Inference'):
@@ -182,7 +239,7 @@ def transactions_page():
                 preprocessed_data = preprocess_data(transactions_data[selected_features])
                 
                 # Run inference with the preprocessed data and loaded models
-                run_inference(transactions_data, rf_model, lof_model)  # Pass transactions_data here
+                run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
                 
         # Display transaction data in an interactive grid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
@@ -191,18 +248,44 @@ def transactions_page():
         gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
         grid_options = gb.build()
         AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
-         # Display LOF anomaly indices separately
+        
+        # Display LOF anomaly indices separately
         lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
         if lof_anomaly_indices:
             st.write("LOF Anomaly Indices:", lof_anomaly_indices)
 
-        # Display the combined list of flagged transactions
-        if st.session_state.get('offline_review_transactions'):
-            combined_flags = st.session_state['offline_review_transactions']
-            st.write("Combined Flags (Possible Fraud):", combined_flags)
+        # Combine LOF anomalies and RF frauds for human review
+        potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
+        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+        
+        # Convert potential_fraud_indices and lof_anomaly_indices to sets
+        potential_fraud_set = set(potential_fraud_indices)
+        lof_anomaly_set = set(lof_anomaly_indices)
+        
+        # Find the intersection of sets to get combined_flags_set
+        combined_flags_set = potential_fraud_set.intersection(lof_anomaly_set)
+        
+        # Convert combined_flags_set back to a list for display
+        combined_flags_indices = list(combined_flags_set)
+
+        if combined_flags_indices:
+            st.write("Combined Flags (Possible Fraud):", combined_flags_indices)
+            
+            # Create and display the combined flags table with modified columns
+            combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
+            st.write("Combined Flags Table:")
+            st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
+
+        # Display the offline review transactions table
+        offline_review_indices = st.session_state.get('offline_review_transactions', [])
+        if offline_review_indices:
+            st.write("Offline Review Transactions:")
+            offline_review_table = create_offline_review_table(offline_review_indices, transactions_data, rf_model, lof_model, selected_features)
+            st.write(offline_review_table)
 
     else:
         st.error("No transactions data available.")
 
 if __name__ == '__main__':
     transactions_page()
+
