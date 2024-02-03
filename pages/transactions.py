@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from sklearn.neighbors import LocalOutlierFactor
 import boto3
 import pickle
 import gzip
@@ -66,6 +67,8 @@ def run_inference(transactions_data, rf_model, lof_model):
     X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
 
     # Apply LOF model on potential non-fraud cases to further screen for anomalies
+    # When initializing the LOF model
+    lof_model = LocalOutlierFactor(novelty=True)
     lof_predictions = lof_model.predict(X_potential_nonfraud)
     
     # Identify indices of anomalies detected by LOF within the non-fraud cases
