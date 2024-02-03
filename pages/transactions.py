@@ -35,6 +35,21 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
         'Decision': decision,
     }
     audit_logs.append(audit_entry)
+    
+def fetch_transactions():
+    try:
+        response = supabase.table('transactions').select('*').execute()
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data. Error: {str(response.error)}')
+            return pd.DataFrame()
+        elif hasattr(response, 'data'):
+            return pd.DataFrame(response.data)
+        else:
+            st.error('Unexpected response format.')
+            return pd.DataFrame()
+    except Exception as e:
+        st.error(f'An error occurred: {e}')
+        return pd.DataFrame()
 
 def load_model_from_s3(bucket_name, model_key):
     aws_access_key_id = st.secrets["aws"]["aws_access_key_id"]
