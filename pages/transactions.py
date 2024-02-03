@@ -47,17 +47,34 @@ def preprocess_data(df):
             df[col] = LabelEncoder().fit_transform(df[col])
     return df
 
-def run_inference(transactions_data, rf_model, lof_model, selected_features):
-    # Ensure only the features used during model training are passed
-    selected_features = [feature for feature in selected_features if feature != 'ref_id']  # Exclude 'ref_id' if it's not part of the training features
-    preprocessed_data = preprocess_data(transactions_data[selected_features])
-    rf_predictions = rf_model.predict(preprocessed_data)
-    lof_predictions = lof_model.predict(preprocessed_data)
-    # Example logic for determining combined flags indices
-    potential_fraud_indices = rf_predictions[rf_predictions['fraud_probability'] > 0.5].index.tolist()
-    lof_anomaly_indices = lof_predictions[lof_predictions == -1].index.tolist()
-    combined_flags_indices = list(set(potential_fraud_indices) | set(lof_anomaly_indices))
-    return combined_flags_indices
+def run_inference(transactions_data, rf_model, lof_model):
+    # Preprocess the data
+    preprocessed_data = preprocess_data(transactions_data)
+    
+    # Retrieve user-defined settings
+    fraud_threshold = st.session_state.get('fraud_threshold', 0.5)  # Default to 0.5 if not set
+    
+    # Predict potential fraud cases with probabilities
+    rf_probabilities = rf_model.predict_proba(preprocessed_data)[:, 1]
+    rf_predictions = [1 if prob > fraud_threshold else 0 for prob in rf_probabilities]
+
+    # Filter out transactions flagged as potential fraud and non-fraud
+    potential_fraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 1]
+    potential_nonfraud_indices = [i for i, pred in enumerate(rf_predictions) if pred == 0]
+    X_potential_nonfraud = preprocessed_data.iloc[potential_nonfraud_indices]
+
+    # Apply LOF model on potential non-fraud cases to further screen for anomalies
+    # Note: Ensure your LOF model was initialized with novelty=True for this use case
+    lof_predictions = lof_model.predict(X_potential_nonfraud)
+    
+    # Identify indices of anomalies detected by LOF within the non-fraud cases
+    lof_anomaly_indices = [potential_nonfraud_indices[i] for i, pred in enumerate(lof_predictions) if pred == -1]
+
+    # Combine indices for review or further action
+    combined_review_indices = set(potential_fraud_indices + lof_anomaly_indices)
+
+    return combined_review_indices
+
 
 def create_combined_flags_table(combined_flags_indices, transactions_data, selected_features):
     # Creating a combined flags table
