@@ -266,6 +266,7 @@ def transactions_page():
             combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
             st.write("Combined Flags Table:")
             st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
+            st.session_state['combined_flags_table'] = combined_flags_table
 
     else:
         st.error("No transactions data available.")
