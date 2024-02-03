@@ -38,17 +38,6 @@ def render_sidebar():
     page_function()
 
 def main():
-    # Initialize session_state variables
-    st.session_state.display_combined_flags_table = False
-    st.session_state.combined_flags_table = None
-
-    # Display the selected page based on the URL query parameter
-   page = st.query_params.get("page", "transactions_page")
-
-    if page == "transactions_page":
-        transactions_page()
-    elif page == "expert_human_judgment_page":
-        expert_human_judgment_page()
 
     # Your existing code to render the sidebar and handle page navigation
     render_sidebar()
