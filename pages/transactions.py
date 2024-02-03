@@ -68,7 +68,7 @@ def run_inference(transactions_data, rf_model, lof_model):
 
     # Apply LOF model on potential non-fraud cases to further screen for anomalies
     # When initializing the LOF model
-    lof_model = LocalOutlierFactor(novelty=True)
+    lof_model = LocalOutlierFactor(n_neighbors=20, contamination='auto')
     lof_predictions = lof_model.predict(X_potential_nonfraud)
     
     # Identify indices of anomalies detected by LOF within the non-fraud cases
