@@ -41,7 +41,7 @@ def preprocess_data(df):
     # Data preprocessing logic
     df = df.copy()
     # Example preprocessing steps
-    for col in ['column_a', 'column_b']:
+    for col in ['payment_type', 'source', 'device_os', 'employment_status', 'housing_status']:
         if col in df.columns:
             df[col] = df[col].fillna('Unknown')
             df[col] = LabelEncoder().fit_transform(df[col])
