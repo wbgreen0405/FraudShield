@@ -74,43 +74,90 @@ def display_combined_data(unified_flags, anomaly_detection_records):
         combined_table = pd.concat([pd.DataFrame(unified_flags), pd.DataFrame(anomaly_detection_records)], ignore_index=True)
         st.dataframe(combined_table)
 
+# Initialize offline_review_transactions variable
+offline_review_transactions = set()
+
 def transactions_page():
     st.set_page_config(layout="wide")
     st.title('Transactions')
 
     # Load models and fetch transactions
     bucket_name = 'frauddetectpred'
-    rf_model = load_model_from_s3(bucket_name, 'random_forest_model.pkl.gz')
-    lof_model = load_model_from_s3(bucket_name, 'lof_nonfraud.pkl.gz')
+    rf_model_key = 'random_forest_model.pkl.gz'
+    lof_model_key = 'lof_nonfraud.pkl.gz'
+    rf_model = load_model_from_s3(bucket_name, rf_model_key)
+    lof_model = load_model_from_s3(bucket_name, lof_model_key)
 
     transactions_data = fetch_transactions()
 
-    if transactions_data.empty:
-        st.error("No transactions data available.")
-        return
+    # Define combined_flags_table and initialize it as None
+    combined_flags_table = None
 
-    if st.button('Run Preprocessing and Inference'):
-        with st.spinner('Running preprocessing and inference...'):
-            selected_features = st.session_state.get('selected_features', transactions_data.columns.tolist())
-            combined_flags_indices = run_inference(transactions_data, rf_model, lof_model, selected_features)
+    # Button to run preprocessing and inference
+    if not transactions_data.empty:
+        if st.button('Run Preprocessing and Inference'):
+            with st.spinner('Running preprocessing and inference...'):
+                # Assuming you allow users to select features in settings
+                selected_features = st.session_state.get('selected_features', transactions_data.columns.tolist())
+                preprocessed_data = preprocess_data(transactions_data[selected_features])
+                
+                # Run inference with the preprocessed data and loaded models
+                run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
+                
+        # Display transaction data in an interactive grid
+        gb = GridOptionsBuilder.from_dataframe(transactions_data)
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)
+        gb.configure_side_bar()
+        gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
+        grid_options = gb.build()
+        AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
+        
+        # Debug: Print offline_review_indices
+        offline_review_indices = st.session_state.get('offline_review_transactions', [])
+        st.write("Debug: Offline Review Indices:", offline_review_indices)
+
+        # Combine LOF anomalies and RF frauds for human review
+        potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
+        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+        
+        # Convert potential_fraud_indices and lof_anomaly_indices to sets
+        potential_fraud_set = set(potential_fraud_indices)
+        lof_anomaly_set = set(lof_anomaly_indices)
+        
+        # Find the intersection of sets to get combined_flags_set
+        combined_flags_set = potential_fraud_set.intersection(lof_anomaly_set)
+        
+        # Convert combined_flags_set back to a list for display
+        combined_flags_indices = list(combined_flags_set)
+
+        if combined_flags_indices:
+            st.write("Combined Flags (Possible Fraud):", combined_flags_indices)
             
+            # Create and display the combined flags table with modified columns
             combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
+            st.write("Combined Flags Table:")
+            st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
+
+        # Display the Unified Flags table and the Anomaly Detection table
+        unified_flags = st.session_state.get('unified_flags', [])
+        anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
+        
+        if unified_flags or anomaly_detection_records:
+            st.write("Combined Flags and Anomaly Detection Table:")
+            combined_table = pd.concat([pd.DataFrame(unified_flags), pd.DataFrame(anomaly_detection_records)], ignore_index=True)
+            st.write(combined_table)
             
-            if not combined_flags_table.empty:
-                st.session_state['combined_flags_table'] = combined_flags_table
-                st.write("Combined Flags Table:")
-                st.dataframe(combined_flags_table)
+        # Store the combined flags table in session_state
+        st.session_state['combined_flags_table'] = combined_flags_table
+
+        # Store the combined flags table in session_state after ensuring it's a DataFrame
+        if isinstance(combined_flags_table, pd.DataFrame):
+            st.session_state['combined_flags_table'] = combined_flags_table
+            # Immediately verify
+            if isinstance(st.session_state['combined_flags_table'], pd.DataFrame):
+                st.write("DataFrame stored correctly in session state.")
             else:
-                st.error("Failed to create a valid DataFrame for combined_flags_table.")
-    else:
-        st.info("Click the button to run preprocessing and inference.")
-
-    display_transactions_data(transactions_data)
-
-    # Display unified flags and anomaly detection records (assuming they are stored in session_state)
-    unified_flags = st.session_state.get('unified_flags', [])
-    anomaly_detection_records = st.session_state.get('anomaly_detection_records', [])
-    display_combined_data(unified_flags, anomaly_detection_records)
+                st.error("Failed to store DataFrame correctly in session state.")
 
 if __name__ == '__main__':
     transactions_page()
