@@ -107,11 +107,8 @@ def transactions_page():
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
     rf_model = load_model_from_s3(bucket_name, rf_model_key)
-    #lof_model = load_model_from_s3(bucket_name, lof_model_key)
-    #lof_model = load_model_from_s3(bucket_name, lof_model_key, novelty=True)
-    # Load the LOF model with novelty detection
-    lof_model_key_novelty = 'lof_nonfraud.pkl.gz'
-    lof_model = load_lof_model_from_s3(bucket_name, lof_model_key_novelty, novelty=True)
+    lof_model = load_model_from_s3(bucket_name, lof_model_key)
+
 
     transactions_data = fetch_transactions()
 
