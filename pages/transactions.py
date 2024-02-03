@@ -126,7 +126,9 @@ def transactions_page():
                 preprocessed_data = preprocess_data(transactions_data[selected_features])
                 
                 # Run inference with the preprocessed data and loaded models
-                run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
+                #run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
+                run_inference(transactions_data, rf_model, lof_model)  # Adjusted call with 3 arguments
+
                 
         # Display transaction data in an interactive grid
         gb = GridOptionsBuilder.from_dataframe(transactions_data)
