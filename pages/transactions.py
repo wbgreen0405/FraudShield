@@ -121,7 +121,7 @@ def transactions_page():
         
         # Debug: Print offline_review_indices
         offline_review_indices = st.session_state.get('offline_review_transactions', [])
-        st.write("Debug: Offline Review Indices:", offline_review_indices)
+        #st.write("Debug: Offline Review Indices:", offline_review_indices)
 
         # Combine LOF anomalies and RF frauds for human review
         potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
