@@ -13,3 +13,5 @@ def expert_human_judgment_page():
         st.info("No transactions available for expert human judgment.")
 
 
+if __name__ == '__main__':
+    expert_human_judgment_page()
