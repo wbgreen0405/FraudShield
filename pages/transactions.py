@@ -48,8 +48,8 @@ def preprocess_data(df):
     return df
 
 def run_inference(transactions_data, rf_model, lof_model, selected_features):
-    # Placeholder for your model inference logic
-    # Assuming your models return a DataFrame with a 'fraud_probability' column
+    # Ensure only the features used during model training are passed
+    selected_features = [feature for feature in selected_features if feature != 'ref_id']  # Exclude 'ref_id' if it's not part of the training features
     preprocessed_data = preprocess_data(transactions_data[selected_features])
     rf_predictions = rf_model.predict(preprocessed_data)
     lof_predictions = lof_model.predict(preprocessed_data)
