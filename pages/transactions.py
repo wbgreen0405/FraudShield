@@ -195,11 +195,7 @@ def create_combined_flags_table(combined_flags_indices, transactions_data, selec
             anomaly_detection_records.append(anomaly_detection_record)
 
     # Set the 'offline_review_transactions' variable in the session_state
-    #st.session_state['offline_review_transactions'] = offline_review_indices  # Pass it to session_state
-    # After running inference, set offline_review_transactions
-    offline_review_transactions = set(potential_fraud_indices).intersection(set(lof_anomaly_indices))
-    st.session_state['offline_review_transactions'] = offline_review_transactions
-
+    st.session_state['offline_review_transactions'] = offline_review_indices  # Pass it to session_state
 
     # Assuming 'unified_flags' and 'anomaly_detection_records' are your final outputs
     st.session_state['unified_flags'] = unified_flags
