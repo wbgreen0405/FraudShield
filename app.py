@@ -43,7 +43,7 @@ def main():
     st.session_state.combined_flags_table = None
 
     # Display the selected page based on the URL query parameter
-    page = st.experimental_get_query_params().get("page", ["transactions_page"])[0]
+    page = st.query_params().get("page", "transactions_page")
 
     if page == "transactions_page":
         transactions_page()
