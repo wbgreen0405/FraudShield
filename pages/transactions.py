@@ -280,11 +280,15 @@ def transactions_page():
         # Store the combined flags table in session_state
         st.session_state['combined_flags_table'] = combined_flags_table
 
-        # Check if combined_flags_table is a pandas DataFrame before adding it to st.session_state
-        if isinstance(combined_flags_table, pd.DataFrame):
-            st.session_state['combined_flags_table'] = combined_flags_table
+        # Store the combined flags table in session_state after ensuring it's a DataFrame
+        if isinstance(combined_table, pd.DataFrame):
+            st.session_state['combined_flags_table'] = combined_table
+            st.write("Combined Flags Table:")
+            st.dataframe(combined_table)  # Example of direct display for testing
         else:
             st.error('combined_flags_table is not a DataFrame')
+
+
         
 
 if __name__ == '__main__':
