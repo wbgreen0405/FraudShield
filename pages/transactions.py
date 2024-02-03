@@ -285,8 +285,7 @@ def transactions_page():
             st.session_state['combined_flags_table'] = combined_flags_table
         else:
             st.error('combined_flags_table is not a DataFrame')
-            else:
-                st.error("No transactions data available.")
+        
 
 if __name__ == '__main__':
     transactions_page()
