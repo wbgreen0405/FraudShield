@@ -23,6 +23,22 @@ def load_model_from_s3(bucket_name, model_key):
     model = pickle.loads(gzip.decompress(model_str))
     return model
 
+def load_lof_model_from_s3(bucket_name, model_key, novelty=False):
+    # Function to load the LOF model from S3 with or without novelty detection
+    s3 = boto3.client('s3', aws_access_key_id=st.secrets["aws"]["aws_access_key_id"],
+                      aws_secret_access_key=st.secrets["aws"]["aws_secret_access_key"])
+    response = s3.get_object(Bucket=bucket_name, Key=model_key)
+    model_str = response['Body'].read()
+    
+    if novelty:
+        # Load LOF model with novelty detection
+        lof_model = pickle.loads(gzip.decompress(model_str))
+    else:
+        # Load LOF model without novelty detection
+        lof_model = pickle.loads(gzip.decompress(model_str))
+    
+    return lof_model
+
 def fetch_transactions():
     try:
         response = supabase.table('transactions').select('*').execute()
@@ -92,7 +108,10 @@ def transactions_page():
     lof_model_key = 'lof_nonfraud.pkl.gz'
     rf_model = load_model_from_s3(bucket_name, rf_model_key)
     #lof_model = load_model_from_s3(bucket_name, lof_model_key)
-    lof_model = load_model_from_s3(bucket_name, lof_model_key, novelty=True)
+    #lof_model = load_model_from_s3(bucket_name, lof_model_key, novelty=True)
+    # Load the LOF model with novelty detection
+    lof_model_key_novelty = 'lof_nonfraud.pkl.gz'
+    lof_model = load_lof_model_from_s3(bucket_name, lof_model_key_novelty, novelty=True)
 
     transactions_data = fetch_transactions()
 
