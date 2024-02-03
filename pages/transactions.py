@@ -44,7 +44,7 @@ def load_model_from_s3(bucket_name, model_key):
     model_str = response['Body'].read()
     with gzip.GzipFile(fileobj=io.BytesIO(model_str)) as file:
         return pickle.load(file)
-        
+
 def fetch_transactions():
     try:
         response = supabase.table('transactions').select('*').execute()
@@ -234,54 +234,57 @@ def transactions_page():
                 # Assuming you allow users to select features in settings
                 selected_features = st.session_state.get('selected_features', transactions_data.columns.tolist())
                 preprocessed_data = preprocess_data(transactions_data[selected_features])
-
+                
                 # Run inference with the preprocessed data and loaded models
                 run_inference(transactions_data, rf_model, lof_model, selected_features)  # Pass selected_features here
 
-                # Set the 'display_combined_flags_table' session state variable to True
-                st.session_state.display_combined_flags_table = True
+            # Set the 'display_combined_flags_table' session state variable to True
+            st.session_state.display_combined_flags_table = True
 
-                # Now, set the combined_flags_table in the session state
-                combined_flags_table = create_combined_flags_table(
-                    st.session_state.get('combined_flags_indices', []),
-                    transactions_data, selected_features
-                )
-                st.session_state.combined_flags_table = combined_flags_table
+        # Display transaction data in an interactive grid
+        gb = GridOptionsBuilder.from_dataframe(transactions_data)
+        gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)
+        gb.configure_side_bar()
+        gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
+        grid_options = gb.build()
+        AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
 
-            # Display transaction data in an interactive grid
-            gb = GridOptionsBuilder.from_dataframe(transactions_data)
-            gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)
-            gb.configure_side_bar()
-            gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc='sum', editable=True)
-            grid_options = gb.build()
-            AgGrid(transactions_data, gridOptions=grid_options, enable_enterprise_modules=True)
+        # Combine LOF anomalies and RF frauds for human review
+        potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
+        lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
 
-            # Combine LOF anomalies and RF frauds for human review
-            potential_fraud_indices = st.session_state.get('potential_fraud_indices', [])
-            lof_anomaly_indices = st.session_state.get('lof_anomaly_indices', [])
+        # Convert potential_fraud_indices and lof_anomaly_indices to sets
+        potential_fraud_set = set(potential_fraud_indices)
+        lof_anomaly_set = set(lof_anomaly_indices)
 
-            # Convert potential_fraud_indices and lof_anomaly_indices to sets
-            potential_fraud_set = set(potential_fraud_indices)
-            lof_anomaly_set = set(lof_anomaly_indices)
+        # Find the intersection of sets to get combined_flags_set
+        combined_flags_set = potential_fraud_set.intersection(lof_anomaly_set)
 
-            # Find the intersection of sets to get combined_flags_set
-            combined_flags_set = potential_fraud_set.intersection(lof_anomaly_set)
+        # Convert combined_flags_set back to a list for display
+        combined_flags_indices = list(combined_flags_set)
 
-            # Convert combined_flags_set back to a list for display
-            combined_flags_indices = list(combined_flags_set)
+        if combined_flags_indices:
+            st.write("Combined Flags (Possible Fraud):", combined_flags_indices)
 
-            if combined_flags_indices:
-                st.write("Combined Flags (Possible Fraud):", combined_flags_indices)
+            # Create and display the combined flags table with modified columns
+            combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
+            st.write("Combined Flags Table:")
+            st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
 
-                # Create and display the combined flags table with modified columns
-                combined_flags_table = create_combined_flags_table(combined_flags_indices, transactions_data, selected_features)
-                st.write("Combined Flags Table:")
-                st.write(combined_flags_table.rename(columns={'model_version': 'model_type', 'prob_score': 'score'}))
+    else:
+        st.error("No transactions data available.")
 
-        else:
-            st.error("No transactions data available.")
+def expert_human_judgment_page():
+    st.set_page_config(layout="wide")
+    st.title('Expert Human Judgment')
+
+    # Check if the flag to display the table is set in session_state
+    if hasattr(st.session_state, 'display_combined_flags_table') and st.session_state.display_combined_flags_table:
+        # Display the "Combined Flags and Anomaly Detection Table" here
+        combined_flags_table = st.session_state.get('combined_flags_table', None)
+        if combined_flags_table is not None:
+            st.write("Combined Flags and Anomaly Detection Table:")
+            st.write(combined_flags_table)
 
 if __name__ == '__main__':
     transactions_page()
-
-
