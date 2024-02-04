@@ -12,7 +12,7 @@ def app():
             
             # Display the DataFrame with an emphasis on the Fraud Status
             st.write("Approval System Results:")
-            st.dataframe(supervised_df[['Fraud Status']], use_container_width=True)  # Use 'ref_id' as the transaction identifier
+            st.dataframe(supervised_df[['ref_id','Fraud Status']], use_container_width=True)  # Use 'ref_id' as the transaction identifier
             
         else:
             st.error("The 'rf_predicted_fraud' column is missing from the approval system data.")
