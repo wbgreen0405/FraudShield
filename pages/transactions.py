@@ -102,13 +102,13 @@ def app():
             
             # Display Analyzed Transactions
             st.write("### Analyzed Transactions:")
-            st.dataframe(analyzed_df[['Transaction ID', 'Approval Status', 'Other Relevant Columns']])
+            st.dataframe(analyzed_df[['ref_id', 'Approval Status', 'Other Relevant Columns']])
             
             # Display Anomaly Detection System Transactions
             if 'anomaly_detection_system_df' in st.session_state:
                 st.write("### Anomaly Detection System")
                 anomaly_df = st.session_state['anomaly_detection_system_df']
-                st.dataframe(anomaly_df[['Transaction ID', 'LOF Prediction', 'Other Relevant Columns']])
+                st.dataframe(anomaly_df[['ref_id', 'LOF Prediction', 'Other Relevant Columns']])
             else:
                 st.write("Anomaly Detection System data not available.")
 
@@ -116,7 +116,7 @@ def app():
             if 'df_offline_review_detailed' in st.session_state:
                 st.write("### Offline Review Detailed Transactions")
                 review_df = st.session_state['df_offline_review_detailed']
-                st.dataframe(review_df[['Transaction ID', 'Model Type', 'Score', 'Other Relevant Columns']])
+                st.dataframe(review_df[['ref_id', 'Model Type', 'Score', 'Other Relevant Columns']])
             else:
                 st.write("Offline Review data not available.")
         else:
