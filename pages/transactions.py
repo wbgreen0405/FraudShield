@@ -123,7 +123,7 @@ def app():
             st.write("### Aproval System")
             supervised_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['rf_predicted_fraud'] == 0)]
             st.dataframe(supervised_df)
-            st.session_state['anomaly_df'] = supervised_df
+            st.session_state['supervised_df'] = supervised_df
 
             st.write("### Anomaly Detection System")
             anomaly_df = analyzed_df[analyzed_df['lof_predicted_fraud'] == 1]
