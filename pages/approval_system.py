@@ -1,24 +1,21 @@
 import streamlit as st
-import plotly.express as px
 
 def app():
-    # Corrected to match the DataFrame name used in the main analysis
+    # Assuming 'approval_system_df' is already set in the session state by the main analysis function
     if 'approval_system_df' in st.session_state:
         approval_df = st.session_state['approval_system_df']
         
-        # Display the DataFrame with an emphasis on 'Approval Status'
-        st.write("Approval System Data:")
-        st.dataframe(approval_df[['Transaction ID', 'Approval Status', 'Other Relevant Columns']])  # Ensure you replace 'Transaction ID' and 'Other Relevant Columns' with actual column names from your DataFrame
-        
-        # Generate a bar chart showing counts of 'Fraud' vs. 'Non-Fraud' based on 'Approval Status'
-        if 'Approval Status' in approval_df.columns:
-            status_counts = approval_df['Approval Status'].value_counts().reset_index()
-            status_counts.columns = ['Approval Status', 'Count']
-            fig = px.bar(status_counts, x='Approval Status', y='Count', title="Fraud vs. Non-Fraud Transactions",
-                         color='Approval Status', text='Count')
-            st.plotly_chart(fig)
+        # Ensure 'rf_predicted_fraud' column is present
+        if 'rf_predicted_fraud' in approval_df.columns:
+            # Optionally, map numeric predictions to string labels for clarity
+            approval_df['Fraud Status'] = approval_df['rf_predicted_fraud'].map({1: 'Fraud', 0: 'Not Fraud'})
+            
+            # Display the DataFrame with an emphasis on the Fraud Status
+            st.write("Approval System Results:")
+            st.dataframe(approval_df[['ref_id', 'Fraud Status']], use_container_width=True)  # Use 'ref_id' as the transaction identifier
+            
         else:
-            st.error("The 'Approval Status' column is missing from the approval data.")
+            st.error("The 'rf_predicted_fraud' column is missing from the approval system data.")
     else:
         st.error('Approval system data not found.')
 
@@ -26,5 +23,6 @@ def app():
 if __name__ == '__main__':
     st.set_page_config(page_title="Approval System", layout="wide")
     app()
+
 
 
