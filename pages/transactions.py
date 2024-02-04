@@ -78,7 +78,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
     st.write("Inference completed.")  # Debugging message
     return transactions_df
 
-def app():
+def transactions_page():
     st.title("Transaction Analysis")
 
     # Using specified bucket name and keys
