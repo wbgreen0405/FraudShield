@@ -84,8 +84,12 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     return transactions_df
 
+import streamlit as st
+
 def app():
     st.title("Transaction Analysis")
+
+    # Using specified bucket name and keys
     bucket_name = 'frauddetectpred'
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
@@ -97,33 +101,37 @@ def app():
     if st.button('Fetch and Analyze Transactions'):
         transactions_df = fetch_transactions()
         if not transactions_df.empty:
-            # Perform inference and update session_state with the results
+            # Perform inference and ensure the 'ref_id' column is used as the identifier
             analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
-            
-            # Display Analyzed Transactions
-            st.write("### Analyzed Transactions:")
-            st.dataframe(analyzed_df[['ref_id', 'Approval Status', 'Other Relevant Columns']])
-            
-            # Display Anomaly Detection System Transactions
-            if 'anomaly_detection_system_df' in st.session_state:
-                st.write("### Anomaly Detection System")
-                anomaly_df = st.session_state['anomaly_detection_system_df']
-                st.dataframe(anomaly_df[['ref_id', 'LOF Prediction', 'Other Relevant Columns']])
-            else:
-                st.write("Anomaly Detection System data not available.")
 
-            # Display Offline Review Detailed Transactions
-            if 'df_offline_review_detailed' in st.session_state:
+            # Display Analyzed Transactions with proper column names
+            if 'ref_id' in analyzed_df and 'rf_predicted_fraud' in analyzed_df:
+                analyzed_df['Fraud Status'] = analyzed_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Not Fraud')
+                st.write("### Analyzed Transactions:")
+                st.dataframe(analyzed_df[['ref_id', 'Fraud Status']])
+
+                # Anomaly Detection System
+                st.write("### Anomaly Detection System")
+                if 'lof_predicted_fraud' in analyzed_df:
+                    anomaly_df = analyzed_df[analyzed_df['lof_predicted_fraud'] == 1]
+                    st.dataframe(anomaly_df[['ref_id', 'Fraud Status']])
+                    st.session_state['anomaly_df'] = anomaly_df
+                else:
+                    st.write("LOF predictions are not available.")
+
+                # Offline Review Detailed Transactions
                 st.write("### Offline Review Detailed Transactions")
-                review_df = st.session_state['df_offline_review_detailed']
-                st.dataframe(review_df[['ref_id', 'Model Type', 'Score', 'Other Relevant Columns']])
+                review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
+                st.dataframe(review_df[['ref_id', 'Fraud Status']])
+                st.session_state['review_df'] = review_df
             else:
-                st.write("Offline Review data not available.")
+                st.error("Required columns for display are missing.")
         else:
             st.write("No transactions found.")
 
 if __name__ == '__main__':
     st.set_page_config(page_title="Transaction Analysis", layout="wide")
     app()
+
 
 
