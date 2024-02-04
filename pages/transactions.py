@@ -120,5 +120,4 @@ def app():
         else:
             st.write("No transactions found.")
 
-if __name__ == '__main__':
-    transactions_page()
+
