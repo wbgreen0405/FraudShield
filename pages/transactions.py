@@ -48,7 +48,7 @@ def fetch_transactions():
     except Exception as e:
         st.error(f'An error occurred while fetching transactions: {e}')
         return pd.DataFrame()
-)
+
 
 def preprocess_data(df):
     """
