@@ -107,3 +107,8 @@ def app():
 
         else:
             st.write("No transactions found.")
+
+
+if __name__ == '__main__':
+    st.set_page_config(page_title="Transaction Analysis", layout="wide")
+    transactions_page()
