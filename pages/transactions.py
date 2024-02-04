@@ -69,6 +69,10 @@ def perform_inference(transactions_df, rf_model, lof_model):
     """
     Perform inference on transaction data using RF and LOF models.
     """
+
+    # Step 1: Save 'ref_id' before dropping or excluding it from the feature set
+    ref_ids = transactions_df['ref_id'].copy()
+    
     transactions_df = preprocess_data(transactions_df)
     
     # RF predictions
@@ -88,6 +92,8 @@ def perform_inference(transactions_df, rf_model, lof_model):
         # Update the main DataFrame
         for index, row in non_fraud_df.iterrows():
             transactions_df.at[index, 'lof_predicted_fraud'] = row['lof_predicted_fraud']
+
+    transactions_df['ref_id'] = ref_ids
             
     # Storing DataFrames in session state for cross-page access
     transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
