@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from pygwalker.streamlit import st_pygwalker  # Ensure Pygwalker is installed and this import works
+#from pygwalker.streamlit import st_pygwalker  # Ensure Pygwalker is installed and this import works
+import pygwalker as pyg
 
 def app():
     # Assuming 'supervised_df' is already set in the session state by the main analysis function
@@ -19,7 +20,7 @@ def app():
             # Create a Pygwalker bar chart for Fraud Status
             fraud_status_counts = supervised_df['Fraud Status'].value_counts().reset_index()
             fraud_status_counts.columns = ['Fraud Status', 'Count']
-            st_pygwalker(fraud_status_counts, kind='bar', x='Fraud Status', y='Count', title="Fraud Status Distribution")
+            pyg.st_pygwalker(fraud_status_counts, kind='bar', x='Fraud Status', y='Count', title="Fraud Status Distribution")
             
         else:
             st.error("The 'rf_predicted_fraud' column is missing from the approval system data.")
