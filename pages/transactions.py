@@ -33,20 +33,18 @@ def load_model_from_s3(bucket_name, model_key):
     return model
 
 def fetch_transactions():
-    """
-    Fetch transactions data from a Supabase table.
-    """
     try:
-        data, error = supabase.table('transactions').select('*').execute()
-
-        if error:
-            st.error(f'Failed to retrieve data. Error: {str(error)}')
+        response = supabase.table('transactions').select('*').execute()
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data. Error: {str(response.error)}')
             return pd.DataFrame()
-        
-        st.write("Transactions fetched successfully.")  # Debugging message
-        return pd.DataFrame(data)
+        elif hasattr(response, 'data'):
+            return pd.DataFrame(response.data)
+        else:
+            st.error('Unexpected response format.')
+            return pd.DataFrame()
     except Exception as e:
-        st.error(f'An error occurred while fetching transactions: {e}')
+        st.error(f'An error occurred: {e}')
         return pd.DataFrame()
 
 
