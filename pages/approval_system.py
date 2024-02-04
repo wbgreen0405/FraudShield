@@ -3,7 +3,7 @@ import streamlit as st
 def app():
     # Assuming 'approval_system_df' is already set in the session state by the main analysis function
     if 'supervised_df' in st.session_state:
-        approval_df = st.session_state['supervised_df']
+        supervised_df= st.session_state['supervised_df']
         
         # Ensure 'rf_predicted_fraud' column is present
         if 'rf_predicted_fraud' in supervised_df.columns:
