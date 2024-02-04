@@ -5,7 +5,7 @@ def app():
     st.title("Approval System")
     
     # Assuming approval_df is accessible; you might need to adjust how it's passed between pages
-    # approval_df = get_approval_df_somehow()
+    approval_df = get_approval_df_somehow()
 
     # Display the DataFrame
     st.write(approval_df)
