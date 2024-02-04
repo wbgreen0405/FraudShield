@@ -13,3 +13,7 @@ def app():
     # Generate and display a bar chart of fraud and non-fraud transactions
     fig = px.bar(approval_df, x='Approval Status', title="Fraud vs. Non-Fraud Transactions")
     st.plotly_chart(fig)
+    
+if __name__ == '__main__':
+    st.set_page_config(page_title=""Approval System", layout="wide")
+    app()
