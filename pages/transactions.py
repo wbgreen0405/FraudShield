@@ -119,3 +119,6 @@ def app():
             st.experimental_rerun()  # Rerun the app to reflect the updated state
         else:
             st.write("No transactions found.")
+
+if __name__ == '__main__':
+    transactions_page()
