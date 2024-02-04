@@ -15,5 +15,5 @@ def app():
     st.plotly_chart(fig)
     
 if __name__ == '__main__':
-    st.set_page_config(page_title=""Approval System", layout="wide")
+    st.set_page_config(page_title="Approval System", layout="wide")
     app()
