@@ -95,24 +95,24 @@ def app():
     rf_model = load_model_from_s3(bucket_name, rf_model_key)
     lof_model = load_model_from_s3(bucket_name, lof_model_key)
 
-    if st.button('Fetch and Analyze Transactions'):
+   if st.button('Fetch and Analyze Transactions'):
         transactions_df = fetch_transactions()
         if not transactions_df.empty:
             analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
             
-            # Display Analyzed Transactions
+            # Display sections as requested
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
 
-            # Debugging: Check if navigation should occur
-            st.write("Ready to navigate to the Approval System page.")
-            
-            # Logic to navigate to the Approval System page or handle additional actions
-            # This part is conceptual; actual navigation depends on the structure of your Streamlit app
+            st.write("### Anomaly Detection System")
+            anomaly_df = analyzed_df[analyzed_df['lof_predicted_fraud'] == 1]
+            st.dataframe(anomaly_df)
 
+            st.write("### Offline Review Detailed Transactions")
+            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
+            st.dataframe(review_df)
         else:
             st.write("No transactions found.")
-
 
 if __name__ == '__main__':
     st.set_page_config(page_title="Transaction Analysis", layout="wide")
