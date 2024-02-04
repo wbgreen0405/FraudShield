@@ -118,11 +118,12 @@ def app():
             # Display sections as requested
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
+            st.session_state['anomaly_df'] = analyzed_df
 
             st.write("### Anomaly Detection System")
             anomaly_df = analyzed_df[analyzed_df['lof_predicted_fraud'] == 1]
             st.dataframe(anomaly_df)
-            st.session_state['anomaly_df'] = analyzed_df
+            st.session_state['anomaly_df'] = anomaly_df
 
             st.write("### Offline Review Detailed Transactions")
             review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
