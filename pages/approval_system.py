@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-#from pygwalker.streamlit import st_pygwalker  # Ensure Pygwalker is installed and this import works
-import pygwalker as pyg
+import plotly.express as px
 
 def app():
     # Assuming 'supervised_df' is already set in the session state by the main analysis function
@@ -17,10 +16,9 @@ def app():
             st.write("Approval System Results:")
             st.dataframe(supervised_df[['ref_id', 'Fraud Status']], use_container_width=True)  # Use 'ref_id' as the transaction identifier
             
-            # Create a Pygwalker bar chart for Fraud Status
-            fraud_status_counts = supervised_df['Fraud Status'].value_counts().reset_index()
-            fraud_status_counts.columns = ['Fraud Status', 'Count']
-            pyg.st_pygwalker(fraud_status_counts, kind='bar', x='Fraud Status', y='Count', title="Fraud Status Distribution")
+            # Create a Plotly bar chart for Fraud Status
+            fig = px.bar(supervised_df, x='Fraud Status', color='Fraud Status', title="Fraud Status Distribution")
+            st.plotly_chart(fig)
             
         else:
             st.error("The 'rf_predicted_fraud' column is missing from the approval system data.")
