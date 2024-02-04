@@ -72,15 +72,19 @@ def perform_inference(transactions_df, rf_model, lof_model):
     rf_predictions = rf_model.predict(X_rf)
     transactions_df['rf_predicted_fraud'] = rf_predictions
 
+    # Initialize LOF predictions column to all zeros
+    transactions_df['lof_predicted_fraud'] = 0
+
     # Applying LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
         X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud'], axis=1, errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
         non_fraud_df['lof_predicted_fraud'] = (lof_predictions == -1).astype(int)
-        transactions_df.update(non_fraud_df[['lof_predicted_fraud']])
+        # Update the main DataFrame
+        for index, row in non_fraud_df.iterrows():
+            transactions_df.at[index, 'lof_predicted_fraud'] = row['lof_predicted_fraud']
 
-    st.write("Inference completed.")  # Debugging message
     return transactions_df
 
 def app():
