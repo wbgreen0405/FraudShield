@@ -36,12 +36,19 @@ def fetch_transactions():
     """
     Fetch transactions data from a Supabase table.
     """
-    response = supabase.table('transactions').select('*').execute()
-    if response.error:
-        st.error(f'Failed to retrieve data. Error: {str(response.error)}')
+    try:
+        data, error = supabase.table('transactions').select('*').execute()
+
+        if error:
+            st.error(f'Failed to retrieve data. Error: {str(error)}')
+            return pd.DataFrame()
+        
+        st.write("Transactions fetched successfully.")  # Debugging message
+        return pd.DataFrame(data)
+    except Exception as e:
+        st.error(f'An error occurred while fetching transactions: {e}')
         return pd.DataFrame()
-    st.write("Transactions fetched successfully.")  # Debugging message
-    return pd.DataFrame(response.data)
+)
 
 def preprocess_data(df):
     """
