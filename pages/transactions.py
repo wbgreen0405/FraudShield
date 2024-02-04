@@ -20,12 +20,17 @@ def load_model_from_s3(bucket_name, model_key):
     """
     aws_access_key_id = st.secrets["aws"]["aws_access_key_id"]
     aws_secret_access_key = st.secrets["aws"]["aws_secret_access_key"]
-    s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key
+    )
     response = s3_client.get_object(Bucket=bucket_name, Key=model_key)
     model_str = response['Body'].read()
     with gzip.GzipFile(fileobj=io.BytesIO(model_str)) as file:
         model = pickle.load(file)
     return model
+
 
 def fetch_transactions():
     """
@@ -81,10 +86,14 @@ def perform_inference(transactions_df, rf_model, lof_model):
 def app():
     st.title("Transaction Analysis")
 
-    # Load models
-    bucket_name = 'frauddetectpred'  # Update with your actual bucket name
-    rf_model = load_model_from_s3(bucket_name, 'random_forest_model.pkl.gz')
-    lof_model = load_model_from_s3(bucket_name, 'lof_model.pkl.gz')
+    # Correctly using specified bucket name and keys
+    bucket_name = 'frauddetectpred'
+    rf_model_key = 'random_forest_model.pkl.gz'
+    lof_model_key = 'lof_nonfraud.pkl.gz'
+    
+    # Load the Random Forest and LOF models from S3
+    rf_model = load_model_from_s3(bucket_name, rf_model_key)
+    lof_model = load_model_from_s3(bucket_name, lof_model_key)
 
     if st.button('Fetch and Analyze Transactions'):
         transactions_df = fetch_transactions()
