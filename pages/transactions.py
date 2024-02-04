@@ -82,7 +82,7 @@ def app():
     st.title("Transaction Analysis")
 
     # Load models
-    bucket_name = 'your_bucket_name'  # Update with your actual bucket name
+    bucket_name = 'frauddetectpred'  # Update with your actual bucket name
     rf_model = load_model_from_s3(bucket_name, 'random_forest_model.pkl.gz')
     lof_model = load_model_from_s3(bucket_name, 'lof_model.pkl.gz')
 
