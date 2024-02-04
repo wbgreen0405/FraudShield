@@ -2,17 +2,17 @@ import streamlit as st
 
 def app():
     # Assuming 'approval_system_df' is already set in the session state by the main analysis function
-    if 'approval_system_df' in st.session_state:
-        approval_df = st.session_state['approval_system_df']
+    if 'supervised_df' in st.session_state:
+        approval_df = st.session_state['supervised_df']
         
         # Ensure 'rf_predicted_fraud' column is present
-        if 'rf_predicted_fraud' in approval_df.columns:
+        if 'rf_predicted_fraud' in supervised_df.columns:
             # Optionally, map numeric predictions to string labels for clarity
-            approval_df['Fraud Status'] = approval_df['rf_predicted_fraud'].map({1: 'Fraud', 0: 'Not Fraud'})
+            supervised_df['Fraud Status'] = supervised_df['rf_predicted_fraud'].map({1: 'Fraud', 0: 'Not Fraud'})
             
             # Display the DataFrame with an emphasis on the Fraud Status
             st.write("Approval System Results:")
-            st.dataframe(approval_df[['ref_id', 'Fraud Status']], use_container_width=True)  # Use 'ref_id' as the transaction identifier
+            st.dataframe(supervised_df[['ref_id', 'Fraud Status']], use_container_width=True)  # Use 'ref_id' as the transaction identifier
             
         else:
             st.error("The 'rf_predicted_fraud' column is missing from the approval system data.")
