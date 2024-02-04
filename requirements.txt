@@ -9,4 +9,4 @@ scikit-learn==1.2.2
 s3fs
 st-files-connection
 boto3
-
+plotly
