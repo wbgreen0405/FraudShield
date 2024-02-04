@@ -124,7 +124,7 @@ def app():
             # Display sections as requested
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
-            st.session_state['anomaly_df'] = analyzed_df
+            st.session_state['analyzed_df'] = analyzed_df
 
             st.write("### Aproval System")
             supervised_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['rf_predicted_fraud'] == 0)]
