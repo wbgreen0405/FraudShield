@@ -95,7 +95,7 @@ def app():
     rf_model = load_model_from_s3(bucket_name, rf_model_key)
     lof_model = load_model_from_s3(bucket_name, lof_model_key)
 
-   if st.button('Fetch and Analyze Transactions'):
+    if st.button('Fetch and Analyze Transactions'):
         transactions_df = fetch_transactions()
         if not transactions_df.empty:
             analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
