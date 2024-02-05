@@ -94,6 +94,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
         # Update the main DataFrame
         for index, row in non_fraud_df.iterrows():
             transactions_df.at[index, 'lof_predicted_fraud'] = row['lof_predicted_fraud']
+            transactions_df.loc[non_fraud_indices, 'lof_scores'] = lof_scores  # Assign LOF scores to the corresponding transactions
 
     transactions_df['ref_id'] = ref_ids
             
