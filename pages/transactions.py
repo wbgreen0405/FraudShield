@@ -82,12 +82,14 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     # Initialize LOF predictions column to all zeros
     transactions_df['lof_predicted_fraud'] = 0
-
+    transactions_df['lof_scores'] = 0  # Initialize a column for LOF scores
+    
     # Applying LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
         X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud'], axis=1, errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
+        lof_scores = lof_model.negative_outlier_factor_  # Assuming use of sklearn, adjust according to your LOF model
         non_fraud_df['lof_predicted_fraud'] = (lof_predictions == -1).astype(int)
         # Update the main DataFrame
         for index, row in non_fraud_df.iterrows():
