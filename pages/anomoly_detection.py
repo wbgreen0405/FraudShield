@@ -4,8 +4,8 @@ import plotly.express as px
 
 # Replace 'income' and 'name_email_similarity' with actual numerical features from your dataset
 def create_anomaly_detection_plot(anomaly_df):
+    anomaly_df['Outlier Status'] = anomaly_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
     fig = px.scatter(
-        anomaly_df['Outlier Status'] = anomaly_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
         anomaly_df, 
         x='income',  # Replace with your actual feature name
         y='name_email_similarity',  # Replace with your actual feature name
