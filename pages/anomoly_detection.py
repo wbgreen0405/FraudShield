@@ -2,22 +2,37 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# Replace 'income' and 'name_email_similarity' with actual numerical features from your dataset
+def create_anomaly_detection_plot(anomaly_df):
+    fig = px.scatter(
+        anomaly_df, 
+        x='income',  # Replace with your actual feature name
+        y='name_email_similarity',  # Replace with your actual feature name
+        color='rf_predicted_fraud',  # This will color the points by their fraud status
+        title="Anomaly Detection Scatter Plot",
+        labels={
+            'rf_predicted_fraud': 'Fraud Status'
+        },
+        hover_data=['ref_id', 'lof_scores']  # Showing the 'ref_id' and 'lof_scores' on hover
+    )
+    return fig
+
 def app():
     st.title("Anomaly Detection System Dashboard")
 
     if 'anomaly_df' in st.session_state:
         anomaly_df = st.session_state['anomaly_df']
-        
-        # Assuming the anomaly detection dataframe has 'ref_id' and some scores or features to plot
-        fig = px.scatter(anomaly_df, x='feature_1', y='feature_2', size='anomaly_score', color='anomaly_score',
-                         hover_data=['ref_id'], title="Outlier Detection Visualization")
+
+        # Plot the scatter plot
+        st.subheader("Anomaly Scatter Plot")
+        fig = create_anomaly_detection_plot(anomaly_df)
         st.plotly_chart(fig)
 
-        # Display the DataFrame with transactions considered outliers
-        st.write("Transactions Identified as Outliers:")
-        st.dataframe(anomaly_df[['ref_id', 'feature_1', 'feature_2', 'anomaly_score']], use_container_width=True)
+        # Display the table of transactions considered as anomalies
+        st.subheader("Detailed Anomaly Transactions")
+        st.dataframe(anomaly_df[['ref_id', 'income', 'name_email_similarity', 'lof_scores']], use_container_width=True)
     else:
-        st.error("No anomaly detection data available. Please run the analysis first.")
+        st.error("No anomalies found. Run the analysis to detect anomalies.")
 
 if __name__ == '__main__':
     st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
