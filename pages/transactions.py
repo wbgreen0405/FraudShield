@@ -78,6 +78,12 @@ def perform_inference(transactions_df, rf_model, lof_model):
     # RF predictions
     X_rf = transactions_df.drop(['fraud_bool'], axis=1, errors='ignore')
     rf_predictions = rf_model.predict(X_rf)
+    # After RF predictions
+    rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
+    transactions_df['rf_prob_scores'] = rf_prob_scores
+
+    # LOF scores assignment remains the same
+
     transactions_df['rf_predicted_fraud'] = rf_predictions
 
     # Initialize LOF predictions column to all zeros
