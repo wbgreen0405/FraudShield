@@ -15,7 +15,7 @@ def create_anomaly_detection_plot(analyzed_df):
     # Create scatter plot with 'ref_id' on the x-axis and 'lof_scores' on the y-axis
     fig = px.scatter(
         non_fraud_df, 
-        x='ref_id', 
+        x='income', 
         y='lof_scores_normalized', 
         color='Outlier Status',  # Color by Outlier Status for clarity
         title="Anomaly Detection Scatter Plot",
