@@ -32,7 +32,7 @@ def create_lof_distribution_plot(analyzed_df):
 
     fig = px.histogram(
         non_fraud_df,
-        x='lof_scores',
+        x='lof_scores_normalized',
         nbins=20,  # Adjust the number of bins as needed
         title="Distribution of Local Outlier Factor Scores"
     )
