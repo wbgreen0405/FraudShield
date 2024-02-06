@@ -52,7 +52,7 @@ def app():
         # Assuming 'Outlier Status' has been assigned in 'analyzed_df'
         outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
         # Choose columns to display for anomaly transactions
-        cols_to_display = ['ref_id', 'lof_scores_normalized'] + [col for col in analyzed_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'Approval Status', 'Outlier Status']]
+        #cols_to_display = ['ref_id', 'lof_scores_normalized'] + [col for col in analyzed_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'Approval Status', 'Outlier Status']]
         st.dataframe(outliers_df[cols_to_display], use_container_width=True)
 
     else:
