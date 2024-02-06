@@ -49,7 +49,7 @@ def app():
 
         # Display detailed transactions
         st.subheader("Detailed Anomaly Transactions")
-        st.dataframe(anomaly_df[['ref_id', 'income', 'name_email_similarity', 'lof_scores']], use_container_width=True)
+        st.dataframe(analyzed_df[['ref_id', 'income', 'name_email_similarity', 'lof_scores']], use_container_width=True)
     else:
         st.error("No anomalies found. Run the analysis to detect anomalies.")
 
