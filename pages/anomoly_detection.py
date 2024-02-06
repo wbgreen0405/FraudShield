@@ -44,7 +44,7 @@ def app():
 
         # Plot scatter plot
         st.subheader("Anomaly Scatter Plot")
-        fig = create_anomaly_detection_plot(analyzed_dff)
+        fig = create_anomaly_detection_plot(analyzed_df)
         st.plotly_chart(fig)
 
         # Display detailed transactions
