@@ -27,24 +27,6 @@ def create_anomaly_detection_plot(analyzed_df):
 
     return fig
 
-def create_lof_distribution_plot(analyzed_df):
-    # Filter for Non-Fraud transactions
-    non_fraud_df = analyzed_df[analyzed_df['Approval Status'] == 'Non-Fraud'].copy()
-
-
-    fig = px.histogram(
-        non_fraud_df,
-        x='lof_scores_normalized',
-        nbins=20,  # Adjust the number of bins as needed
-        title="Distribution of Local Outlier Factor Scores"
-    )
-    return fig
-
-def remove_duplicate_columns(df):
-    # Remove duplicate columns from a DataFrame and append a suffix to duplicates.
-    df = df.loc[:, ~df.columns.duplicated()]
-    return df
-
 def app():
     st.title("Anomaly Detection System Dashboard")
 
@@ -53,6 +35,27 @@ def app():
 
         # Clean the dataframe of any duplicate columns
         analyzed_df = remove_duplicate_columns(analyzed_df)
+
+        # Normalize LOF scores for visualization
+        analyzed_df['lof_scores_normalized'] = (analyzed_df['lof_scores'] - analyzed_df['lof_scores'].min()) / (analyzed_df['lof_scores'].max() - analyzed_df['lof_scores'].min())
+        
+        # Assign 'Outlier Status' based on LOF predictions
+        analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
+        
+        # Drop unwanted columns
+        analyzed_df = analyzed_df.drop(columns=['rf_prob_scores', 'rf_predicted_fraud'], errors='ignore')
+
+        # Specify the order of the first few columns
+        first_columns = ['ref_id', 'lof_scores', 'lof_scores_normalized']
+        
+        # Get the remaining column names, excluding the first columns
+        remaining_columns = [col for col in analyzed_df.columns if col not in first_columns]
+        
+        # Combine the first columns with the remaining columns
+        columns_order = first_columns + remaining_columns
+        
+        # Reorder the dataframe
+        analyzed_df = analyzed_df[columns_order]
 
         col1, col2 = st.columns(2)
 
@@ -66,14 +69,11 @@ def app():
             dist_fig = create_lof_distribution_plot(analyzed_df)
             st.plotly_chart(dist_fig)
 
-        # Assuming 'Outlier Status' is properly set up in the analyzed_df
-        # Display only the outliers in a detailed transactions dataframe
-        st.subheader("Detailed Anomaly Transactions")
-        outlier_condition = (analyzed_df['Outlier Status'] == 'Outlier')
-        detailed_outliers_df = analyzed_df[outlier_condition]
+        # Filter for outliers if necessary
+        outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
 
-        # Display all columns in the dataframe or specify columns you're interested in
-        st.dataframe(detailed_outliers_df, use_container_width=True)
+        st.subheader("Detailed Anomaly Transactions")
+        st.dataframe(outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
 
