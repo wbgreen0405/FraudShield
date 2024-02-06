@@ -53,11 +53,6 @@ def app():
         # Assign 'Outlier Status' based on LOF predictions
         analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
 
-        # Drop 'lof_predicted_fraud' and 'Approval Status' if present
-        columns_to_drop = ['lof_predicted_fraud', 'Approval Status']
-        for col in columns_to_drop:
-            if col in  analyzed_df.columns:
-                analyzed_df =  analyzed_df.drop(columns=[col])
 
         # Create two columns for the scatter plot and the distribution plot
         col1, col2 = st.columns(2)
