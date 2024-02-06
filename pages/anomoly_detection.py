@@ -46,6 +46,11 @@ def app():
         # Retrieve the analyzed dataframe from the session state
         analyzed_df = st.session_state['analyzed_df']
 
+        # Normalize LOF scores for visualization
+        analyzed_df['lof_scores_normalized'] = (analyzed_df['lof_scores'] - analyzed_df['lof_scores'].min()) / (analyzed_df['lof_scores'].max() - analyzed_df['lof_scores'].min())
+        # Assign 'Outlier Status' based on LOF predictions
+        analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
+
         # Create two columns for the scatter plot and the distribution plot
         col1, col2 = st.columns(2)
 
