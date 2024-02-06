@@ -41,21 +41,9 @@ def create_lof_distribution_plot(analyzed_df):
     return fig
 
 def remove_duplicate_columns(df):
-    # Create an empty set for column names
-    cols_seen = set()
-    # Create an empty list for columns to keep
-    cols_to_keep = []
-
-    for col in df.columns:
-        # If the column is in the set, it's a duplicate, so we modify it
-        if col in cols_seen:
-            col = f"{col}_duplicate"
-        # Add the original or modified column to the list and set
-        cols_to_keep.append(col)
-        cols_seen.add(col)
-
-    # Select the columns to keep from the dataframe
-    return df[cols_to_keep]
+    # Remove duplicate columns from a DataFrame and append a suffix to duplicates.
+    df = df.loc[:, ~df.columns.duplicated()]
+    return df
 
 def app():
     st.title("Anomaly Detection System Dashboard")
@@ -63,39 +51,32 @@ def app():
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
 
-        # Remove duplicate columns before plotting
+        # Clean the dataframe of any duplicate columns
         analyzed_df = remove_duplicate_columns(analyzed_df)
 
         col1, col2 = st.columns(2)
 
         with col1:
-            # Plot scatter plot based on analyzed_df
             st.subheader("Anomaly Scatter Plot")
             scatter_fig = create_anomaly_detection_plot(analyzed_df)
             st.plotly_chart(scatter_fig)
 
         with col2:
-            # Plot LOF scores distribution
             st.subheader("LOF Scores Distribution")
             dist_fig = create_lof_distribution_plot(analyzed_df)
             st.plotly_chart(dist_fig)
 
-        # Display detailed transactions
+        # Assuming 'Outlier Status' is properly set up in the analyzed_df
+        # Display only the outliers in a detailed transactions dataframe
         st.subheader("Detailed Anomaly Transactions")
+        outlier_condition = (analyzed_df['Outlier Status'] == 'Outlier')
+        detailed_outliers_df = analyzed_df[outlier_condition]
 
-        # Filter for outliers if necessary
-        outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
-
-        # Reorder the columns as needed and exclude unwanted columns
-        cols_to_show = ['ref_id', 'lof_scores', 'lof_scores_normalized'] + \
-                       [col for col in outliers_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'Approval Status', 'Outlier Status']]
-        outliers_df = outliers_df[cols_to_show]
-
-        st.dataframe(outliers_df, use_container_width=True)
+        # Display all columns in the dataframe or specify columns you're interested in
+        st.dataframe(detailed_outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
 
 if __name__ == '__main__':
     st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
     app()
-
