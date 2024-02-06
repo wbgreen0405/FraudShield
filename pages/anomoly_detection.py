@@ -31,32 +31,33 @@ def app():
     st.title("Anomaly Detection System Dashboard")
 
     if 'analyzed_df' in st.session_state:
+        # Retrieve the analyzed dataframe from the session state
         analyzed_df = st.session_state['analyzed_df']
 
-        # First, ensure 'Outlier Status' is in the dataframe
-        if 'Outlier Status' not in analyzed_df.columns:
-            # If 'Outlier Status' is not in dataframe, create it based on LOF predictions
-            # For example:
-            analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].apply(lambda x: 'Outlier' if x == -1 else 'Inlier')
-
+        # Create two columns for the scatter plot and the distribution plot
         col1, col2 = st.columns(2)
 
         with col1:
             # Plot scatter plot based on analyzed_df
             st.subheader("Anomaly Scatter Plot")
+            # Ensure that the function create_anomaly_detection_plot is defined in your script
             scatter_fig = create_anomaly_detection_plot(analyzed_df)
             st.plotly_chart(scatter_fig)
 
         with col2:
             # Plot LOF scores distribution
             st.subheader("LOF Scores Distribution")
+            # Ensure that the function create_lof_distribution_plot is defined in your script
             dist_fig = create_lof_distribution_plot(analyzed_df)
             st.plotly_chart(dist_fig)
 
-        # Filter for outliers and display detailed transactions
+        # Assuming that the 'Outlier Status' column has been created after LOF predictions
+        # Display detailed transactions for Outliers only
         st.subheader("Detailed Anomaly Transactions")
+        # Filter for outliers if necessary
         outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
-        st.dataframe(outliers_df[['ref_id', 'lof_scores_normalized', 'Outlier Status']], use_container_width=True)
+        # Display all columns in the dataframe or specify columns you're interested in
+        st.dataframe(outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
 
