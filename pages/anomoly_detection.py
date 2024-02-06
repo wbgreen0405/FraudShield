@@ -10,6 +10,8 @@ def create_anomaly_detection_plot(analyzed_df):
     # Assign 'Outlier Status' based on LOF predictions
     non_fraud_df['Outlier Status'] = non_fraud_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
 
+
+
     # Create scatter plot with 'ref_id' on the x-axis and 'lof_scores_normalized' on the y-axis
     fig = px.scatter(
         non_fraud_df,
@@ -50,6 +52,12 @@ def app():
         analyzed_df['lof_scores_normalized'] = (analyzed_df['lof_scores'] - analyzed_df['lof_scores'].min()) / (analyzed_df['lof_scores'].max() - analyzed_df['lof_scores'].min())
         # Assign 'Outlier Status' based on LOF predictions
         analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
+
+        # Drop 'lof_predicted_fraud' and 'Approval Status' if present
+        columns_to_drop = ['lof_predicted_fraud', 'Approval Status']
+        for col in columns_to_drop:
+            if col in  analyzed_df.columns:
+                analyzed_df =  analyzed_df.drop(columns=[col])
 
         # Create two columns for the scatter plot and the distribution plot
         col1, col2 = st.columns(2)
