@@ -1,7 +1,3 @@
-
-
-
-
 import streamlit as st
 import pandas as pd
 import pickle
@@ -69,40 +65,43 @@ def perform_inference(transactions_df, rf_model, lof_model):
     """
     Perform inference on transaction data using RF and LOF models.
     """
-
-    # Step 1: Save 'ref_id' before dropping or excluding it from the feature set
+    # Save 'ref_id' before dropping or excluding it from the feature set
     ref_ids = transactions_df['ref_id'].copy()
     
+    # Preprocess data
     transactions_df = preprocess_data(transactions_df)
     
     # RF predictions
     X_rf = transactions_df.drop(['fraud_bool'], axis=1, errors='ignore')
     rf_predictions = rf_model.predict(X_rf)
-    # After RF predictions
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
     transactions_df['rf_prob_scores'] = rf_prob_scores
-
-    # LOF scores assignment remains the same
-
     transactions_df['rf_predicted_fraud'] = rf_predictions
 
-    # Initialize LOF predictions column to all zeros
+    # Initialize LOF columns
     transactions_df['lof_predicted_fraud'] = 0
-    transactions_df['lof_scores'] = 0  # Initialize a column for LOF scores
+    transactions_df['lof_scores'] = 0
     
     # Applying LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
-        X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud'], axis=1, errors='ignore')
+        X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
+        lof_model.fit(X_lof)
         lof_predictions = lof_model.fit_predict(X_lof)
-        lof_scores = lof_model.negative_outlier_factor_  # Assuming use of sklearn, adjust according to your LOF model
-        non_fraud_df['lof_predicted_fraud'] = (lof_predictions == -1).astype(int)
-        # Update the main DataFrame
-        for index, row in non_fraud_df.iterrows():
-            transactions_df.at[index, 'lof_predicted_fraud'] = row['lof_predicted_fraud']
-            transactions_df.loc[non_fraud_df.index, 'lof_scores'] = lof_scores # Assign LOF scores to the corresponding transactions
+        lof_scores = -lof_model.negative_outlier_factor_  # Negative scores because higher means more abnormal
+        
+        # Assign LOF scores and predictions to the corresponding transactions
+        transactions_df.loc[non_fraud_df.index, 'lof_predicted_fraud'] = lof_predictions
+        transactions_df.loc[non_fraud_df.index, 'lof_scores'] = lof_scores
 
+    # Normalize LOF scores for the whole dataset
+    max_score = transactions_df['lof_scores'].max()
+    min_score = transactions_df['lof_scores'].min()
+    transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score)
+
+    # Assign back 'ref_id' and 'Approval Status'
     transactions_df['ref_id'] = ref_ids
+    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
             
     # Storing DataFrames in session state for cross-page access
     transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
