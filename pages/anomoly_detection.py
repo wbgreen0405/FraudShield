@@ -1,37 +1,29 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objs as go
+import plotly.express as px
 
 def create_anomaly_detection_plot(analyzed_df):
-    # Ensure analyzed_df contains 'lof_scores' and has been normalized
-    analyzed_df['lof_scores_normalized'] = (analyzed_df['lof_scores'] - analyzed_df['lof_scores'].min()) / (analyzed_df['lof_scores'].max() - analyzed_df['lof_scores'].min())
+    # Filter for Non-Fraud transactions
+    non_fraud_df = analyzed_df[analyzed_df['Approval Status'] == 'Non-Fraud']
+    
+    # Normalize LOF scores for visualization
+    non_fraud_df['lof_scores_normalized'] = (non_fraud_df['lof_scores'] - non_fraud_df['lof_scores'].min()) / (non_fraud_df['lof_scores'].max() - non_fraud_df['lof_scores'].min())
     
     # Assign 'Outlier Status' based on LOF predictions
-    analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
+    non_fraud_df['Outlier Status'] = non_fraud_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
 
-    # Create scatter plot
-    fig = go.Figure()
-
-    # Add inliers and outliers using conditional plotting
-    fig.add_trace(go.Scatter(
-        x=analyzed_df[analyzed_df['Outlier Status'] == 'Inlier']['income'],  # Adjust these feature names as necessary
-        y=analyzed_df[analyzed_df['Outlier Status'] == 'Inlier']['name_email_similarity'],  # Adjust these feature names as necessary
-        mode='markers',
-        marker=dict(size=10, color='blue'),
-        name='Inlier',
-        hovertext=analyzed_df[analyzed_df['Outlier Status'] == 'Inlier']['ref_id']
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']['income'],  # Adjust these feature names as necessary
-        y=analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']['name_email_similarity'],  # Adjust these feature names as necessary
-        mode='markers',
-        marker=dict(size=100 * analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']['lof_scores_normalized'], color='red', line=dict(width=2, color='DarkSlateGrey')),
-        name='Outlier',
-        hovertext=analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']['ref_id']
-    ))
-
-    fig.update_layout(title="Anomaly Detection Scatter Plot", xaxis_title="Income", yaxis_title="Name Email Similarity")
+    # Create scatter plot with 'ref_id' on the x-axis and 'lof_scores' on the y-axis
+    fig = px.scatter(
+        non_fraud_df, 
+        x='ref_id', 
+        y='lof_scores_normalized', 
+        color='Outlier Status',  # Color by Outlier Status for clarity
+        title="Anomaly Detection Scatter Plot",
+        hover_data=['ref_id', 'lof_scores']  # Ensure 'lof_scores' is included in your dataframe
+    )
+    
+    # Update layout if needed
+    fig.update_layout(xaxis_title="Reference ID", yaxis_title="LOF Scores Normalized")
 
     return fig
 
@@ -41,19 +33,15 @@ def app():
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
 
-        # Plot scatter plot based on analyzed_df
-        st.subheader("Anomaly Scatter Plot")
+        # Plot scatter plot based on Non-Fraud transactions
+        st.subheader("Anomaly Scatter Plot for Non-Fraud Transactions")
         fig = create_anomaly_detection_plot(analyzed_df)
         st.plotly_chart(fig)
 
-        # Assuming anomaly_df is filtered from analyzed_df where 'lof_predicted_fraud' indicates anomalies
-        if 'anomaly_df' in st.session_state:
-            anomaly_df = st.session_state['anomaly_df']
-            st.subheader("Detailed Anomaly Transactions")
-            st.dataframe(anomaly_df[['ref_id', 'income', 'name_email_similarity', 'lof_scores']], use_container_width=True)
-        else:
-            st.error("No anomalies found. Run the analysis to detect anomalies.")
-
+        # Display detailed transactions for Non-Fraud
+        st.subheader("Detailed Non-Fraud Transactions")
+        non_fraud_df = analyzed_df[analyzed_df['Approval Status'] == 'Non-Fraud']
+        st.dataframe(non_fraud_df[['ref_id', 'lof_scores']], use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
 
