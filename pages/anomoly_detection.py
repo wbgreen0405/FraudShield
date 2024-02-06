@@ -40,12 +40,23 @@ def create_lof_distribution_plot(analyzed_df):
     )
     return fig
 
+def remove_duplicate_columns(df):
+    # Create an empty set for column names
+    cols_seen = set()
+    # Create an empty list for columns to keep
+    cols_to_keep = []
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
+    for col in df.columns:
+        # If the column is in the set, it's a duplicate, so we modify it
+        if col in cols_seen:
+            col = f"{col}_duplicate"
+        # Add the original or modified column to the list and set
+        cols_to_keep.append(col)
+        cols_seen.add(col)
 
-# Other functions would remain the same...
+    # Select the columns to keep from the dataframe
+    return df[cols_to_keep]
+
 
 def app():
     st.title("Anomaly Detection System Dashboard")
@@ -77,6 +88,10 @@ def app():
         cols_to_show = ['ref_id', 'lof_scores', 'lof_scores_normalized'] + \
                        [col for col in outliers_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'Approval Status', 'Outlier Status']]
         outliers_df = outliers_df[cols_to_show]
+
+        # Inside your app() function, before plotting
+        analyzed_df = remove_duplicate_columns(analyzed_df)
+    
 
         st.dataframe(outliers_df, use_container_width=True)
     else:
