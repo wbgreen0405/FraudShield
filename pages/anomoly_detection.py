@@ -37,7 +37,7 @@ def app():
 
         # Display detailed transactions
         st.subheader("Detailed Anomaly Transactions")
-        st.dataframe(analyzed_df[['ref_id', 'lof_scores']], use_container_width=True)
+        st.dataframe(analyzed_df[['ref_id', 'lof_scores_normalized', 'Outlier Status']], use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
 
