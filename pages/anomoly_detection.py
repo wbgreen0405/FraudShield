@@ -39,12 +39,12 @@ def create_anomaly_detection_plot(anomaly_df):
 def app():
     st.title("Anomaly Detection System Dashboard")
 
-    if 'anomaly_df' in st.session_state:
-        anomaly_df = st.session_state['anomaly_df']
+    if 'analyzed_df' in st.session_state:
+        analyzed_df = st.session_state['analyzed_df']
 
         # Plot scatter plot
         st.subheader("Anomaly Scatter Plot")
-        fig = create_anomaly_detection_plot(anomaly_df)
+        fig = create_anomaly_detection_plot(analyzed_dff)
         st.plotly_chart(fig)
 
         # Display detailed transactions
@@ -58,6 +58,4 @@ if __name__ == '__main__':
     app()
 
 
-if __name__ == '__main__':
-    st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
-    app()
+
