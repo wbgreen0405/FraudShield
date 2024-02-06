@@ -74,7 +74,7 @@ def app():
         # Filter for outliers if necessary
         outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
         # Drop unwanted columns
-        desired_columns = ['ref_id', 'lof_scores'] + [col for col in analyzed_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'lof_predicted_fraud', 'Approval Status', 'Outlier Status', 'lof_scores_normalized']]
+        #desired_columns = ['ref_id', 'lof_scores'] + [col for col in analyzed_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'lof_predicted_fraud', 'Approval Status', 'Outlier Status', 'lof_scores_normalized']]
         outliers_df = outliers_df[desired_columns]
         st.dataframe(outliers_df, use_container_width=True)
     else:
