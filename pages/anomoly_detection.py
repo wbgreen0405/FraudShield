@@ -44,7 +44,8 @@ def create_lof_distribution_plot(analyzed_df):
     group_labels = ['LOF Scores']  # Label for the LOF scores dataset
 
     # Use Plotly's create_distplot to create the distribution plot
-    fig = ff.create_distplot(hist_data, group_labels, show_hist=False, show_rug=False)
+    #fig = ff.create_distplot(hist_data, group_labels, show_hist=False, show_rug=False)
+    fig = ff.create_distplot([lof_scores], group_labels=['LOF Scores'], bin_size=.2, show_rug=True)
     fig.update_layout(title="Distribution of Normalized LOF Scores",
                       xaxis_title="Normalized LOF Score",
                       yaxis_title="Density")
