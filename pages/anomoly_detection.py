@@ -20,6 +20,15 @@ def create_anomaly_detection_plot(analyzed_df):
     fig.update_layout(xaxis_title="Reference ID", yaxis_title="Normalized LOF Scores")
 
     return fig
+    
+def create_lof_distribution_plot(analyzed_df):
+    fig = px.histogram(
+        analyzed_df,
+        x='lof_scores',
+        nbins=40,  # Adjust the number of bins as needed
+        title="Distribution of Local Outlier Factor Scores"
+    )
+    return fig
 
 def app():
     st.title("Anomaly Detection System Dashboard")
@@ -27,10 +36,19 @@ def app():
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
 
-        # Plot scatter plot based on analyzed_df
-        st.subheader("Anomaly Scatter Plot")
-        fig = create_anomaly_detection_plot(analyzed_df)
-        st.plotly_chart(fig)
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # Plot scatter plot based on analyzed_df
+            st.subheader("Anomaly Scatter Plot")
+            scatter_fig = create_anomaly_detection_plot(analyzed_df)
+            st.plotly_chart(scatter_fig)
+
+        with col2:
+            # Plot LOF scores distribution
+            st.subheader("LOF Scores Distribution")
+            dist_fig = create_lof_distribution_plot(analyzed_df)
+            st.plotly_chart(dist_fig)
 
         # Display detailed transactions
         st.subheader("Detailed Anomaly Transactions")
