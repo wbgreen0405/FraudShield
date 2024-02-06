@@ -57,12 +57,14 @@ def remove_duplicate_columns(df):
     # Select the columns to keep from the dataframe
     return df[cols_to_keep]
 
-
 def app():
     st.title("Anomaly Detection System Dashboard")
 
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
+
+        # Remove duplicate columns before plotting
+        analyzed_df = remove_duplicate_columns(analyzed_df)
 
         col1, col2 = st.columns(2)
 
@@ -89,10 +91,6 @@ def app():
                        [col for col in outliers_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'Approval Status', 'Outlier Status']]
         outliers_df = outliers_df[cols_to_show]
 
-        # Inside your app() function, before plotting
-        analyzed_df = remove_duplicate_columns(analyzed_df)
-    
-
         st.dataframe(outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
@@ -100,5 +98,4 @@ def app():
 if __name__ == '__main__':
     st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
     app()
-
 
