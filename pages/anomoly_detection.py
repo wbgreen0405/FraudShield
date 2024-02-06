@@ -9,18 +9,18 @@ def create_anomaly_detection_plot(analyzed_df):
     # Assign 'Outlier Status' based on LOF predictions
     analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
 
-    # Create scatter plot with 'ref_id' on the x-axis and 'lof_scores' on the y-axis
+    # Create scatter plot with 'ref_id' on the x-axis and 'lof_scores_normalized' on the y-axis
     fig = px.scatter(
         analyzed_df, 
         x='ref_id', 
         y='lof_scores_normalized', 
         color='Outlier Status',  # Color by Outlier Status for clarity
         title="Anomaly Detection Scatter Plot",
-        hover_data=['ref_id', 'lof_scores']  # Ensure 'lof_scores' is included in your dataframe
+        hover_data=['ref_id', 'lof_scores_normalized']  # Ensure 'lof_scores' is included in your dataframe
     )
     
     # Update layout if needed
-    fig.update_layout(xaxis_title="Reference ID", yaxis_title="LOF Scores Normalized")
+    fig.update_layout(xaxis_title="Reference ID", yaxis_title="Normalized LOF Scores")
 
     return fig
 
@@ -44,5 +44,3 @@ def app():
 if __name__ == '__main__':
     st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
     app()
-
-
