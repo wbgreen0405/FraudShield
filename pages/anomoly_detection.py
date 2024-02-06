@@ -24,7 +24,7 @@ def create_anomaly_detection_plot(analyzed_df):
 def create_lof_distribution_plot(analyzed_df):
     fig = px.histogram(
         analyzed_df,
-        x='lof_scores',
+        x='lof_scores_normalized',
         nbins=40,  # Adjust the number of bins as needed
         title="Distribution of Local Outlier Factor Scores"
     )
