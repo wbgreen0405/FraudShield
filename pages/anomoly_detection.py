@@ -19,38 +19,18 @@ def create_anomaly_detection_plot(analyzed_df):
     fig.update_layout(xaxis_title="Reference ID", yaxis_title="Normalized LOF Scores")
     return fig
 
-#def create_lof_distribution_plot(analyzed_df):
-    #"""
-    #Creates a histogram for the distribution of LOF scores.
-    #"""
-    #fig = px.histogram(
-        #analyzed_df,
-        #x='lof_scores_normalized',
-        #title="Distribution of Local Outlier Factor Scores",
-        #nbins=30  # Adjust based on your data
-    #)
-    #return fig
-
-
 def create_lof_distribution_plot(analyzed_df):
     """
-    Creates a distribution plot for the distribution of LOF scores using Plotly's figure_factory.
+    Creates a histogram for the distribution of LOF scores.
     """
-    # Extract the LOF scores as a numpy array for the distribution plot
-    lof_scores = analyzed_df['lof_scores_normalized'].to_numpy()
-    
-    # Prepare the data for the distribution plot
-    hist_data = [lof_scores]
-    group_labels = ['LOF Scores']  # Label for the LOF scores dataset
-
-    # Use Plotly's create_distplot to create the distribution plot
-    #fig = ff.create_distplot(hist_data, group_labels, show_hist=False, show_rug=False)
-    fig = ff.create_distplot([lof_scores], group_labels=['LOF Scores'], bin_size=.2, show_rug=True)
-    fig.update_layout(title="Distribution of Normalized LOF Scores",
-                      xaxis_title="Normalized LOF Score",
-                      yaxis_title="Density")
-    
+    fig = px.histogram(
+        analyzed_df,
+        x='lof_scores_normalized',
+        title="Distribution of Local Outlier Factor Scores",
+        nbins=30  # Adjust based on your data
+    )
     return fig
+
 
 def app():
     st.title("Anomaly Detection System Dashboard")
