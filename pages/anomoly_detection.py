@@ -44,27 +44,29 @@ def app():
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
 
-        col1, col2 = st.columns(2)
+        # Normalize LOF scores for visualization
+        analyzed_df['lof_scores_normalized'] = (analyzed_df['lof_scores'] - analyzed_df['lof_scores'].min()) / (analyzed_df['lof_scores'].max() - analyzed_df['lof_scores'].min())
+        # Assign 'Outlier Status' based on LOF predictions
+        analyzed_df['Outlier Status'] = analyzed_df['lof_predicted_fraud'].map({-1: 'Outlier', 1: 'Inlier'})
 
-        with col1:
-            # Plot scatter plot based on analyzed_df
-            st.subheader("Anomaly Scatter Plot")
-            scatter_fig = create_anomaly_detection_plot(analyzed_df)
-            st.plotly_chart(scatter_fig)
+        # Plot scatter plot based on analyzed_df
+        st.subheader("Anomaly Scatter Plot")
+        fig = create_anomaly_detection_plot(analyzed_df)
+        st.plotly_chart(fig)
 
-        with col2:
-            # Plot LOF scores distribution
-            st.subheader("LOF Scores Distribution")
-            dist_fig = create_lof_distribution_plot(analyzed_df)
-            st.plotly_chart(dist_fig)
-
-        # Display detailed transactions
+        # Display detailed transactions for Outliers only
         st.subheader("Detailed Anomaly Transactions")
-        st.dataframe(analyzed_df[['ref_id', 'lof_scores_normalized', 'Outlier Status']], use_container_width=True)
+        # Filter for outliers
+        outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
+        # Drop unwanted columns
+        desired_columns = ['ref_id', 'lof_scores'] + [col for col in analyzed_df.columns if col not in ['rf_prob_scores', 'rf_predicted_fraud', 'lof_predicted_fraud', 'Approval Status', 'Outlier Status', 'lof_scores_normalized']]
+        outliers_df = outliers_df[desired_columns]
+        st.dataframe(outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
 
 if __name__ == '__main__':
     st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
     app()
+
 
