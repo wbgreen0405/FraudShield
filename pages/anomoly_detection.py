@@ -68,6 +68,14 @@ def app():
         # Filter for outliers if necessary
         outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
         # Display all columns in the dataframe or specify columns you're interested in
+
+        columns_to_drop = ['rf_prob_scores', 'rf_predicted_fraud']
+        outliers_df.drop(columns=[col for col in columns_to_drop if col in df.columns], inplace=True)
+
+        # Rearrange columns to have 'ref_id' and 'Flagged as Fraud' first
+        cols = ['ref_id', 'lof_predicted_fraud', lof_score_normalized] + [col for col in supervised_df.columns if col not in ['ref_id', 'Flagged as Fraud']]
+        outliers_df = outliers_df[cols]
+
         st.dataframe(outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
