@@ -71,19 +71,22 @@ def app():
         simulate_offline_review()
         st.success("Simulation complete. Expert decisions have been added.")
 
-    # Workflow Diagram and Case Resolution Timeline
+    # Workflow Diagram
     plot_workflow_diagram()
-    plot_case_resolution_timeline()
 
-    # Select a case to review in detail
+    # Make sure to check if 'review_df' is in st.session_state before calling the plot functions
     if 'review_df' in st.session_state:
+        # Now pass the 'review_df' from st.session_state to the function
+        plot_case_resolution_timeline(st.session_state['review_df'])
+
+        # Select a case to review in detail
         case_id_option = st.selectbox("Select a case to review in detail:", st.session_state['review_df']['ref_id'].unique())
         show_case_detail(case_id_option)
 
-    # Display updated dataframe after Expert Review
-    if 'review_df' in st.session_state:
+        # Display updated dataframe after Expert Review
         st.subheader("Updated Transactions after Expert Review")
         st.dataframe(st.session_state['review_df'])
 
 if __name__ == '__main__':
     app()
+
