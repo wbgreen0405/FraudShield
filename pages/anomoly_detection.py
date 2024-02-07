@@ -31,26 +31,20 @@ def create_lof_distribution_plot(analyzed_df):
     )
     return fig
 
-
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import plotly.figure_factory as ff
-
-# Assuming the rest of your functions (create_anomaly_detection_plot, create_lof_distribution_plot) are defined above
-
 def app():
     st.title("Anomaly Detection System Dashboard")
 
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
 
-        # Ensure 'Outlier Status' column exists and is correctly populated
+        # Check and ensure 'Outlier Status' column exists in 'analyzed_df'
+        # This step assumes 'Outlier Status' should already be part of your DataFrame
+        # Add or update 'Outlier Status' column here if necessary
+        # Example placeholder; replace with your actual logic if 'Outlier Status' is missing
         if 'Outlier Status' not in analyzed_df.columns:
-            # Example logic to assign 'Outlier Status'
-            # You need to replace this with your actual logic
-            threshold = 0.5  # Example threshold for determining outliers
-            analyzed_df['Outlier Status'] = analyzed_df['lof_scores_normalized'].apply(lambda x: 'Outlier' if x > threshold else 'Normal')
+            # Placeholder logic for determining 'Outlier Status'; adjust as necessary
+            analyzed_df['Outlier Status'] = ['Normal' if x <= threshold else 'Outlier' for x in analyzed_df['lof_scores_normalized']]
+            # Ensure you have defined 'threshold' appropriately elsewhere in your code
 
         col1, col2 = st.columns(2)
 
