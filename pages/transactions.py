@@ -148,6 +148,7 @@ def app():
             st.write("### Offline Review Detailed Transactions")
             review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
             st.dataframe(review_df)
+            st.session_state['review_df'] = review_df
         else:
             st.write("No transactions found.")
 
