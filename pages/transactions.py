@@ -146,8 +146,8 @@ def app():
             st.session_state['anomaly_df'] = anomaly_df
 
             st.write("### Offline Review Detailed Transactions")
-            review_df = analyzed_df.query("`Approval Status` == 'Non-Fraud'")
-            #review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
+            
+            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 0) | (analyzed_df['lof_predicted_fraud'] == 1)]
             #review_df = analyzed_df.query('rf_predicted_fraud == 1 or lof_predicted_fraud == 1')
 
 
