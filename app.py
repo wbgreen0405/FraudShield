@@ -1,6 +1,6 @@
 import streamlit as st
 # Import pages for each section of your app
-from pages import transactions, approval_system, anomaly_detection, case_detail
+from pages import transactions, approval_system, anomoly_detection, case_detail
 
 # Define a simple navigation structure using Streamlit sidebar
 st.sidebar.title('Navigation')
