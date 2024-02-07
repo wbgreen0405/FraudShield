@@ -1,88 +1,89 @@
 import streamlit as st
 import pandas as pd
-import random
 import plotly.express as px
+import random
 
-# Placeholder for the review dataframe
-if 'review_df' in st.session_state:
-        # Retrieve the analyzed dataframe from the session state
+# Assuming review_df is generated or loaded in your transactions.py and stored in session_state
+
+def simulate_offline_review():
+    """
+    Simulates the offline review process and updates the review_df in session_state.
+    """
+    if 'review_df' in st.session_state:
         review_df = st.session_state['review_df']
+        # Simulation logic here
+        for index, row in review_df.iterrows():
+            # Simplified simulation logic for illustration
+            review_df.at[index, 'expert_decision'] = random.choice(['Confirmed Fraud', 'Confirmed Legitimate'])
+        st.session_state['review_df'] = review_df
+
+def plot_workflow_diagram():
+    """
+    Plots a workflow diagram showing the distribution of expert decisions.
+    """
+    if 'review_df' in st.session_state:
+        fig = px.pie(st.session_state['review_df'], names='expert_decision', title='Review Cases Status')
+        st.plotly_chart(fig)
+
+def plot_case_resolution_timeline(review_df):
+    """
+    Plots a case resolution timeline using start and end times from review_df.
+    """
+    # Ensure the data has the expected columns
+    if 'review_start' in review_df.columns and 'review_end' in review_df.columns and 'ref_id' in review_df.columns:
+        # Convert review_start and review_end to datetime if they're not already
+        review_df['review_start'] = pd.to_datetime(review_df['review_start'])
+        review_df['review_end'] = pd.to_datetime(review_df['review_end'])
         
-def simulate_offline_review(transaction_data):
-    # Constants defining the fraud criteria
-    INCOME_THRESHOLD = 100000
-    AGE_THRESHOLD = 50
-    EMPLOYMENT_STATUS_SUSPICIOUS = 3
-    HOUSING_STATUS_SUSPICIOUS = 2
-    ERROR_RATE = 0.1
-
-    decisions = {}
-    for index, transaction in transaction_data.iterrows():
-        # Apply expert rules to decide if a transaction is fraudulent
-        is_unusually_high_income = transaction['income'] > INCOME_THRESHOLD
-        is_age_above_threshold = transaction['customer_age'] > AGE_THRESHOLD
-        is_suspicious_employment = transaction['employment_status'] == EMPLOYMENT_STATUS_SUSPICIOUS
-        is_suspicious_housing = transaction['housing_status'] == HOUSING_STATUS_SUSPICIOUS
-
-        decision = 'fraudulent' if is_unusually_high_income and (is_age_above_threshold or is_suspicious_employment or is_suspicious_housing) else 'legitimate'
-
-        # Introduce a random error rate to simulate inaccuracies in expert decision-making
-        if random.random() < ERROR_RATE:
-            decision = 'legitimate' if decision == 'fraudulent' else 'fraudulent'
-
-        decisions[index] = decision
-    return decisions
-
-def show_case_detail(case_id, data):
-    st.header(f"Case Detail: {case_id}")
-    case = data[data['ref_id'] == case_id]
-    if not case.empty:
-        st.write(case)
+        # Plotly Express timeline requires a start, end, and a category (y-axis) for each event
+        fig = px.timeline(review_df, x_start='review_start', x_end='review_end', y='ref_id', labels={'ref_id': 'Case ID'})
+        
+        # Update layout for better readability
+        fig.update_layout(xaxis_title='Time', yaxis_title='Case ID', title='Case Resolution Timeline')
+        fig.update_yaxes(categoryorder='total ascending')  # This ensures the timeline is sorted by case ID
+        
+        st.plotly_chart(fig)
     else:
-        st.error("Case not found!")
+        st.error("Dataframe does not contain the required columns for plotting the timeline.")
 
-def plot_workflow_diagram(data):
-    st.header("Workflow Diagram")
-    fig = px.pie(data, names='expert_decision', title='Review Cases Status')
-    st.plotly_chart(fig)
+# Example usage, assuming review_df is available in the session state
+if 'review_df' in st.session_state:
+    plot_case_resolution_timeline(st.session_state['review_df'])
+else:
+    st.error("Review data not found.")
 
-def plot_case_resolution_timeline(data):
-    st.header("Case Resolution Timeline")
-    fig = px.timeline(data, x_start='review_start', x_end='review_end', y='ref_id', labels={'ref_id': 'Case ID'})
-    fig.update_yaxes(autorange="reversed")  # To reverse the Y-Axis
-    st.plotly_chart(fig)
+def show_case_detail(case_id):
+    """
+    Shows details for a selected case.
+    """
+    if 'review_df' in st.session_state:
+        case_data = st.session_state['review_df'][st.session_state['review_df']['ref_id'] == case_id]
+        if not case_data.empty:
+            st.write(case_data)
+        else:
+            st.error("Case not found!")
 
-# Streamlit app
 def app():
     st.title("Expert Review Dashboard")
-
-    # Workflow Diagram
-    plot_workflow_diagram(review_df)
-
-    # Case Resolution Timeline
-    plot_case_resolution_timeline(review_df)
-
-    # Display transactions
-    st.header("Transactions")
-    st.dataframe(review_df)
-
-    # Simulate button
+    
+    # Simulate Offline Review button
     if st.button('Simulate Offline Review'):
-        decisions = simulate_offline_review(review_df)
-        review_df['expert_decision'] = review_df.index.map(decisions)
-        st.write("Simulation complete. Expert decisions have been added.")
+        simulate_offline_review()
+        st.success("Simulation complete. Expert decisions have been added.")
 
-    # Individual Case Detail Page
-    case_id = st.selectbox("Select a case to review in detail:", review_df['ref_id'])
-    show_case_detail(case_id, review_df)
+    # Workflow Diagram and Case Resolution Timeline
+    plot_workflow_diagram()
+    plot_case_resolution_timeline()
 
-    # Display updated dataframe
-    st.header("Updated Transactions after Expert Review")
-    st.dataframe(review_df)
+    # Select a case to review in detail
+    if 'review_df' in st.session_state:
+        case_id_option = st.selectbox("Select a case to review in detail:", st.session_state['review_df']['ref_id'].unique())
+        show_case_detail(case_id_option)
 
-    # Optional: Save the updated dataframe to a CSV file
-    if st.button('Save Updated Data'):
-        review_df.to_csv('updated_transactions.csv', index=False)
-        st.success('Data saved successfully!')
+    # Display updated dataframe after Expert Review
+    if 'review_df' in st.session_state:
+        st.subheader("Updated Transactions after Expert Review")
+        st.dataframe(st.session_state['review_df'])
 
-app()
+if __name__ == '__main__':
+    app()
