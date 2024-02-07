@@ -70,7 +70,7 @@ def app():
         # Display all columns in the dataframe or specify columns you're interested in
 
         columns_to_drop = ['rf_prob_scores', 'rf_predicted_fraud']
-        outliers_df.drop(columns=[col for col in columns_to_drop if col in df.columns], inplace=True)
+        outliers_df.drop(columns=[col for col in columns_to_drop if col in outliers_df.columns], inplace=True)
 
         # Rearrange columns to have 'ref_id' and 'Flagged as Fraud' first
         cols = ['ref_id', 'lof_predicted_fraud', 'lof_score_normalized'] + [col for col in outliers_df.columns if col not in ['ref_id', 'lof_predicted_fraud', 'lof_score_normalized']]
