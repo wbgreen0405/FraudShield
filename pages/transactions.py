@@ -146,12 +146,11 @@ def app():
             st.session_state['anomaly_df'] = anomaly_df
 
             st.write("### Offline Review Detailed Transactions")
-            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
-
+            review_df = analyzed_df[ ((analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)) &
+            (analyzed_df['Approval Status'] == 'Fraud')]
             # Drop unwanted columns
             columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
             review_df = review_df.drop(columns=[col for col in columns_to_drop if col in review_df.columns], errors='ignore')
-    
             # Reorder columns
             cols = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]
             review_df = review_df[cols]
