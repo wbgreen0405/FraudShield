@@ -28,8 +28,6 @@ elif page == "Anomaly Detection":
     anomaly_detection.app()
 elif page == "Case Detail":
     case_detail.app()
-# Optionally, you can add more pages or conditional logic as needed.
-
 
 
 
