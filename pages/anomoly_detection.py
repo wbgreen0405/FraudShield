@@ -73,7 +73,7 @@ def app():
         outliers_df.drop(columns=[col for col in columns_to_drop if col in outliers_df.columns], inplace=True)
 
         # Rearrange columns to have 'ref_id' and 'Flagged as Fraud' first
-        cols = ['ref_id', 'lof_predicted_fraud', 'lof_score_normalized'] + [col for col in outliers_df.columns if col not in ['ref_id', 'lof_predicted_fraud', 'lof_score_normalized']]
+        cols = ['ref_id', 'lof_predicted_fraud'] + [col for col in outliers_df.columns if col not in ['ref_id', 'lof_predicted_fraud']]
         outliers_df = outliers_df[cols]
 
         st.dataframe(outliers_df, use_container_width=True)
