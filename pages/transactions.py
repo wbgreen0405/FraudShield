@@ -101,10 +101,9 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     # Assign back 'ref_id' and 'Approval Status'
     transactions_df['ref_id'] = ref_ids
-    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
             
     # Storing DataFrames in session state for cross-page access
-    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
+    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 0 else 'Non-Fraud')
     
      #st.session_state['approval_system_df'] = transactions_df
      #st.session_state['anomaly_detection_system_df'] = transactions_df[transactions_df['lof_predicted_fraud'] == 1]
