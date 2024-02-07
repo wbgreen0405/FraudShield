@@ -153,7 +153,7 @@ def app():
             review_df = review_df.drop(columns=[col for col in columns_to_drop if col in review_df.columns], errors='ignore')
     
             # Reorder columns
-            cols = ['ref_id', 'Approval Status','espert_decision','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','espert_decision','lof_scores', 'rf_prob_scores', ]]
+            cols = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]
             review_df = review_df[cols]
             
             st.dataframe(review_df)
