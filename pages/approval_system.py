@@ -12,14 +12,14 @@ def app():
         supervised_df['Flagged as Fraud'] = supervised_df['rf_predicted_fraud'].map({1: 'Yes', 0: 'No'})
         
         # Drop 'lof_predicted_fraud' and 'Approval Status' if present
-        columns_to_drop = ['lof_predicted_fraud', 'Approval Status']
+        columns_to_drop = ['lof_predicted_fraud', 'Approval Status','lof_scores', 'lof_scores_normalized']
         for col in columns_to_drop:
             if col in supervised_df.columns:
                 supervised_df = supervised_df.drop(columns=[col])
 
 
         # Rearrange columns to have 'ref_id' and 'Flagged as Fraud' first
-        cols = ['ref_id', 'Flagged as Fraud'] + [col for col in supervised_df.columns if col not in ['ref_id', 'Flagged as Fraud']]
+        cols = ['ref_id', 'Flagged as Fraud','rf_prob_scores'] + [col for col in supervised_df.columns if col not in ['ref_id', 'Flagged as Fraud','rf_prob_scores']]
         supervised_df = supervised_df[cols]
 
         col1, col2 = st.columns([2, 3])
