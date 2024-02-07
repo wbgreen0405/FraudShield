@@ -62,55 +62,55 @@ def preprocess_data(df):
     return df
 
 def perform_inference(transactions_df, rf_model, lof_model):
-    # Ensure 'ref_id' is preserved for later use
+    """
+    Perform inference on transaction data using RF and LOF models.
+    """
+    # Save 'ref_id' before dropping or excluding it from the feature set
     ref_ids = transactions_df['ref_id'].copy()
-
-    # Preprocess data as needed for model inputs
-    transactions_df_preprocessed = preprocess_data(transactions_df.copy())
-
-    # Isolate features for RF prediction
-    X_rf = transactions_df_preprocessed.drop(['fraud_bool', 'ref_id'], axis=1, errors='ignore')
     
-    # Perform RF predictions
+    # Preprocess data
+    transactions_df = preprocess_data(transactions_df)
+    
+    # RF predictions
+    X_rf = transactions_df.drop(['fraud_bool'], axis=1, errors='ignore')
     rf_predictions = rf_model.predict(X_rf)
-    rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]
+    rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
     transactions_df['rf_prob_scores'] = rf_prob_scores
     transactions_df['rf_predicted_fraud'] = rf_predictions
 
-    # Initial flagging by RF
-    transactions_df['flagged_by'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'rf_v1' if x == 1 else None)
-
-    # Select transactions for LOF analysis
-    non_fraud_by_rf = transactions_df[transactions_df['rf_predicted_fraud'] == 0]
-
-    # Ensure LOF model receives correct features, identical to its training phase
-    X_lof = non_fraud_by_rf.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'ref_id', 'flagged_by'], axis=1, errors='ignore')
-
-    # Perform LOF predictions
-    if not X_lof.empty:
+    # Initialize LOF columns
+    transactions_df['lof_predicted_fraud'] = 0
+    transactions_df['lof_scores'] = 0
+    
+    # Applying LOF on transactions classified as non-fraud by RF
+    non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
+    if not non_fraud_df.empty:
+        X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
+        lof_model.fit(X_lof)
         lof_predictions = lof_model.fit_predict(X_lof)
-        lof_scores = -lof_model.negative_outlier_factor_
+        lof_scores = -lof_model.negative_outlier_factor_  # Negative scores because higher means more abnormal
+        
+        # Assign LOF scores and predictions to the corresponding transactions
+        transactions_df.loc[non_fraud_df.index, 'lof_predicted_fraud'] = lof_predictions
+        transactions_df.loc[non_fraud_df.index, 'lof_scores'] = lof_scores
 
-        # Update transactions_df based on LOF predictions
-        lof_fraud_indices = non_fraud_by_rf.index[lof_predictions == -1]
-        transactions_df.loc[lof_fraud_indices, 'lof_predicted_fraud'] = 1
-        transactions_df.loc[lof_fraud_indices, 'lof_scores'] = lof_scores[lof_predictions == -1]
-        transactions_df.loc[lof_fraud_indices, 'flagged_by'] = transactions_df.loc[lof_fraud_indices, 'flagged_by'].apply(lambda x: 'both' if x == 'rf_v1' else 'lof_v1')
+    # Normalize LOF scores for the whole dataset
+    max_score = transactions_df['lof_scores'].max()
+    min_score = transactions_df['lof_scores'].min()
+    transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score)
 
-    # Normalize LOF scores
-    if 'lof_scores' in transactions_df:
-        transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - transactions_df['lof_scores'].min()) / (transactions_df['lof_scores'].max() - transactions_df['lof_scores'].min())
-    else:
-        transactions_df['lof_scores_normalized'] = 0
-
-    # Reattach 'ref_id'
+    # Assign back 'ref_id' and 'Approval Status'
     transactions_df['ref_id'] = ref_ids
-
-    # Update Approval Status
-    transactions_df['Approval Status'] = transactions_df.apply(lambda x: 'Non-Fraud' if (x['rf_predicted_fraud'] == 0 and x.get('lof_predicted_fraud', 0) == 0) else 'Fraud', axis=1)
+    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
+            
+    # Storing DataFrames in session state for cross-page access
+    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
+    
+     #st.session_state['approval_system_df'] = transactions_df
+     #st.session_state['anomaly_detection_system_df'] = transactions_df[transactions_df['lof_predicted_fraud'] == 1]
+     #st.session_state['df_offline_review_detailed'] = transactions_df[(transactions_df['rf_predicted_fraud'] == 1) | (transactions_df['lof_predicted_fraud'] == 1)]
 
     return transactions_df
-
 
 def app():
     st.title("Transaction Analysis")
