@@ -176,10 +176,10 @@ def app():
             st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
     
-            anomaly_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
+            non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
             st.write("### Anomaly Detection System")
-            st.dataframe(anomaly_df)
-            st.session_state['anomaly_df'] = anomaly_df
+            st.dataframe(non_fraud_df)
+            st.session_state['anomaly_df'] = non_fraud_df
 
 
             if 'lof_scores' not in analyzed_df.columns:
