@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 import pickle
 import boto3
@@ -123,9 +124,6 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     return transactions_df
 
-import streamlit as st
-import numpy as np
-# Ensure all necessary imports are included, such as load_model_from_s3, fetch_transactions, etc.
 
 def app():
     st.title("Transaction Analysis")
@@ -152,6 +150,10 @@ def app():
             st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
     
+            # Debugging: Check unique values in the 'RF Approval Status' and 'LOF Status' columns
+            st.write("Unique RF Approval Status values:", analyzed_df['RF Approval Status'].unique())
+            st.write("Unique LOF Status values:", analyzed_df['LOF Status'].unique())
+
             # Approval System: Filter based on RF Approval Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
             st.write("### Approval System")
@@ -183,7 +185,6 @@ def app():
             st.write(anomaly_df['LOF Status'].value_counts())
             st.write("Offline Review Shape:", review_df.shape)
             st.write(review_df[['RF Approval Status', 'LOF Status']].value_counts())
-    
         else:
             st.write("No transactions found.")
 
