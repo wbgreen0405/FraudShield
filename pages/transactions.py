@@ -169,7 +169,7 @@ def app():
             # Offline Review Detailed Transactions: Filter for suspected fraud by both models
             if 'lof_scores' not in analyzed_df.columns:
                 analyzed_df['lof_scores'] = np.nan  # Ensure 'lof_scores' column exists
-            review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') & (analyzed_df['LOF Status'] == 'Suspected Fraud')]
+            review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')]
             cols_order = ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
             review_df = review_df[cols_order]
             st.write("### Offline Review Detailed Transactions")
