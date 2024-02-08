@@ -62,45 +62,46 @@ def preprocess_data(df):
     return df
 
 def perform_inference(transactions_df, rf_model, lof_model):
-    # Preprocess the DataFrame
-    transactions_df = preprocess_data(transactions_df)
+    # Save 'ref_id' before preprocessing
     ref_ids = transactions_df['ref_id'].copy()
-
-    # RF predictions with probability threshold
-    X_rf = transactions_df.drop(['fraud_bool'], axis=1, errors='ignore')
+    
+    # Preprocess data
+    transactions_df = preprocess_data(transactions_df)
+    
+    # RF predictions
+    X_rf = transactions_df.drop(columns=['fraud_bool'], axis=1, errors='ignore')
+    rf_predictions = rf_model.predict(X_rf)
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
-    rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
-
-    # Update the DataFrame with RF predictions and scores
     transactions_df['rf_prob_scores'] = rf_prob_scores
     transactions_df['rf_predicted_fraud'] = rf_predictions
-
-    # Map RF predictions to Approval Status
-    transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
-
-    # Applying LOF on transactions classified as non-fraud by RF
+    
+    # Filter transactions classified as non-fraud by RF for LOF analysis
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
-        X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
+        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
         lof_model.fit(X_lof)
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
         
-        # Map LOF predictions to Status
+        # Map LOF predictions to categorical status
         non_fraud_df['LOF Status'] = (lof_predictions == -1).astype(int).map({1: 'Suspected Fraud', 0: 'Non-Fraud'})
-        non_fraud_df['lof_scores'] = lof_scores.astype('float64')
-
-        # Update the main DataFrame with LOF results
+        non_fraud_df['lof_scores'] = lof_scores.astype('float64')  # Ensure lof_scores are float
+        
+        # Update the main DataFrame with LOF analysis results
         transactions_df.update(non_fraud_df)
 
-    # Normalize LOF scores for the whole dataset
-    max_score = transactions_df['lof_scores'].max() if 'lof_scores' in transactions_df else 0
-    min_score = transactions_df['lof_scores'].min() if 'lof_scores' in transactions_df else 0
-    transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score) if max_score > min_score else transactions_df['lof_scores']
-
+    # Assign back 'ref_id' and map RF predictions to Approval Status
     transactions_df['ref_id'] = ref_ids
+    transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked As Approved'})
+    transactions_df['LOF Status'] = transactions_df['LOF Status'].fillna('Non-Fraud')  # Fill NaNs for those not analyzed by LOF
+
+    # Optionally normalize LOF scores
+    max_score = transactions_df['lof_scores'].max()
+    min_score = transactions_df['lof_scores'].min()
+    transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score)
 
     return transactions_df
+
 
 
 def app():
