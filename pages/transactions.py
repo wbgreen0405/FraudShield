@@ -62,52 +62,46 @@ def preprocess_data(df):
     return df
 
 def perform_inference(transactions_df, rf_model, lof_model):
-    """
-    Perform inference on transaction data using RF and LOF models.
-    """
-    # Save 'ref_id' before dropping or excluding it from the feature set
-    ref_ids = transactions_df['ref_id'].copy()
-    
-    # Preprocess data
+    # Preprocess the DataFrame
     transactions_df = preprocess_data(transactions_df)
-    
-    # RF predictions
+    ref_ids = transactions_df['ref_id'].copy()
+
+    # RF predictions with probability threshold
     X_rf = transactions_df.drop(['fraud_bool'], axis=1, errors='ignore')
-    rf_predictions = rf_model.predict(X_rf)
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
+    rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
+
+    # Update the DataFrame with RF predictions and scores
     transactions_df['rf_prob_scores'] = rf_prob_scores
     transactions_df['rf_predicted_fraud'] = rf_predictions
 
-    # Initialize LOF columns
-    transactions_df['lof_predicted_fraud'] = 0
-    transactions_df['lof_scores'] = 0
-    
+    # Map RF predictions to Approval Status
+    transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
+
     # Applying LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
         X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
         lof_model.fit(X_lof)
         lof_predictions = lof_model.fit_predict(X_lof)
-        lof_scores = -lof_model.negative_outlier_factor_  # Negative scores because higher means more abnormal
+        lof_scores = -lof_model.negative_outlier_factor_
         
-        # Assign LOF scores and predictions to the corresponding transactions
-        transactions_df.loc[non_fraud_df.index, 'lof_predicted_fraud'] = lof_predictions
-        transactions_df.loc[non_fraud_df.index, 'lof_scores'] = lof_scores
+        # Map LOF predictions to Status
+        non_fraud_df['LOF Status'] = (lof_predictions == -1).astype(int).map({1: 'Suspected Fraud', 0: 'Non-Fraud'})
+        non_fraud_df['lof_scores'] = lof_scores
+
+        # Update the main DataFrame with LOF results
+        transactions_df.update(non_fraud_df)
 
     # Normalize LOF scores for the whole dataset
-    max_score = transactions_df['lof_scores'].max()
-    min_score = transactions_df['lof_scores'].min()
-    transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score)
+    max_score = transactions_df['lof_scores'].max() if 'lof_scores' in transactions_df else 0
+    min_score = transactions_df['lof_scores'].min() if 'lof_scores' in transactions_df else 0
+    transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score) if max_score > min_score else transactions_df['lof_scores']
 
-    # Assign back 'ref_id' and 'Approval Status'
     transactions_df['ref_id'] = ref_ids
-    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
-    # After obtaining predictions from both models, set 'Approval Status' to 'Fraud' if either model predicts a case as fraud
-    #transactions_df['Approval Status'] = transactions_df.apply(
-        #lambda x: 'Fraud' if x['rf_predicted_fraud'] == 1 or x['lof_predicted_fraud'] == 1 else 'Non-Fraud', axis=1)
 
-            
     return transactions_df
+
 
 def app():
     st.title("Transaction Analysis")
@@ -133,42 +127,40 @@ def app():
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
-
+    
+            # Approval System: Filter based on RF Approval Status
+            supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
             st.write("### Approval System")
-            supervised_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['rf_predicted_fraud'] == 0)]
             st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
-
+    
+            # Anomaly Detection System: Filter based on LOF Status
+            anomaly_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
             st.write("### Anomaly Detection System")
-            anomaly_df = analyzed_df[analyzed_df['lof_predicted_fraud'] == 1]
             st.dataframe(anomaly_df)
             st.session_state['anomaly_df'] = anomaly_df
-
+    
+            # Offline Review Detailed Transactions: Filter for suspected fraud by both models
+            review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') & (analyzed_df['LOF Status'] == 'Suspected Fraud')]
             st.write("### Offline Review Detailed Transactions")
-            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
-            cols_order = ['ref_id', 'Approval Status', 'lof_scores', 'rf_prob_scores'] + [col for col in review_df.columns if col not in ['ref_id', 'Approval Status', 'lof_scores', 'rf_prob_scores']]
+            cols_order = ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in review_df.columns if col not in ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
             review_df = review_df[cols_order]
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
-
-
+    
+            # Debugging: Filtered DataFrames
             st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
-            
-            # Approval System
             st.write("Approval System Shape:", supervised_df.shape)
-            st.write(supervised_df['Approval Status'].value_counts())
-            
-            # Anomaly Detection System
+            st.write(supervised_df['RF Approval Status'].value_counts())
             st.write("Anomaly Detection System Shape:", anomaly_df.shape)
-            st.write(anomaly_df['lof_predicted_fraud'].value_counts())
-            
-            # Offline Review Detailed Transactions
+            st.write(anomaly_df['LOF Status'].value_counts())
             st.write("Offline Review Shape:", review_df.shape)
-            st.write(review_df['Approval Status'].value_counts())
-
+            st.write(review_df[['RF Approval Status', 'LOF Status']].value_counts())
+    
         else:
             st.write("No transactions found.")
+
 
 if __name__ == '__main__':
     st.set_page_config(page_title="Transaction Analysis", layout="wide")
