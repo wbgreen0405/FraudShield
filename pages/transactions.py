@@ -85,11 +85,8 @@ def perform_inference(transactions_df, rf_model, lof_model):
     transactions_df = transactions_df.drop(columns=['ref_id'], errors='ignore')
     transactions_df = preprocess_data(transactions_df)
 
-    # Initialize 'LOF Status' to ensure the column exists
-    transactions_df['LOF Status'] = 'Not Evaluated'
-
-    # RF predictions with probability threshold
-    X_rf = transactions_df.drop(columns=['fraud_bool'], errors='ignore')
+    # Exclude any additional columns like 'LOF Status' for RF predictions
+    X_rf = transactions_df.drop(columns=['fraud_bool', 'LOF Status'], errors='ignore')
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
 
@@ -98,10 +95,10 @@ def perform_inference(transactions_df, rf_model, lof_model):
     transactions_df['rf_predicted_fraud'] = rf_predictions
     transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
 
-    # Applying LOF on transactions classified as non-fraud by RF
+    # Now, apply LOF on transactions classified as non-fraud by RF
+    # Ensure the dataset for LOF model doesn't include 'LOF Status' or other post-RF columns
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
-        # Ensure X_lof contains only the numeric features LOF was trained on
         X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id'], errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
@@ -110,10 +107,10 @@ def perform_inference(transactions_df, rf_model, lof_model):
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores
 
-        # Merge LOF results back into the main DataFrame
+        # Update the main DataFrame with LOF results
         transactions_df.update(non_fraud_df)
 
-    # Normalize LOF scores
+    # Normalize LOF scores if present
     if 'lof_scores' in transactions_df.columns:
         max_score = transactions_df['lof_scores'].max()
         min_score = transactions_df['lof_scores'].min()
