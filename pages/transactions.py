@@ -148,14 +148,14 @@ def app():
             st.write("### Offline Review Detailed Transactions")
             
             # Filter to include only fraud cases as predicted by RF or LOF
-            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 0) | (analyzed_df['lof_predicted_fraud'] == 1)]
+            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
             
             # Drop unwanted columns from review_df if needed
             columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
             review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
             
             # Ensure only cases with 'Approval Status' marked as 'Fraud' are included
-            review_df = review_df[review_df['Approval Status'] == 'Non Fraud']
+            review_df = review_df[review_df['Approval Status'] == 'Fraud']
             
             # Reorder columns if necessary
             cols_order = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]  # Add other columns as per your requirement
