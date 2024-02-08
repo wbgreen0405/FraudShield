@@ -117,23 +117,25 @@ def app():
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
     
-    # Load the Random Forest and LOF models from S3
-    rf_model = load_model_from_s3(bucket_name, rf_model_key)
-    lof_model = load_model_from_s3(bucket_name, lof_model_key)
+    try:
+        # Load the Random Forest and LOF models from S3
+        rf_model = load_model_from_s3(bucket_name, rf_model_key)
+        lof_model = load_model_from_s3(bucket_name, lof_model_key)
+    except Exception as e:
+        st.error(f"Failed to load models: {e}")
+        return
 
     if st.button('Fetch and Analyze Transactions'):
         transactions_df = fetch_transactions()
         if not transactions_df.empty:
             analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
             
-            # Display sections as requested
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
 
-            st.write("### Aproval System")
+            st.write("### Approval System")
             supervised_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['rf_predicted_fraud'] == 0)]
-            #st.dataframe(supervised_df[['ref_id', 'rf_predicted_fraud', 'Approval Status']])
             st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
 
@@ -143,28 +145,9 @@ def app():
             st.session_state['anomaly_df'] = anomaly_df
 
             st.write("### Offline Review Detailed Transactions")
-            
-            # Filter to include only fraud cases as predicted by RF or LOF
             review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
-           # review_df = analyzed_df[analyzed_df['Approval Status'] == 'Fraud']
-           # review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) & (analyzed_df['lof_predicted_fraud'] == 1)]
-            #review_df = transactions_df[(transactions_df['rf_predicted_fraud'] == 1) & (transactions_df['lof_predicted_fraud'] == 1)]
-
-
-
-            
-            # Drop unwanted columns from review_df if needed
-            #columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
-            #review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
-            
-            # Ensure only cases with 'Approval Status' marked as 'Fraud' are included
-            #review_df = review_df[review_df['Approval Status'] == 'Fraud']
-            
-            # Reorder columns if necessary
-            cols_order = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]  # Add other columns as per your requirement
+            cols_order = ['ref_id', 'Approval Status', 'lof_scores', 'rf_prob_scores'] + [col for col in review_df.columns if col not in ['ref_id', 'Approval Status', 'lof_scores', 'rf_prob_scores']]
             review_df = review_df[cols_order]
-            
-            # Display the dataframe in Streamlit and save it in the session state
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
         else:
@@ -173,4 +156,3 @@ def app():
 if __name__ == '__main__':
     st.set_page_config(page_title="Transaction Analysis", layout="wide")
     app()
-
