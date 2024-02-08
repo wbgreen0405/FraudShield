@@ -111,8 +111,11 @@ def perform_inference(transactions_df, rf_model, lof_model):
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores
 
+        # Merge LOF scores back into the main DataFrame
+        transactions_df.update(non_fraud_df[['lof_scores']])
+
         # Debugging: Check DataFrame after LOF score calculation
-        st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
+        #st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
 
         # Update the main DataFrame with LOF results
         transactions_df.update(non_fraud_df)
@@ -169,15 +172,23 @@ def app():
             st.session_state['supervised_df'] = supervised_df
     
             # Anomaly Detection System showcasing LOF scores
+            # Ensure anomaly_df reflects the LOF scores where applicable
             anomaly_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud'].copy()
-            st.write("### Anomaly Detection System")
-            st.dataframe(anomaly_df[['ref_id', 'LOF Status', 'lof_scores']])
-            st.session_state['anomaly_df'] = anomaly_df
+            if 'lof_scores' in anomaly_df.columns:
+                st.write("### Anomaly Detection System")
+                st.dataframe(anomaly_df[['ref_id', 'LOF Status', 'lof_scores']])
+            else:
+                st.write("### Anomaly Detection System")
+                st.write("LOF scores not available for anomaly detection.")
 
             # Offline Review Detailed Transactions with merged flags
+            # Ensure offline review displays the data correctly with LOF scores where applicable
             review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')].copy()
+            review_df['Flagged By'] = np.where(review_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
+                                               np.where(review_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
+            if 'lof_scores' not in review_df.columns:
+                review_df['lof_scores'] = np.nan  # Ensure column exists even if no scores are present
             cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']
-            review_df['Flagged By'] = np.where(review_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 'LOF Model')
             st.write("### Offline Review Detailed Transactions")
             st.dataframe(review_df[cols_order])
             st.session_state['review_df'] = review_df
