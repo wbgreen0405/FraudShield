@@ -111,6 +111,9 @@ def perform_inference(transactions_df, rf_model, lof_model):
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores
 
+        # Debugging: Check DataFrame after LOF score calculation
+        st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
+
         # Update the main DataFrame with LOF results
         transactions_df.update(non_fraud_df)
 
