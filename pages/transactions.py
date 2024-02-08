@@ -123,6 +123,10 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     return transactions_df
 
+import streamlit as st
+import numpy as np
+# Ensure all necessary imports are included, such as load_model_from_s3, fetch_transactions, etc.
+
 def app():
     st.title("Transaction Analysis")
 
@@ -140,7 +144,7 @@ def app():
         return
 
     if st.button('Fetch and Analyze Transactions'):
-        transactions_df = fetch_transactions()
+        transactions_df = fetch_transactions()  # Placeholder for your actual data fetching logic
         if not transactions_df.empty:
             analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
             
@@ -161,10 +165,12 @@ def app():
             st.session_state['anomaly_df'] = anomaly_df
     
             # Offline Review Detailed Transactions: Filter for suspected fraud by both models
+            if 'lof_scores' not in analyzed_df.columns:
+                analyzed_df['lof_scores'] = np.nan  # Ensure 'lof_scores' column exists
             review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') & (analyzed_df['LOF Status'] == 'Suspected Fraud')]
-            st.write("### Offline Review Detailed Transactions")
-            cols_order = ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in review_df.columns if col not in ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
+            cols_order = ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
             review_df = review_df[cols_order]
+            st.write("### Offline Review Detailed Transactions")
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
     
@@ -180,6 +186,10 @@ def app():
     
         else:
             st.write("No transactions found.")
+
+if __name__ == '__main__':
+    st.set_page_config(page_title="Transaction Analysis", layout="wide")
+    app()
 
 
 if __name__ == '__main__':
