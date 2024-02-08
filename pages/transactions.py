@@ -176,7 +176,7 @@ def app():
             st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
     
-            non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
+            #non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
             st.write("### Anomaly Detection System")
             st.dataframe(non_fraud_df)
             st.session_state['anomaly_df'] = non_fraud_df
