@@ -147,17 +147,21 @@ def app():
 
             st.write("### Offline Review Detailed Transactions")
             
+            # Filter to include only fraud cases as predicted by RF or LOF
             review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 0) | (analyzed_df['lof_predicted_fraud'] == 1)]
-            #review_df = analyzed_df.query('rf_predicted_fraud == 1 or lof_predicted_fraud == 1')
-
-
-            # Drop unwanted columns
-            #columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
-            #review_df = review_df.drop(columns=[col for col in columns_to_drop if col in review_df.columns], errors='ignore')
-            # Reorder columns
-            cols = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]
-            review_df = review_df[cols]
             
+            # Drop unwanted columns from review_df if needed
+            columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
+            review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
+            
+            # Ensure only cases with 'Approval Status' marked as 'Fraud' are included
+            review_df = review_df[review_df['Approval Status'] == 'Non Fraud']
+            
+            # Reorder columns if necessary
+            cols_order = ['ref_id', 'Approval Status', 'lof_scores_normalized', 'rf_prob_scores', ...]  # Add other columns as per your requirement
+            review_df = review_df[cols_order]
+            
+            # Display the dataframe in Streamlit and save it in the session state
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
         else:
