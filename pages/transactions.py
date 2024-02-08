@@ -61,6 +61,8 @@ def preprocess_data(df):
     st.write("Data preprocessing completed.")  # Debugging message
     return df
 
+import pandas as pd
+
 def perform_inference(transactions_df, rf_model, lof_model):
     # Preprocess the DataFrame
     transactions_df = preprocess_data(transactions_df)
@@ -82,13 +84,11 @@ def perform_inference(transactions_df, rf_model, lof_model):
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
         X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
-        lof_model.fit(X_lof)
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
-
-        # Convert lof_predictions to a pandas Series for mapping
-        lof_predictions_series = pd.Series(lof_predictions, index=non_fraud_df.index)
-        non_fraud_df['LOF Status'] = lof_predictions_series.map({-1: 'Suspected Fraud', 1: 'Non-Fraud'}).values
+        
+        # Correctly map LOF predictions using a pandas Series
+        non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores.astype('float64')
 
         # Update the main DataFrame with LOF results
@@ -102,8 +102,6 @@ def perform_inference(transactions_df, rf_model, lof_model):
     transactions_df['ref_id'] = ref_ids
 
     return transactions_df
-
-
 
 
 def app():
