@@ -152,8 +152,8 @@ def app():
 
             
             # Drop unwanted columns from review_df if needed
-            columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
-            review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
+            #columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
+            #review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
             
             # Ensure only cases with 'Approval Status' marked as 'Fraud' are included
             #review_df = review_df[review_df['Approval Status'] == 'Fraud']
