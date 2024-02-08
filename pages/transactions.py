@@ -168,7 +168,10 @@ def app():
             st.write("### Anomaly Detection System")
             st.dataframe(anomaly_df)
             st.session_state['anomaly_df'] = anomaly_df
-    
+
+
+            if 'lof_scores' not in analyzed_df.columns:
+                analyzed_df['lof_scores'] = np.nan
             # Prepare Offline Review Detailed Transactions with merged flags
             analyzed_df['Flagged By'] = np.where(analyzed_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
                                                  np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
