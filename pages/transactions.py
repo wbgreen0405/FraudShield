@@ -65,10 +65,18 @@ def preprocess_data(df):
     return df
 
 def perform_inference(transactions_df, rf_model, lof_model):
-    # Ensure 'ref_id' exists or create a placeholder
-    if 'ref_id' not in transactions_df.columns:
-        transactions_df['ref_id'] = pd.RangeIndex(start=1, stop=len(transactions_df) + 1, step=1)
-    
+    # Save 'ref_id' before preprocessing if it exists, and create a placeholder if it doesn't
+    if 'ref_id' in transactions_df.columns:
+        ref_ids = transactions_df['ref_id'].copy()
+    else:
+        # If 'ref_id' doesn't exist, we create a placeholder
+        ref_ids = pd.Series(range(len(transactions_df)), name='ref_id')
+        print("Column 'ref_id' does not exist. Using a placeholder series.")
+
+    # Remove 'ref_id' before preprocessing and inference
+    transactions_df = transactions_df.drop(columns=['ref_id'], errors='ignore')
+
+    # Preprocess the data
     transactions_df = preprocess_data(transactions_df)
 
     # RF predictions with probability threshold
