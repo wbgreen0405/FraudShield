@@ -56,7 +56,7 @@ def preprocess_data(df):
     Preprocess transaction data for model inference.
     """
     # Drop 'ref_id' column if it exists to avoid errors during processing
-    df = df.drop(columns=['ref_id'], errors='ignore')
+    #df = df.drop(columns=['ref_id'], errors='ignore')
     categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
     for col in categorical_cols:
         if col in df.columns:
