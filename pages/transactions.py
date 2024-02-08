@@ -150,6 +150,23 @@ def app():
             review_df = review_df[cols_order]
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
+
+
+            st.write("### Debugging: Filtered DataFrames")
+            st.write("Original Data Shape:", transactions_df.shape)
+            
+            # Approval System
+            st.write("Approval System Shape:", supervised_df.shape)
+            st.write(supervised_df['Approval Status'].value_counts())
+            
+            # Anomaly Detection System
+            st.write("Anomaly Detection System Shape:", anomaly_df.shape)
+            st.write(anomaly_df['lof_predicted_fraud'].value_counts())
+            
+            # Offline Review Detailed Transactions
+            st.write("Offline Review Shape:", review_df.shape)
+            st.write(review_df['Approval Status'].value_counts())
+
         else:
             st.write("No transactions found.")
 
