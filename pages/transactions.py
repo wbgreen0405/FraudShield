@@ -156,7 +156,7 @@ def app():
             review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
             
             # Ensure only cases with 'Approval Status' marked as 'Fraud' are included
-            review_df = review_df[review_df['Approval Status'] == 'Fraud']
+            #review_df = review_df[review_df['Approval Status'] == 'Fraud']
             
             # Reorder columns if necessary
             cols_order = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]  # Add other columns as per your requirement
