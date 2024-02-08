@@ -78,6 +78,9 @@ def preprocess_data(df):
     return df
 
 def perform_inference(transactions_df, rf_model, lof_model):
+    # Initialize 'LOF Status' column to ensure it's always present
+    transactions_df['LOF Status'] = 'Not Evaluated'  # Default status
+    
     # Save 'ref_id' before preprocessing if it exists, create a placeholder if it doesn't
     ref_ids = transactions_df['ref_id'].copy() if 'ref_id' in transactions_df.columns else pd.Series(range(len(transactions_df)), name='ref_id')
     
@@ -96,7 +99,6 @@ def perform_inference(transactions_df, rf_model, lof_model):
     transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
 
     # Now, apply LOF on transactions classified as non-fraud by RF
-    # Ensure the dataset for LOF model doesn't include 'LOF Status' or other post-RF columns
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
         X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id'], errors='ignore')
