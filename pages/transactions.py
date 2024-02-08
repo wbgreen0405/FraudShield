@@ -132,7 +132,9 @@ def app():
             st.session_state['analyzed_df'] = analyzed_df
 
             # Filtering for the Approval System and Anomaly Detection System as before
-            supervised_df = analyzed_df[analyzed_df['rf_predicted_fraud'] == 1 | analyzed_df['rf_predicted_fraud'] == 0]
+            #supervised_df = analyzed_df[analyzed_df['rf_predicted_fraud'] == 1 | analyzed_df['rf_predicted_fraud'] == 0]
+            supervised_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['rf_predicted_fraud'] == 0)]
+
             st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
 
