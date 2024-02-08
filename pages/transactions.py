@@ -64,6 +64,19 @@ def preprocess_data(df):
             df[col] = encoder.fit_transform(df[col].astype(str))
     return df
 
+def preprocess_data(df):
+    """
+    Placeholder for the actual preprocessing steps.
+    Adjust according to your actual preprocessing requirements.
+    """
+    # Example preprocessing steps
+    categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
+    for col in categorical_cols:
+        if col in df.columns:
+            encoder = LabelEncoder()
+            df[col] = encoder.fit_transform(df[col].astype(str))
+    return df
+
 def perform_inference(transactions_df, rf_model, lof_model):
     # Save 'ref_id' before preprocessing if it exists, create a placeholder if it doesn't
     ref_ids = transactions_df['ref_id'].copy() if 'ref_id' in transactions_df.columns else pd.Series(range(len(transactions_df)), name='ref_id')
@@ -71,6 +84,9 @@ def perform_inference(transactions_df, rf_model, lof_model):
     # Preprocess the data, excluding 'ref_id'
     transactions_df = transactions_df.drop(columns=['ref_id'], errors='ignore')
     transactions_df = preprocess_data(transactions_df)
+
+    # Initialize 'LOF Status' to ensure the column exists
+    transactions_df['LOF Status'] = 'Not Evaluated'
 
     # RF predictions with probability threshold
     X_rf = transactions_df.drop(columns=['fraud_bool'], errors='ignore')
@@ -94,7 +110,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores
 
-        # Update the main DataFrame with LOF results
+        # Merge LOF results back into the main DataFrame
         transactions_df.update(non_fraud_df)
 
     # Normalize LOF scores
