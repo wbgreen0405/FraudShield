@@ -125,6 +125,10 @@ def perform_inference(transactions_df, rf_model, lof_model):
     return transactions_df
 
 
+import streamlit as st
+import numpy as np
+import pandas as pd
+
 def app():
     st.title("Transaction Analysis")
 
@@ -142,41 +146,40 @@ def app():
         return
 
     if st.button('Fetch and Analyze Transactions'):
-        transactions_df = fetch_transactions()  # Placeholder for your actual data fetching logic
+        transactions_df = fetch_transactions()  # Placeholder for actual data fetching logic
         if not transactions_df.empty:
             analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
             
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
-    
+
             # Debugging: Check unique values in the 'RF Approval Status' and 'LOF Status' columns
             st.write("Unique RF Approval Status values:", analyzed_df['RF Approval Status'].unique())
             st.write("Unique LOF Status values:", analyzed_df['LOF Status'].unique())
 
-            # Approval System: Filter based on RF Approval Status
+            # Filter based on RF Approval Status and LOF Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
             st.write("### Approval System")
             st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
     
-            # Anomaly Detection System: Filter based on LOF Status
             anomaly_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
             st.write("### Anomaly Detection System")
             st.dataframe(anomaly_df)
             st.session_state['anomaly_df'] = anomaly_df
     
-            # Offline Review Detailed Transactions: Filter for suspected fraud by both models
-            if 'lof_scores' not in analyzed_df.columns:
-                analyzed_df['lof_scores'] = np.nan  # Ensure 'lof_scores' column exists
+            # Prepare Offline Review Detailed Transactions with merged flags
+            analyzed_df['Flagged By'] = np.where(analyzed_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
+                                                 np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
             review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')]
-            cols_order = ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
+            cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
             review_df = review_df[cols_order]
             st.write("### Offline Review Detailed Transactions")
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
-    
-            # Debugging: Filtered DataFrames
+
+            # Additional debugging output as before
             st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
             st.write("Approval System Shape:", supervised_df.shape)
@@ -191,4 +194,6 @@ def app():
 if __name__ == '__main__':
     st.set_page_config(page_title="Transaction Analysis", layout="wide")
     app()
+
+
 
