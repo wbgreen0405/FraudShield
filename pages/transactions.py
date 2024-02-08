@@ -158,7 +158,7 @@ def app():
             review_df = review_df[review_df['Approval Status'] == 'Non Fraud']
             
             # Reorder columns if necessary
-            cols_order = ['ref_id', 'Approval Status', 'lof_scores_normalized', 'rf_prob_scores', ...]  # Add other columns as per your requirement
+            cols = ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ] + [col for col in review_df.columns if col not in  ['ref_id', 'Approval Status','lof_scores', 'rf_prob_scores', ]]  # Add other columns as per your requirement
             review_df = review_df[cols_order]
             
             # Display the dataframe in Streamlit and save it in the session state
