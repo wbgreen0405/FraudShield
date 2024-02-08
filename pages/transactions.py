@@ -88,7 +88,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
         
         # Map LOF predictions to Status
         non_fraud_df['LOF Status'] = (lof_predictions == -1).astype(int).map({1: 'Suspected Fraud', 0: 'Non-Fraud'})
-        non_fraud_df['lof_scores'] = lof_scores
+        non_fraud_df['lof_scores'] = lof_scores.astype('float64')
 
         # Update the main DataFrame with LOF results
         transactions_df.update(non_fraud_df)
