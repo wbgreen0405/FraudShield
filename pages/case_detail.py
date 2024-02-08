@@ -41,6 +41,7 @@ def app():
     st.title("Expert Review Dashboard")
     if 'review_df' in st.session_state:
         review_df = st.session_state['review_df']
+        review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)].copy
 
         if st.button('Simulate Offline Review'):
             review_df = simulate_offline_review(review_df)
