@@ -146,7 +146,7 @@ def app():
             
             # Filter to include only fraud cases as predicted by RF or LOF
             #review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
-            review_df = analyzed_df[transactions_df['Approval Status'] == 'Fraud']
+            review_df = analyzed_df[analyzed_df['Approval Status'] == 'Fraud']
             
             # Drop unwanted columns from review_df if needed
             columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
