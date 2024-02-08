@@ -2,15 +2,23 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Assuming lof_scores are already included and correctly assigned in your DataFrame
+# Function to add 'Outlier Status' based on 'LOF Status'
+def add_outlier_status(df):
+    # Ensure 'LOF Status' is present and map it to 'Outlier Status'
+    if 'LOF Status' in df.columns:
+        df['Outlier Status'] = df['LOF Status'].map({'Suspected Fraud': 'Outlier', None: 'Inlier', '': 'Inlier'})
+    else:
+        df['Outlier Status'] = 'Inlier'  # Default to 'Inlier' if 'LOF Status' is not available
+    return df
 
 # Function to create anomaly detection scatter plot
 def create_anomaly_detection_plot(df):
+    # Use 'lof_scores' directly for y-axis values
     fig = px.scatter(
         df,
         x='ref_id',
-        y='lof_scores',  # Use raw LOF scores for plotting
-        color='LOF Status',  # Use 'LOF Status' for coloring points
+        y='lof_scores',  # Assuming 'lof_scores' column exists and is populated
+        color='Outlier Status',  # Use the 'Outlier Status' column for color
         title="Anomaly Detection Scatter Plot",
         hover_data=['ref_id', 'lof_scores']
     )
@@ -21,9 +29,9 @@ def create_anomaly_detection_plot(df):
 def create_lof_distribution_plot(df):
     fig = px.histogram(
         df,
-        x='lof_scores',  # Use raw LOF scores for the histogram
+        x='lof_scores',  # Directly use 'lof_scores' for the x-axis
         nbins=20,
-        title="Distribution of Local Outlier Factor Scores"
+        title="Distribution of LOF Scores"
     )
     return fig
 
@@ -33,8 +41,14 @@ def app():
 
     if 'analyzed_df' in st.session_state:
         analyzed_df = st.session_state['analyzed_df']
+        # Ensure 'lof_scores' is present; you might also normalize or calculate it beforehand
+        if 'lof_scores' not in analyzed_df.columns:
+            st.warning("LOF scores are missing in the analyzed data.")
+            return
 
-        # Setup layout for plots
+        # Add 'Outlier Status' based on 'LOF Status'
+        analyzed_df = add_outlier_status(analyzed_df)
+
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Anomaly Scatter Plot")
@@ -46,18 +60,10 @@ def app():
             dist_fig = create_lof_distribution_plot(analyzed_df)
             st.plotly_chart(dist_fig)
 
-        # Filter for outliers based on 'LOF Status'
-        outliers_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
-        
-        # Drop unwanted columns for clarity in the detailed view
-        columns_to_drop = ['rf_prob_scores', 'rf_predicted_fraud', 'RF Approval Status']
-        outliers_df = outliers_df.drop(columns=[col for col in columns_to_drop if col in outliers_df.columns], errors='ignore')
+        # Filter for outliers based on 'Outlier Status'
+        outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
 
-        # Reorder columns for the detailed view
-        cols = ['ref_id', 'LOF Status', 'lof_scores'] + [col for col in outliers_df.columns if col not in ['ref_id', 'LOF Status', 'lof_scores']]
-        outliers_df = outliers_df[cols]
-
-        st.subheader("Detailed Anomaly Transactions")
+        st.subheader("Detailed Outlier Transactions")
         st.dataframe(outliers_df, use_container_width=True)
     else:
         st.error("No analyzed data available. Please run the analysis first.")
@@ -65,4 +71,5 @@ def app():
 if __name__ == '__main__':
     st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
     app()
+
 
