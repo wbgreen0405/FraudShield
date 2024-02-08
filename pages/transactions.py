@@ -48,68 +48,59 @@ def fetch_transactions():
         return pd.DataFrame()
 
 
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
 def preprocess_data(df):
     """
     Preprocess transaction data for model inference.
     """
+    # Drop 'ref_id' column if it exists to avoid errors during processing
     df = df.drop(columns=['ref_id'], errors='ignore')
     categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
     for col in categorical_cols:
         if col in df.columns:
             encoder = LabelEncoder()
             df[col] = encoder.fit_transform(df[col].astype(str))
-    st.write("Data preprocessing completed.")  # Debugging message
     return df
 
-import pandas as pd
-
-
 def perform_inference(transactions_df, rf_model, lof_model):
-    # Check if 'ref_id' exists in the DataFrame
-    if 'ref_id' in transactions_df.columns:
-        ref_ids = transactions_df['ref_id'].copy()
-    else:
-        print("Column 'ref_id' does not exist. Creating a placeholder.")
-        # Create a placeholder 'ref_id' if it doesn't exist
-        transactions_df['ref_id'] = range(len(transactions_df))
-        ref_ids = transactions_df['ref_id'].copy()
+    # Ensure 'ref_id' exists or create a placeholder
+    if 'ref_id' not in transactions_df.columns:
+        transactions_df['ref_id'] = pd.RangeIndex(start=1, stop=len(transactions_df) + 1, step=1)
     
-    # Continue with preprocessing...
     transactions_df = preprocess_data(transactions_df)
-    ref_ids = transactions_df['ref_id'].copy()
 
     # RF predictions with probability threshold
-    X_rf = transactions_df.drop(['fraud_bool'], axis=1, errors='ignore')
+    X_rf = transactions_df.drop(columns=['fraud_bool'], errors='ignore')
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
 
-    # Update the DataFrame with RF predictions and scores
+    # Update DataFrame with RF predictions and scores
     transactions_df['rf_prob_scores'] = rf_prob_scores
     transactions_df['rf_predicted_fraud'] = rf_predictions
-
-    # Map RF predictions to Approval Status
     transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
 
-    # Applying LOF on transactions classified as non-fraud by RF
-    non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
+    # LOF for non-fraud by RF
+    non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0]
     if not non_fraud_df.empty:
-        X_lof = non_fraud_df.drop(['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], axis=1, errors='ignore')
+        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores'], errors='ignore')
+        lof_model.fit(X_lof)
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
-        
-        # Correctly map LOF predictions using a pandas Series
-        non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
-        non_fraud_df['lof_scores'] = lof_scores.astype('float64')
 
-        # Update the main DataFrame with LOF results
+        # Map LOF predictions to Status
+        non_fraud_df.loc[:, 'LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
+        non_fraud_df.loc[:, 'lof_scores'] = lof_scores
+
+        # Merge LOF results back into the main DataFrame
         transactions_df.update(non_fraud_df)
 
-    # Normalize LOF scores for the whole dataset
-    max_score = transactions_df['lof_scores'].max() if 'lof_scores' in transactions_df.columns else 0
-    min_score = transactions_df['lof_scores'].min() if 'lof_scores' in transactions_df.columns else 0
-    transactions_df['lof_scores_normalized'] = ((transactions_df['lof_scores'] - min_score) / (max_score - min_score)) if max_score > min_score else transactions_df['lof_scores']
-
-    transactions_df['ref_id'] = ref_ids
+    # Normalize LOF scores
+    if 'lof_scores' in transactions_df.columns:
+        max_score = transactions_df['lof_scores'].max()
+        min_score = transactions_df['lof_scores'].min()
+        transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score) if max_score > min_score else 0
 
     return transactions_df
 
