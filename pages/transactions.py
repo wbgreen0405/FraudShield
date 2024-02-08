@@ -101,7 +101,11 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     # Assign back 'ref_id' and 'Approval Status'
     transactions_df['ref_id'] = ref_ids
-    transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
+    #transactions_df['Approval Status'] = transactions_df['rf_predicted_fraud'].apply(lambda x: 'Fraud' if x == 1 else 'Non-Fraud')
+    # After obtaining predictions from both models, set 'Approval Status' to 'Fraud' if either model predicts a case as fraud
+    transactions_df['Approval Status'] = transactions_df.apply(
+        lambda x: 'Fraud' if x['rf_predicted_fraud'] == 1 or x['lof_predicted_fraud'] == 1 else 'Non-Fraud', axis=1)
+
             
     return transactions_df
 
@@ -141,7 +145,8 @@ def app():
             st.write("### Offline Review Detailed Transactions")
             
             # Filter to include only fraud cases as predicted by RF or LOF
-            review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
+            #review_df = analyzed_df[(analyzed_df['rf_predicted_fraud'] == 1) | (analyzed_df['lof_predicted_fraud'] == 1)]
+            review_df = transactions_df[transactions_df['Approval Status'] == 'Fraud']
             
             # Drop unwanted columns from review_df if needed
             columns_to_drop = ['rf_predicted_fraud', 'lof_predicted_fraud']
