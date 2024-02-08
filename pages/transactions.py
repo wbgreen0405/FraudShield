@@ -63,8 +63,18 @@ def preprocess_data(df):
 
 import pandas as pd
 
+
 def perform_inference(transactions_df, rf_model, lof_model):
-    # Preprocess the DataFrame
+    # Check if 'ref_id' exists in the DataFrame
+    if 'ref_id' in transactions_df.columns:
+        ref_ids = transactions_df['ref_id'].copy()
+    else:
+        print("Column 'ref_id' does not exist. Creating a placeholder.")
+        # Create a placeholder 'ref_id' if it doesn't exist
+        transactions_df['ref_id'] = range(len(transactions_df))
+        ref_ids = transactions_df['ref_id'].copy()
+    
+    # Continue with preprocessing...
     transactions_df = preprocess_data(transactions_df)
     ref_ids = transactions_df['ref_id'].copy()
 
