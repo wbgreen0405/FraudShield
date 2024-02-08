@@ -88,7 +88,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
     transactions_df = transactions_df.drop(columns=['ref_id'], errors='ignore')
     transactions_df = preprocess_data(transactions_df)
 
-    # Exclude any additional columns like 'LOF Status' for RF predictions
+    # Exclude 'LOF Status' and any other non-numeric or post-processing columns for RF predictions
     X_rf = transactions_df.drop(columns=['fraud_bool', 'LOF Status'], errors='ignore')
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]  # Probability of being fraud
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
@@ -98,10 +98,11 @@ def perform_inference(transactions_df, rf_model, lof_model):
     transactions_df['rf_predicted_fraud'] = rf_predictions
     transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
 
-    # Now, apply LOF on transactions classified as non-fraud by RF
+    # Apply LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
     if not non_fraud_df.empty:
-        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id'], errors='ignore')
+        # Ensure X_lof contains only numeric features by excluding non-numeric columns explicitly
+        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id', 'LOF Status'], errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
 
