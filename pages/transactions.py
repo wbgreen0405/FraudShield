@@ -148,7 +148,8 @@ def app():
     if st.button('Fetch and Analyze Transactions'):
         transactions_df = fetch_transactions()  # Placeholder for actual data fetching logic
         if not transactions_df.empty:
-            analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
+            #analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
+            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
             
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
