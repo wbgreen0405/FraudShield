@@ -91,7 +91,7 @@ def app():
 
     bucket_name = 'frauddetectpred'
     rf_model_key = 'random_forest_model.pkl.gz'
-    lof_model_key = 'lof_nonfraud.pkl.gz''
+    lof_model_key = 'lof_nonfraud.pkl.gz'
     
     rf_model = load_model_from_s3(bucket_name, rf_model_key)
     lof_model = load_model_from_s3(bucket_name, lof_model_key)
