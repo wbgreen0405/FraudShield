@@ -38,11 +38,11 @@ def plot_workflow_diagram(review_df):
         st.warning("Run the simulation to generate expert decisions.")
 
 def plot_case_resolution_timeline(review_df):
-    required_cols = ['review_start', 'review_end', 'ref_id']
+    required_cols = ['review_start', 'review_end', 'ref_id', 'expert_decision']
     if all(col in review_df.columns for col in required_cols):
         review_df['review_start'] = pd.to_datetime(review_df['review_start'], errors='coerce')
         review_df['review_end'] = pd.to_datetime(review_df['review_end'], errors='coerce')
-        fig = px.timeline(review_df, x_start='review_start', x_end='review_end', y='ref_id', labels={'ref_id': 'Case ID'})
+        fig = px.timeline(review_df, x_start='review_start', x_end='review_end', y='ref_id', color='expert_decision', labels={'ref_id': 'Case ID', 'expert_decision': 'Decision'})
         fig.update_layout(xaxis_title='Time', yaxis_title='Case ID', title='Case Resolution Timeline')
         fig.update_yaxes(categoryorder='total ascending')
         st.plotly_chart(fig)
