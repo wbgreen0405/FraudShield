@@ -201,7 +201,7 @@ def app():
             st.write("Approval System Shape:", supervised_df.shape)
             st.write(supervised_df['RF Approval Status'].value_counts())
             st.write("Anomaly Detection System Shape:", non_fraud_df .shape)
-            st.write(anomaly_df['LOF Status'].value_counts())
+            st.write(non_fraud_df['LOF Status'].value_counts())
             st.write("Offline Review Shape:", review_df.shape)
             st.write(review_df[['RF Approval Status', 'LOF Status']].value_counts())
         else:
