@@ -52,7 +52,7 @@ def app():
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Anomaly Scatter Plot")
-            scatter_fig = create_anomaly_detection_plot(non_fraud_df)
+            scatter_fig = create_anomaly_detection_plot(anomaly_df)
             st.plotly_chart(scatter_fig)
 
         with col2:
