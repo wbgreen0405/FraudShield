@@ -3,19 +3,25 @@ import pandas as pd
 import random
 
 def simulate_test_and_learn_loop(review_df):
-    # For demo purposes, randomly decide if the model performance improves
-    improvement = random.choice([True, False])
+    # Assume review_df contains a column 'actual_outcome' that stores the true outcome of each transaction
+    # and 'expert_decision' that stores the decision made by the expert.
+    # A transaction is a true positive if it was flagged as fraud and confirmed as fraud by the expert.
+    # A transaction is a false positive if it was flagged as fraud but confirmed as legitimate by the expert.
     
-    if improvement:
-        # Randomly generate some improvement statistics
-        false_positives = random.randint(0, 5)
-        false_negatives = random.randint(0, 5)
-    else:
-        # Randomly generate some worsening statistics
-        false_positives = random.randint(5, 15)
-        false_negatives = random.randint(5, 15)
+    true_positives = ((review_df['RF Approval Status'] == 'Marked as Fraud') & 
+                      (review_df['actual_outcome'] == 'Fraud') & 
+                      (review_df['expert_decision'] == 'Confirmed Fraud')).sum()
     
-    return false_positives, false_negatives
+    false_positives = ((review_df['RF Approval Status'] == 'Marked as Fraud') & 
+                       (review_df['actual_outcome'] == 'Legitimate') & 
+                       (review_df['expert_decision'] == 'Confirmed Legitimate')).sum()
+    
+    # Similar logic would apply for calculating true negatives and false negatives.
+    # For the purposes of this simulation, let's assume all non-fraud flagged transactions are true negatives
+    # and the false negatives would require a mechanism to identify fraud cases missed by both the system and the expert.
+
+    # This function now returns the counts of true positives and false positives based on actual expert review.
+    return true_positives, false_positives
 
 def test_and_learn_loop_page():
     st.title("Test and Learn Feedback Loop (Demo)")
