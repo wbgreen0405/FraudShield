@@ -82,14 +82,13 @@ def perform_inference(transactions_df, rf_model, lof_model):
     # Initialize 'LOF Status' column to ensure it's always present
     transactions_df['LOF Status'] = 'Not Evaluated'
     
-    # Save 'ref_id' before preprocessing if it exists, create a placeholder if it doesn't
+    # No need to save 'ref_id' for this approach, but let's keep it for potential future use
     ref_ids = transactions_df['ref_id'].copy() if 'ref_id' in transactions_df.columns else pd.Series(range(len(transactions_df)), name='ref_id')
     
-    # Preprocess the data, excluding 'ref_id'
-    transactions_df = transactions_df.drop(columns=['ref_id'], errors='ignore')
-    transactions_df = preprocess_data(transactions_df)
+    # Preprocess the data, now excluding 'ref_id' from the preprocessing steps
+    transactions_df = preprocess_data(transactions_df.drop(columns=['ref_id'], errors='ignore'))
 
-    # Exclude 'LOF Status' and any other non-numeric or post-processing columns for RF predictions
+    # Prepare data for RandomForestClassifier predictions
     X_rf = transactions_df.drop(columns=['fraud_bool', 'LOF Status'], errors='ignore')
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
@@ -102,41 +101,28 @@ def perform_inference(transactions_df, rf_model, lof_model):
     # Apply LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
 
-    # Reattach 'ref_id' for merging purposes
-    non_fraud_df['ref_id'] = ref_ids[non_fraud_df.index]
-
     if not non_fraud_df.empty:
-        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id', 'LOF Status'], errors='ignore')
+        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'LOF Status'], errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
         st.write("LOF scores generated:", lof_scores[:5])  # Print first 5 scores for inspection
 
-        # Map LOF predictions and scores back to non_fraud_df
-        non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
-        non_fraud_df['lof_scores'] = lof_scores
-
-        # Merge LOF scores back into the main DataFrame
-        #transactions_df.update(non_fraud_df[['lof_scores']])
-        transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
-
-
-        # Debugging: Check DataFrame after LOF score calculation
-        #st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
-
-        # Update the main DataFrame with LOF results
-        #transactions_df.update(non_fraud_df)
+        # Directly assign lof_scores and LOF Status back to transactions_df using DataFrame indices
+        transactions_df.loc[non_fraud_df.index, 'lof_scores'] = non_fraud_df['lof_scores']
+        transactions_df.loc[non_fraud_df.index, 'LOF Status'] = non_fraud_df['LOF Status'].map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
 
     # Normalize LOF scores if present
     if 'lof_scores' in transactions_df.columns:
         max_score = transactions_df['lof_scores'].max()
         min_score = transactions_df['lof_scores'].min()
-        transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score) if max_score > min_score else 0
+        transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score) if max_score > min_score else transactions_df['lof_scores']
 
-    # Reattach 'ref_id' after all processing
-    transactions_df['ref_id'] = ref_ids.values
- 
+    # Since 'ref_id' was not used in the merge process here, we don't necessarily need to reattach it immediately,
+    # but let's keep this in case 'ref_id' is needed for other operations or outputs
+    transactions_df['ref_id'] = ref_ids
 
     return transactions_df, non_fraud_df
+
 
 def app():
     st.title("Transaction Analysis")
