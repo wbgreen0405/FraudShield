@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import random
+from datetime import datetime, timedelta
+
 
 def simulate_offline_review(review_df):
     # Simulate review dates if not already present
@@ -19,9 +21,8 @@ def simulate_offline_review(review_df):
     # Simulate expert decisions if not already present
     if 'expert_decision' not in review_df.columns:
         decisions = ['Confirmed Fraud', 'Confirmed Legitimate']
-        review_df['expert_decision'] = [random.choice(decisions) for _ in range(len(review_df))]
+        review_df['expert_decision'] = [random.choice(decisions) for _ in review_df.index]
 
-    return review_df
 
 def plot_workflow_diagram(review_df):
     if 'expert_decision' in review_df.columns:
