@@ -193,18 +193,6 @@ def app():
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
 
-            if 'lof_scores' not in  transactions_df.columns:
-                 transactions_df['lof_scores'] = np.nan
-            # Prepare Offline Review Detailed Transactions with merged flags
-            transactions_df['Flagged By'] = np.where(transactions_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
-                                                 np.where(transactions_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
-            review_df2 = transactions_df[(transactions_df['RF Approval Status'] == 'Marked as Fraud') | (transactions_df['LOF Status'] == 'Suspected Fraud')]
-            cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in transactions_df.columns if col not in ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
-            review_df2 = review_df2[cols_order]
-            st.write("### Offline Review Detailed Transactions2")
-            st.dataframe(review_df2)
-            st.session_state['review_df2'] = review_df2
-
             # Additional debugging output as before
             st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
