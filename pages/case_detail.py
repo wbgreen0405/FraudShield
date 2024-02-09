@@ -70,10 +70,16 @@ def app():
             st.session_state['review_df'] = review_df  # Update review_df in session state
             st.success("Simulation complete. Expert decisions have been added.")
 
+        # Ensure review_df is not None
         if review_df is not None:
-            plot_workflow_diagram(review_df)
-            plot_case_resolution_timeline(review_df)
+            col1, col2 = st.columns(2)
             
+            with col1:
+                plot_workflow_diagram(review_df)
+                
+            with col2:
+                plot_case_resolution_timeline(review_df)
+                
             case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
             show_case_detail(review_df, case_id_option)
 
@@ -81,6 +87,7 @@ def app():
             st.dataframe(review_df)
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
+
 
 if __name__ == '__main__':
     app()
