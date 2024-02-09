@@ -78,38 +78,41 @@ def preprocess_data(df):
             df[col] = encoder.fit_transform(df[col].astype(str))
     return df
 
-def perform_inference(transactions_df, rf_model, lof_model):
-    # Verify 'ref_id' presence
-    assert 'ref_id' in transactions_df.columns, "ref_id column is missing from transactions_df at the start."
-
-    # Copy 'ref_id' before preprocessing
-    ref_ids = transactions_df['ref_id'].copy()
+    # Initialize 'LOF Status' column to ensure it's always present
+    transactions_df['LOF Status'] = 'Not Evaluated'
     
-    # Preprocess data, excluding 'ref_id' for model input preparation
-    transactions_df_processed = preprocess_data(transactions_df.drop(columns=['ref_id'], errors='ignore'))
+    # Save 'ref_id' before preprocessing if it exists, create a placeholder if it doesn't
+    ref_ids = transactions_df['ref_id'].copy() if 'ref_id' in transactions_df.columns else pd.Series(range(len(transactions_df)), name='ref_id')
+    
+    # Preprocess the data, excluding 'ref_id'
+    transactions_df = transactions_df.drop(columns=['ref_id'], errors='ignore')
+    transactions_df = preprocess_data(transactions_df)
 
-    # Model predictions (RandomForestClassifier)
-    X_rf = transactions_df_processed.drop(columns=['fraud_bool', 'LOF Status'], errors='ignore')
+    # Exclude 'LOF Status' and any other non-numeric or post-processing columns for RF predictions
+    X_rf = transactions_df.drop(columns=['fraud_bool', 'LOF Status'], errors='ignore')
     rf_prob_scores = rf_model.predict_proba(X_rf)[:, 1]
     rf_predictions = [1 if prob > 0.5 else 0 for prob in rf_prob_scores]
+
+    # Update DataFrame with RF predictions and scores
     transactions_df['rf_prob_scores'] = rf_prob_scores
     transactions_df['rf_predicted_fraud'] = rf_predictions
     transactions_df['RF Approval Status'] = transactions_df['rf_predicted_fraud'].map({1: 'Marked as Fraud', 0: 'Marked as Approve'})
 
-    # Prepare non-fraud data for LOF analysis
+    # Apply LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
-    non_fraud_df['ref_id'] = ref_ids[non_fraud_df.index]  # Reattach 'ref_id'
 
     if not non_fraud_df.empty:
-        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'LOF Status', 'ref_id'], errors='ignore')
+        X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id', 'LOF Status'], errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
+        st.write("LOF scores generated:", lof_scores[:5])  # Print first 5 scores for inspection
 
+        # Map LOF predictions and scores back to non_fraud_df
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores
 
-    # Merge LOF results back into transactions_df using 'ref_id'
-    transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
+        # Merge LOF scores back into the main DataFrame
+        transactions_df.update(non_fraud_df[['lof_scores']])
 
     # Normalize LOF scores if present
     if 'lof_scores' in transactions_df.columns:
@@ -117,8 +120,11 @@ def perform_inference(transactions_df, rf_model, lof_model):
         min_score = transactions_df['lof_scores'].min()
         transactions_df['lof_scores_normalized'] = (transactions_df['lof_scores'] - min_score) / (max_score - min_score) if max_score > min_score else 0
 
-    return transactions_df, non_fraud_df
+    # Reattach 'ref_id' after all processing
+    transactions_df['ref_id'] = ref_ids.values
+ 
 
+    return transactions_df, non_fraud_df
 def app():
     st.title("Transaction Analysis")
 
