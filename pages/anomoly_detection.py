@@ -6,7 +6,7 @@ import plotly.express as px
 def add_outlier_status(df):
     # Ensure 'LOF Status' is present and map it to 'Outlier Status'
     if 'LOF Status' in df.columns:
-        df['Outlier Status'] = df['LOF Status'].map({'Suspected Fraud': 'Outlier', None: 'Inlier', '': 'Inlier'})
+        df['Outlier Status'] = df['LOF Status'].map({'Suspected Fraud': 'Outlier', None: 'Inlier', 'Non-Fraud': 'Inlier'})
     else:
         df['Outlier Status'] = 'Inlier'  # Default to 'Inlier' if 'LOF Status' is not available
     return df
