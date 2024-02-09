@@ -51,10 +51,6 @@ def fetch_transactions():
         st.error(f'An error occurred: {e}')
         return pd.DataFrame()
 
-
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-
 def preprocess_data(df):
     """
     Preprocess transaction data for model inference.
@@ -118,14 +114,6 @@ def perform_inference(transactions_df, rf_model, lof_model):
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
         non_fraud_df['lof_scores'] = lof_scores
 
-        # Merge LOF scores back into the main DataFrame
-        #transactions_df.update(non_fraud_df[['lof_scores']])
-        #non_fraud_df['ref_id'] = ref_ids[non_fraud_df.index]
-        #transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
-
-
-        # Debugging: Check DataFrame after LOF score calculation
-        #st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
 
         # Update the main DataFrame with LOF results
         transactions_df.update(non_fraud_df)
