@@ -212,7 +212,7 @@ def app():
 
 
             # Ensure that non_fraud_df has the lof_scores column after performing inference
-            if 'lof_scores' not in anomaly_df.columns:
+            if 'lof_scores' not in non_fraud_df.columns:
                 st.error("LOF scores are missing from non_fraud_df.")
                 return
             
