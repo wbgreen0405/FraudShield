@@ -228,7 +228,7 @@ def app():
             cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [
                 col for col in human_review.columns if col not in [
                     'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
-           human_review = human_review[cols_order]
+            human_review = human_review[cols_order]
         
             # Display the Offline Review Detailed Transactions
             st.write("### Review Detailed Transactions")
