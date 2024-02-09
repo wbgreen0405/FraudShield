@@ -128,6 +128,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     # Reattach 'ref_id' after all processing
     transactions_df['ref_id'] = ref_ids.values
+    non_fraud_df['ref_id'] = ref_ids.values
 
     return transactions_df, non_fraud_df
 
