@@ -6,6 +6,10 @@ from datetime import datetime, timedelta
 
 
 def simulate_offline_review(review_df):
+    # Ensure review_df is not None
+    if review_df is None:
+        return None
+
     # Simulate review dates if not already present
     if 'review_start' not in review_df.columns or 'review_end' not in review_df.columns:
         review_start_dates = []
@@ -22,6 +26,8 @@ def simulate_offline_review(review_df):
     if 'expert_decision' not in review_df.columns:
         decisions = ['Confirmed Fraud', 'Confirmed Legitimate']
         review_df['expert_decision'] = [random.choice(decisions) for _ in review_df.index]
+
+    return review_df
 
 
 def plot_workflow_diagram(review_df):
@@ -52,7 +58,7 @@ def show_case_detail(review_df, case_id):
 
 def app():
     st.title("Expert Review Dashboard")
-    if 'review_df' in st.session_state:
+    if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
         review_df = st.session_state['review_df']
 
         # Drop unnecessary columns
@@ -64,17 +70,15 @@ def app():
             st.session_state['review_df'] = review_df  # Update review_df in session state
             st.success("Simulation complete. Expert decisions have been added.")
 
-        plot_workflow_diagram(review_df)
-        plot_case_resolution_timeline(review_df)
-        
-        case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
-        show_case_detail(review_df, case_id_option)
+        if review_df is not None:
+            plot_workflow_diagram(review_df)
+            plot_case_resolution_timeline(review_df)
+            
+            case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
+            show_case_detail(review_df, case_id_option)
 
-        st.subheader("Updated Transactions after Expert Review")
-        st.dataframe(review_df)
+            st.subheader("Updated Transactions after Expert Review")
+            st.dataframe(review_df)
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
-
-if __name__ == '__main__':
-    app()
 
