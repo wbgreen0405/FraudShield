@@ -1,13 +1,9 @@
 import streamlit as st
 import pandas as pd
-import datetime
+from datetime import datetime
 
-# Define an empty list to store audit logs
-audit_logs = []
-
-# Function to log an entry in the audit logs
-def log_audit_entry(transaction_id, reviewer_id, decision):
-    timestamp = datetime.datetime.now()
+def log_audit_entry(transaction_id, reviewer_id, decision, audit_logs):
+    timestamp = datetime.now()
     audit_entry = {
         'Timestamp': timestamp,
         'Transaction ID': transaction_id,
@@ -16,21 +12,32 @@ def log_audit_entry(transaction_id, reviewer_id, decision):
     }
     audit_logs.append(audit_entry)
 
-def audit_logs_history_page(audit_logs):
+def load_audit_logs_data(audit_logs):
+    # Create a DataFrame from the passed audit_logs list
+    audit_logs_df = pd.DataFrame(audit_logs)
+    return audit_logs_df
+
+def audit_logs_history_page():
     st.title("Audit Logs / History")
     st.write("View detailed transaction audit logs and the history of changes made through the UI.")
 
-    # Retrieve offline_review_transactions from session_state
-    offline_review_transactions = st.session_state.get('offline_review_transactions', set())
+    # Initialize an empty list to store audit logs if not already in session state
+    if 'audit_logs' not in st.session_state:
+        st.session_state['audit_logs'] = []
 
-    # Log these transactions in the audit_logs list
-    for transaction_id in offline_review_transactions:
-        # Log each transaction with relevant information
-        log_audit_entry(transaction_id, 'simulated_reviewer', 'offline review')
+    # Check if there is review data in session_state and log actions
+    if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
+        review_df = st.session_state['review_df']
+        for _, row in review_df.iterrows():
+            log_audit_entry(
+                transaction_id=row['ref_id'],
+                reviewer_id="Expert Reviewer",
+                decision=row.get('expert_decision', 'No Decision'),
+                audit_logs=st.session_state['audit_logs']
+            )
 
-    # Load audit logs and change history data (you may need to fetch this from your data source)
-    audit_logs_df = load_audit_logs_data(audit_logs)
-    change_history_df = load_change_history_data()  # Replace with your data source
+    # Load audit logs data
+    audit_logs_df = load_audit_logs_data(st.session_state['audit_logs'])
 
     # Display audit logs
     st.subheader("Transaction Audit Logs")
@@ -39,33 +46,26 @@ def audit_logs_history_page(audit_logs):
     else:
         st.info("No audit logs available.")
 
-    # Display change history
+# This is just a placeholder function for loading change history, which should be replaced with your actual data source logic.
+def load_change_history_data():
+    # Placeholder function for demonstration
+    change_history_data = {
+        'Timestamp': [datetime.now(), datetime.now()],
+        'User': ['User A', 'User B'],
+        'Change': ['Decision Updated', 'Decision Confirmed'],
+        'Details': ['Decision: Confirmed Fraud', 'Decision: Confirmed Legitimate'],
+    }
+    return pd.DataFrame(change_history_data)
+
+def main():
+    # Display change history (assuming this is also part of your requirement)
     st.subheader("Change History")
+    change_history_df = load_change_history_data()
     if not change_history_df.empty:
         st.dataframe(change_history_df)  # Display change history as a dataframe
     else:
         st.info("No change history available.")
 
-def load_audit_logs_data(audit_logs):
-    # Create a DataFrame from the passed audit_logs list
-    audit_logs_df = pd.DataFrame(audit_logs)
-    return audit_logs_df
-
-def load_change_history_data():
-    # Replace this function with your logic to fetch change history data
-    # Example: You can load data from a CSV file, a database, or an API
-    # Ensure the DataFrame has columns like 'Timestamp', 'User', 'Change', 'Details', etc.
-    change_history_data = {
-        'Timestamp': ['2023-01-01 08:00:00', '2023-01-02 10:30:00'],
-        'User': ['User A', 'User B'],
-        'Change': ['Threshold Updated', 'Configuration Modified'],
-        'Details': ['New Threshold: 0.6', 'Updated Features: Feature1, Feature2'],
-    }
-    return pd.DataFrame(change_history_data)
-
-# You can call the audit_logs_history_page function in your main app file
-# Example:
-#if pages == 'Audit Logs / History':
-    #audit_logs_history_page()
-
-audit_logs_history_page(audit_logs)
+if __name__ == "__main__":
+    audit_logs_history_page()
+    main()
