@@ -153,13 +153,13 @@ def app():
             #analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
             analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
 
-        # Make sure that lof_scores are in non_fraud_df
-        if 'lof_scores' not in non_fraud_df.columns:
-            st.error("LOF scores are missing in non_fraud_df.")
+            # Make sure that lof_scores are in non_fraud_df
+            if 'lof_scores' not in non_fraud_df.columns:
+                st.error("LOF scores are missing in non_fraud_df.")
             return
-        
-        # Update transactions_df with non_fraud_df information
-        transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
+            
+            # Update transactions_df with non_fraud_df information
+            transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
 
                
             st.write("Analyzed Transactions:")
