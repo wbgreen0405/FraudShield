@@ -78,6 +78,7 @@ def preprocess_data(df):
             df[col] = encoder.fit_transform(df[col].astype(str))
     return df
 
+def perform_inference(transactions_df, rf_model, lof_model):
     # Initialize 'LOF Status' column to ensure it's always present
     transactions_df['LOF Status'] = 'Not Evaluated'
     
@@ -101,6 +102,9 @@ def preprocess_data(df):
     # Apply LOF on transactions classified as non-fraud by RF
     non_fraud_df = transactions_df[transactions_df['rf_predicted_fraud'] == 0].copy()
 
+    # Reattach 'ref_id' for merging purposes
+    non_fraud_df['ref_id'] = ref_ids[non_fraud_df.index]
+
     if not non_fraud_df.empty:
         X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id', 'LOF Status'], errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
@@ -112,7 +116,15 @@ def preprocess_data(df):
         non_fraud_df['lof_scores'] = lof_scores
 
         # Merge LOF scores back into the main DataFrame
-        transactions_df.update(non_fraud_df[['lof_scores']])
+        #transactions_df.update(non_fraud_df[['lof_scores']])
+        transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
+
+
+        # Debugging: Check DataFrame after LOF score calculation
+        #st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
+
+        # Update the main DataFrame with LOF results
+        #transactions_df.update(non_fraud_df)
 
     # Normalize LOF scores if present
     if 'lof_scores' in transactions_df.columns:
@@ -125,6 +137,7 @@ def preprocess_data(df):
  
 
     return transactions_df, non_fraud_df
+
 def app():
     st.title("Transaction Analysis")
 
