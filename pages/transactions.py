@@ -171,11 +171,11 @@ def app():
             st.session_state['analyzed_df'] = analyzed_df
 
             # Debugging: Check unique values in the 'RF Approval Status' and 'LOF Status' columns
-            st.write("Unique RF Approval Status values:", analyzed_df['RF Approval Status'].unique())
-            st.write("Unique LOF Status values:", analyzed_df['LOF Status'].unique())
+             #st.write("Unique RF Approval Status values:", analyzed_df['RF Approval Status'].unique())
+             #st.write("Unique LOF Status values:", analyzed_df['LOF Status'].unique())
 
             # Debugging: Check DataFrame after calculating LOF scores
-            st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
+             #st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
             
             # Filter based on RF Approval Status and LOF Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
@@ -199,14 +199,14 @@ def app():
             st.session_state['review_df'] = review_df
 
             # Additional debugging output as before
-            st.write("### Debugging: Filtered DataFrames")
+             #st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
             st.write("Approval System Shape:", supervised_df.shape)
             st.write(supervised_df['RF Approval Status'].value_counts())
             st.write("Anomaly Detection System Shape:", non_fraud_df.shape)
-            st.write(non_fraud_df['LOF Status'].value_counts())
+             #st.write(non_fraud_df['LOF Status'].value_counts())
             st.write("Offline Review Shape:", review_df.shape)
-            st.write(review_df[['RF Approval Status', 'LOF Status']].value_counts())
+             #st.write(review_df[['RF Approval Status', 'LOF Status']].value_counts())
         else:
             st.write("No transactions found.")
 
