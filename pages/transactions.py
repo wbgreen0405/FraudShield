@@ -10,6 +10,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import LocalOutlierFactor
 from supabase import create_client, Client
 
+# Set the option
+pd.set_option('future.no silent downcasting', True)
+
 # Initialize Supabase client using Streamlit secrets
 supabase_url = st.secrets["supabase"]["url"]
 supabase_key = st.secrets["supabase"]["key"]
