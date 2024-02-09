@@ -211,45 +211,6 @@ def app():
 
 
 
-            # Ensure that non_fraud_df has the lof_scores column after performing inference
-            if 'lof_scores' not in non_fraud_df.columns:
-                st.error("LOF scores are missing from non_fraud_df.")
-                return
-            
-            # Merge lof_scores from non_fraud_df into analyzed_df
-            # This assumes that 'ref_id' is a unique identifier in both DataFrames
-            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores']], on='ref_id', how='left')
-            
-            # Now, you can prepare the Offline Review Detailed Transactions with merged flags
-            analyzed_df['Flagged By'] = np.where(
-                analyzed_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model',
-                np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None')
-            )
-            
-            # Create review_df from the records flagged as fraud by either the RF model or the LOF model
-            review_df2 = analyzed_df[
-                (analyzed_df['RF Approval Status'] == 'Marked as Fraud') |
-                (analyzed_df['LOF Status'] == 'Suspected Fraud')
-            ]
-            
-            # Specify the order of columns for review_df, ensuring lof_scores is included
-            cols_order = [
-                'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'
-            ] + [col for col in analyzed_df.columns if col not in [
-                'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'
-            ]]
-            
-            review_df2 = review_df2[cols_order]
-            
-            # Display the Offline Review Detailed Transactions
-            st.write("### Offline Review Detailed Transactions")
-            st.dataframe(review_df2)
-            
-            # Save review_df in session state if needed elsewhere
-            st.session_state['review_df'] = review_df
-
-
-
             # Additional debugging output as before
             st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
