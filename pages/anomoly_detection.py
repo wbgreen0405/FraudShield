@@ -39,29 +39,29 @@ def create_lof_distribution_plot(df):
 def app():
     st.title("Anomaly Detection System Dashboard")
 
-    if 'analyzed_df' in st.session_state:
-        analyzed_df = st.session_state['analyzed_df']
+    if 'non_fraud_df' in st.session_state:
+        non_fraud_df = st.session_state['non_fraud_df']
         # Ensure 'lof_scores' is present; you might also normalize or calculate it beforehand
-        if 'lof_scores' not in analyzed_df.columns:
+        if 'lof_scores' not in non_fraud_df.columns:
             st.warning("LOF scores are missing in the analyzed data.")
             return
 
         # Add 'Outlier Status' based on 'LOF Status'
-        analyzed_df = add_outlier_status(analyzed_df)
+        non_fraud_df = add_outlier_status(non_fraud_df)
 
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Anomaly Scatter Plot")
-            scatter_fig = create_anomaly_detection_plot(analyzed_df)
+            scatter_fig = create_anomaly_detection_plot(non_fraud_df)
             st.plotly_chart(scatter_fig)
 
         with col2:
             st.subheader("LOF Scores Distribution")
-            dist_fig = create_lof_distribution_plot(analyzed_df)
+            dist_fig = create_lof_distribution_plot(non_fraud_df)
             st.plotly_chart(dist_fig)
 
         # Filter for outliers based on 'Outlier Status'
-        outliers_df = analyzed_df[analyzed_df['Outlier Status'] == 'Outlier']
+        outliers_df = non_fraud_df[non_fraud_df['Outlier Status'] == 'Outlier']
 
         st.subheader("Detailed Outlier Transactions")
         st.dataframe(outliers_df, use_container_width=True)
