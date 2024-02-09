@@ -42,6 +42,9 @@ def app():
     if 'review_df' in st.session_state:
         review_df = st.session_state['review_df']
 
+        # Drop unnecessary columns
+        columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
+        review_df = review_df.drop(columns=columns_to_drop, errors='ignore')  # Use errors='ignore' to avoid errors if a column is missing
 
         if st.button('Simulate Offline Review'):
             review_df = simulate_offline_review(review_df)
@@ -61,3 +64,4 @@ def app():
 
 if __name__ == '__main__':
     app()
+
