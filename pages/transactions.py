@@ -141,6 +141,8 @@ def perform_inference(transactions_df, rf_model, lof_model):
  
 
     return transactions_df, non_fraud_df
+
+
 def app():
     st.title("Transaction Analysis")
 
@@ -195,26 +197,14 @@ def app():
                 analyzed_df['lof_scores'] = np.nan
             # Prepare Offline Review Detailed Transactions with merged flags
             analyzed_df['Flagged By'] = np.where(analyzed_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
-                                                 np.where(non_fraud_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
-            review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (non_fraud_df['LOF Status'] == 'Suspected Fraud')]
+                                                 np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
+            review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')]
             cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
             review_df = review_df[cols_order]
             st.write("### Offline Review Detailed Transactions")
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
 
-
-            if 'lof_scores' not in non_fraud_df.columns:
-                analyzed_df['lof_scores'] = np.nan
-            # Prepare Offline Review Detailed Transactions with merged flags
-            non_fraud_df['Flagged By'] = np.where(non_fraud_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
-                                                 np.where(non_fraud_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None'))
-            prereview_df = non_fraud_df[(non_fraud_df['RF Approval Status'] == 'Marked as Fraud') | (non_fraud_df['LOF Status'] == 'Suspected Fraud')]
-            cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in non_fraud_df.columns if col not in ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
-            prereview_df = prereview_df[cols_order]
-            st.write("### Offline Review Detailed Transactions")
-            st.dataframe(prereview_df)
-            st.session_state['prereview_df'] = prereview_df
 
             # Additional debugging output as before
             st.write("### Debugging: Filtered DataFrames")
