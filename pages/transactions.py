@@ -189,14 +189,50 @@ def app():
             st.session_state['anomaly_df'] = non_fraud_df
 
             # Prepare Offline Review Detailed Transactions with merged flags
-            analyzed_df['Flagged By'] = np.where(analyzed_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model', 
-                                                 np.where(analyzed_df['LOF Status_x'] == 'Suspected Fraud', 'LOF Model', 'None'))
-            review_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status_x'] == 'Suspected Fraud')]
-            cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status_x', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
+            # Merge the non_fraud_df information into analyzed_df, specifying suffixes to avoid column name duplication
+            analyzed_df = analyzed_df.merge(
+                non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']],
+                on='ref_id',
+                how='left',
+                suffixes=('', '_y')  # Suffixes for overlapping columns
+            )
+            
+            # Check for LOF scores in analyzed_df and display relevant data
+            if 'lof_scores' in analyzed_df.columns:
+                st.write("LOF scores are present in analyzed_df.")
+                lof_scores_present = analyzed_df[analyzed_df['lof_scores'].notnull()]
+                st.dataframe(lof_scores_present)
+            else:
+                st.write("LOF scores are missing in analyzed_df.")
+            
+            # Prepare Offline Review Detailed Transactions with merged flags
+            # Note that we use 'LOF Status' without a suffix here, assuming that's the correct column
+            analyzed_df['Flagged By'] = np.where(
+                analyzed_df['RF Approval Status'] == 'Marked as Fraud',
+                'RF Model',
+                np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None')
+            )
+            review_df = analyzed_df[
+                (analyzed_df['RF Approval Status'] == 'Marked as Fraud') |
+                (analyzed_df['LOF Status'] == 'Suspected Fraud')
+            ]
+            
+            # Define the columns to display in review_df
+            cols_order = [
+                'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'
+            ] + [
+                col for col in analyzed_df.columns if col not in [
+                    'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'
+                ]
+            ]
+            
+            # Reorder the columns in review_df according to cols_order
             review_df = review_df[cols_order]
+            
             st.write("### Offline Review Detailed Transactions")
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
+
 
             # Additional debugging output as before
              #st.write("### Debugging: Filtered DataFrames")
