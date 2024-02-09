@@ -4,11 +4,23 @@ import plotly.express as px
 import random
 
 def simulate_offline_review(review_df):
-    # Check if the simulation has already been run
+    # Simulate review dates if not already present
+    if 'review_start' not in review_df.columns or 'review_end' not in review_df.columns:
+        review_start_dates = []
+        review_end_dates = []
+        for _ in range(len(review_df)):
+            start_date = datetime.now() - timedelta(days=random.randint(1, 30))
+            end_date = start_date + timedelta(hours=random.randint(1, 48))
+            review_start_dates.append(start_date)
+            review_end_dates.append(end_date)
+        review_df['review_start'] = review_start_dates
+        review_df['review_end'] = review_end_dates
+
+    # Simulate expert decisions if not already present
     if 'expert_decision' not in review_df.columns:
-        for index, _ in review_df.iterrows():
-            decision = random.choice(['Confirmed Fraud', 'Confirmed Legitimate'])
-            review_df.at[index, 'expert_decision'] = decision
+        decisions = ['Confirmed Fraud', 'Confirmed Legitimate']
+        review_df['expert_decision'] = [random.choice(decisions) for _ in range(len(review_df))]
+
     return review_df
 
 def plot_workflow_diagram(review_df):
