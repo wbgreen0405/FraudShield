@@ -117,6 +117,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
         # Merge LOF scores back into the main DataFrame
         #transactions_df.update(non_fraud_df[['lof_scores']])
+        non_fraud_df['ref_id'] = ref_ids[non_fraud_df.index]
         transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
 
 
