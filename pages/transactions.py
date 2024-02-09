@@ -218,7 +218,7 @@ def app():
             
             # Merge lof_scores from non_fraud_df into analyzed_df
             # This assumes that 'ref_id' is a unique identifier in both DataFrames
-            analyzed_df = analyzed_df.merge(anomaly_df[['ref_id', 'lof_scores']], on='ref_id', how='left')
+            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores']], on='ref_id', how='left')
             
             # Now, you can prepare the Offline Review Detailed Transactions with merged flags
             analyzed_df['Flagged By'] = np.where(
