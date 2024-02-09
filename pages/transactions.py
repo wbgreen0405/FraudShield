@@ -202,6 +202,41 @@ def app():
             st.dataframe(review_df)
             st.session_state['review_df'] = review_df
 
+
+
+            # Let's rename it for clarity
+            human_review = transactions_df
+        
+            # Ensure that lof_scores are now in analyzed_df after the update
+            if 'lof_scores' not in human_review.columns:
+                st.error("LOF scores are missing after update.")
+                return
+            
+            # Prepare Offline Review Detailed Transactions with merged flags
+            human_review['Flagged By'] = np.where(
+                human_review['RF Approval Status'] == 'Marked as Fraud', 'RF Model',
+                np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None')
+            )
+        
+            # Select only the flagged transactions for review
+            human_review = human_review[
+                (human_review['RF Approval Status'] == 'Marked as Fraud') |
+                (human_review['LOF Status'] == 'Suspected Fraud')
+            ]
+        
+            # Specify columns for the review_df
+            cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [
+                col for col in human_review.columns if col not in [
+                    'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'
+                ]
+            ]
+           human_review = human_review[cols_order]
+        
+            # Display the Offline Review Detailed Transactions
+            st.write("### Review Detailed Transactions")
+            st.dataframe(human_review)
+
+
             # Additional debugging output as before
             st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
