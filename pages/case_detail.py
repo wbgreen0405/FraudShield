@@ -82,3 +82,5 @@ def app():
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
 
+if __name__ == '__main__':
+    app()
