@@ -164,6 +164,22 @@ def app():
         if not transactions_df.empty:
             #analyzed_df = perform_inference(transactions_df, rf_model, lof_model)
             analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
+
+            # Perform inference to get analyzed_df and non_fraud_df
+            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
+            
+            # Make sure that lof_scores are in non_fraud_df
+            if 'lof_scores' not in non_fraud_df.columns:
+                st.error("LOF scores are missing in non_fraud_df.")
+                return
+            
+            # Update transactions_df with non_fraud_df information
+            transactions_df = transactions_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
+        
+            # Check if lof_scores are now in transactions_df
+            if 'lof_scores' not in transactions_df.columns:
+                st.error("LOF scores did not merge correctly into transactions_df.")
+                return
             
             st.write("Analyzed Transactions:")
             st.dataframe(analyzed_df)
