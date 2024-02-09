@@ -210,44 +210,6 @@ def app():
             st.session_state['review_df'] = review_df
 
 
-            # Ensure non_fraud_df has lof_scores and ref_id columns
-            if 'lof_scores' not in non_fraud_df.columns or 'ref_id' not in non_fraud_df.columns:
-                st.error('LOF scores or ref_id are missing from non_fraud_df.')
-                return
-        
-            # Merge lof_scores from non_fraud_df into analyzed_df on ref_id
-            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores']], on='ref_id', how='left')
-        
-            # Add a column for flags based on RF and LOF model predictions
-            analyzed_df['Flagged By'] = np.where(
-                analyzed_df['RF Approval Status'] == 'Marked as Fraud', 'RF Model',
-                np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None')
-            )
-        
-            # Create a DataFrame for offline review, filtering for fraud flags
-            review_df2 = analyzed_df[
-                (analyzed_df['RF Approval Status'] == 'Marked as Fraud') |
-                (analyzed_df['LOF Status'] == 'Suspected Fraud')
-            ]
-        
-            # Reorder columns for the review DataFrame
-            cols_order = [
-                'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status',
-                'lof_scores', 'rf_prob_scores'
-            ] + [col for col in analyzed_df.columns if col not in [
-                'ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status',
-                'lof_scores', 'rf_prob_scores'
-            ]]
-            review_df2 = review_df2[cols_order]
-        
-            # Display the offline review DataFrame
-            st.write("### Offline Review Detailed Transactions 2")
-            st.dataframe(review_df2)
-        
-            # Save in session state if needed elsewhere
-            st.session_state['review_df'] = review_df
-
-
             # Additional debugging output as before
             st.write("### Debugging: Filtered DataFrames")
             st.write("Original Data Shape:", transactions_df.shape)
