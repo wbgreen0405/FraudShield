@@ -42,7 +42,7 @@ def app():
     if 'anomaly_df' in st.session_state:
         non_fraud_df = st.session_state['anomaly_df']
         # Ensure 'lof_scores' is present; you might also normalize or calculate it beforehand
-        if 'lof_scores' not in anomaly_df.columns:
+        if 'lof_scores' not in non_fraud_df.columns:
             st.warning("LOF scores are missing in the analyzed data.")
             return
 
