@@ -22,7 +22,7 @@ def create_anomaly_detection_plot(df):
         title="Anomaly Detection Scatter Plot",
         hover_data=['ref_id', 'lof_scores']
     )
-    fig.update_layout(xaxis_title="Reference ID", yaxis_title="LOF Scores")
+    fig.update_layout(xaxis_title="Suspected Fraud Transactions", yaxis_title="LOF Scores")
     return fig
 
 # Function to create LOF scores distribution plot
