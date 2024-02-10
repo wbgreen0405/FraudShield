@@ -58,14 +58,15 @@ def plot_feature_importance(df):
 def fetch_supabase_table(table_name):
     try:
         response = supabase.table(table_name).select('*').execute()
-        if response.status_code == 200:
-            return pd.DataFrame(response.json())
+        if response.error is None:
+            return pd.DataFrame(response.data)
         else:
-            st.error(f'Failed to retrieve data. Error: {response.status_code}')
+            st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
             return pd.DataFrame()
     except Exception as e:
         st.error(f'An error occurred while fetching data from {table_name}: {e}')
         return pd.DataFrame()
+
 
 if __name__ == '__main__':
     supervised_fraud_results_page()
