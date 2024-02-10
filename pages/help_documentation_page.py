@@ -1,6 +1,6 @@
 import streamlit as st
 
-def help_documentation_page():
+def app():
     st.title("Help / Documentation")
     
     st.write("""
@@ -43,5 +43,5 @@ def help_documentation_page():
     # Optionally, if you want to display the diagram within Streamlit from an uploaded file
     #st.image("path_to_diagram_image", caption="Fraud Detection Workflow Diagram")
 
-help_documentation_page()
+app()
 
