@@ -52,11 +52,23 @@ def plot_feature_importance(df):
 
 # Helper function to fetch data from Supabase tables
 def fetch_supabase_table(table_name):
-    response = supabase.table(table_name).select('*').execute()
-    if response.error:
-        st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
+    try:
+        response = supabase.table(table_name).select('*').execute()
+        # Check for errors in the response
+        if response.get('error') is not None:
+            st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.get("error"))}')
+            return pd.DataFrame()
+        # Access data if there's no error
+        data = response.get('data')
+        if data:
+            return pd.DataFrame(data)
+        else:
+            st.error(f'Unexpected response format from {table_name}.')
+            return pd.DataFrame()
+    except Exception as e:
+        st.error(f'An error occurred while fetching data from {table_name}: {e}')
         return pd.DataFrame()
-    return pd.DataFrame(response.data)
+
 
 if __name__ == '__main__':
     supervised_fraud_results_page()
