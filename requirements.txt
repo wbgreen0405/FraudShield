@@ -11,3 +11,4 @@ st-files-connection
 boto3
 plotly
 pygwalker
+streamlit-option-menu
