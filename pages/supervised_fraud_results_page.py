@@ -54,20 +54,16 @@ def plot_feature_importance(df):
 def fetch_supabase_table(table_name):
     try:
         response = supabase.table(table_name).select('*').execute()
-        # Check for errors in the response
-        if response.error:
-            st.error(f'Failed to retrieve data from {table_name}. Error: {response.error.message}')
-            return pd.DataFrame()
-        # Access data if there's no error
-        data = response.data
-        if data is not None:
-            return pd.DataFrame(data)
+        # Directly create a DataFrame from the response if it's successful
+        if response:
+            return pd.DataFrame(response)
         else:
-            st.error('Unexpected response format.')
+            st.error(f'Unexpected response format or empty data from {table_name}.')
             return pd.DataFrame()
     except Exception as e:
         st.error(f'An error occurred while fetching data from {table_name}: {e}')
         return pd.DataFrame()
+
 
 if __name__ == '__main__':
     supervised_fraud_results_page()
