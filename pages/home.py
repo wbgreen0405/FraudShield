@@ -8,18 +8,6 @@ def home_page():
     st.subheader("Fraud Detection Pipeline")
     st.image("assets/logo_transparent.png", caption="Fraud Detection Pipeline Visualization", use_column_width=True)
     
-    # Placeholder for high-level statistics
-    st.subheader("High-Level Statistics")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Total Transactions", "0")  # Replace "0" with dynamic count after data upload
-    with col2:
-        st.metric("Transactions Flagged", "0")  # Replace "0" with dynamic count after data upload
-    with col3:
-        st.metric("Transactions Approved", "0")  # Replace "0" with dynamic count after data upload
-    with col4:
-        st.metric("Transactions Marked as Fraudulent", "0")  # Replace "0" with dynamic count after data upload
-
     # Rest of the home page content
     st.markdown("""
     Dive into the world of anti-fraud analytics with our streamlined, user-friendly platform designed to highlight suspicious financial activities through data-driven insights. FraudShield provides a comprehensive suite of tools to identify, analyze, and combat fraudulent transactions, ensuring your financial security.
