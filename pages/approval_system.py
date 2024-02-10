@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 def app():
-    st.title("Approval System Dashboard")
+    st.title("Approval System Page")
 
     if 'supervised_df' in st.session_state:
         supervised_df = st.session_state['supervised_df']
