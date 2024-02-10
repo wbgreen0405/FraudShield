@@ -50,7 +50,7 @@ def plot_confusion_matrix(df):
 def plot_feature_importance(df):
     if not df.empty:
         # Sort the DataFrame based on the 'Importance' column in descending order
-        df_sorted = df.sort_values(by='Importance', ascending=False)
+        df_sorted = df.sort_values(by='Importance', ascending=True)
         
         # Assuming your feature importance DataFrame has 'Feature' and 'Importance' columns
         fig = px.bar(df_sorted, x='Importance', y='Feature', orientation='h', title="Feature Importance")
