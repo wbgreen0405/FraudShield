@@ -9,7 +9,6 @@ from pages import (
     test_and_learn_loop_page_app,
     help_documentation_page_app,
     audit_logs_history_page_app,
-    supervised_fraud_results_page_app,
 )
 
 def main():
