@@ -5,7 +5,7 @@ def app():
     st.title('Welcome to FraudShield: The Fraud Detection System Demo.')
 
     # Placeholder for the pipeline image
-    st.subheader("Fraud Detection Pipeline")
+    #st.subheader("Fraud Detection Pipeline")
     #st.image("assets/logo_transparent.png", caption="Fraud Detection Pipeline Visualization", use_column_width=True)
     
     # Rest of the home page content
