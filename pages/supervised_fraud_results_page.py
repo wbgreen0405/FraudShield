@@ -58,10 +58,13 @@ def plot_feature_importance(df):
 def fetch_supabase_table(table_name):
     try:
         response = supabase.table(table_name).select('*').execute()
-        if response.error is None:
+        if hasattr(response, 'error') and response.error:
+            st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
+            return pd.DataFrame()
+        elif hasattr(response, 'data'):
             return pd.DataFrame(response.data)
         else:
-            st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
+            st.error(f'Unexpected response format from {table_name}.')
             return pd.DataFrame()
     except Exception as e:
         st.error(f'An error occurred while fetching data from {table_name}: {e}')
