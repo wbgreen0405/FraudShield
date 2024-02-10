@@ -6,7 +6,7 @@ def app():
 
     # Placeholder for the pipeline image
     st.subheader("Fraud Detection Pipeline")
-    st.image("assets/logo_transparent.png", caption="Fraud Detection Pipeline Visualization", use_column_width=True)
+    #st.image("assets/logo_transparent.png", caption="Fraud Detection Pipeline Visualization", use_column_width=True)
     
     # Rest of the home page content
     st.markdown("""
