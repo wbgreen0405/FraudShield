@@ -9,6 +9,9 @@ supabase_url = st.secrets["supabase"]["url"]
 supabase_key = st.secrets["supabase"]["key"]
 supabase: Client = create_client(supabase_url, supabase_key)
 
+# Set the page to wide mode
+st.set_page_config(layout="wide")
+
 def supervised_fraud_results_page():
     st.title('Supervised Fraud Model Results')
 
