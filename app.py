@@ -8,7 +8,7 @@ from pages import (
     test_and_learn_loop_page,
     help_documentation_page,
     audit_logs_history_page,
-    supervised_fraud_results_page  # Import the new page here
+    #supervised_fraud_results_page  # Import the new page here
 )
 
 # Define a simple navigation structure using Streamlit sidebar
@@ -24,7 +24,7 @@ page = st.sidebar.selectbox(
         "Test and Learn Loop",
         "Help / Documentation",
         "Audit Logs / History",
-        "Supervised Fraud Results"  # Add the new page to the dropdown
+        #"Supervised Fraud Results"  # Add the new page to the dropdown
     ]
 )
 
@@ -49,8 +49,8 @@ elif page == "Help / Documentation":
     help_documentation_page.app()
 elif page == "Audit Logs / History":
     audit_logs_history_page.app()
-elif page == "Supervised Fraud Results":  # Add the rendering condition for the new page
-    supervised_fraud_results_page.app()  # Make sure this matches the function name in your new page module
+#elif page == "Supervised Fraud Results":  # Add the rendering condition for the new page
+    #supervised_fraud_results_page.app()  # Make sure this matches the function name in your new page module
 
 
 
