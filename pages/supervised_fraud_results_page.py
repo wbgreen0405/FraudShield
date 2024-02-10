@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import plotly.figure_factory as ff
+import plotly.express as px
 from supabase import create_client, Client
 
 # Initialize Supabase client using Streamlit secrets
@@ -17,31 +19,44 @@ def supervised_fraud_results_page():
 
     # Display the fetched results
     st.subheader("Random Forest Confusion Matrix:")
-    st.dataframe(rf_confusion_matrix)
+    plot_confusion_matrix(rf_confusion_matrix)
 
     st.subheader("Random Forest Feature Importance:")
-    st.dataframe(rf_feature_importance)
+    plot_feature_importance(rf_feature_importance)
 
     st.subheader("Random Forest Model Metrics:")
     st.dataframe(rf_model_metrics)
 
+def plot_confusion_matrix(df):
+    if not df.empty:
+        # Assuming your confusion matrix is in a DataFrame with appropriate labels
+        fig = ff.create_annotated_heatmap(
+            z=df.values,
+            x=list(df.columns),
+            y=list(df.index),
+            annotation_text=df.values,
+            colorscale='Viridis'
+        )
+        fig.update_layout(title_text='Confusion Matrix', xaxis_title="Predicted", yaxis_title="Actual")
+        st.plotly_chart(fig)
+    else:
+        st.write("Confusion matrix data not available.")
+
+def plot_feature_importance(df):
+    if not df.empty:
+        # Assuming your feature importance DataFrame has 'Feature' and 'Importance' columns
+        fig = px.bar(df, x='Importance', y='Feature', orientation='h', title="Feature Importance")
+        st.plotly_chart(fig)
+    else:
+        st.write("Feature importance data not available.")
+
 # Helper function to fetch data from Supabase tables
 def fetch_supabase_table(table_name):
-    try:
-        response = supabase.table(table_name).select('*').execute()
-        if hasattr(response, 'error') and response.error:
-            st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
-            return pd.DataFrame()
-        elif hasattr(response, 'data'):
-            return pd.DataFrame(response.data)
-        else:
-            st.error(f'Unexpected response format from {table_name}.')
-            return pd.DataFrame()
-    except Exception as e:
-        st.error(f'An error occurred while fetching data from {table_name}: {e}')
+    response = supabase.table(table_name).select('*').execute()
+    if response.error:
+        st.error(f'Failed to retrieve data from {table_name}. Error: {str(response.error)}')
         return pd.DataFrame()
-
-
+    return pd.DataFrame(response.data)
 
 if __name__ == '__main__':
     supervised_fraud_results_page()
