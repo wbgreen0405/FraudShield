@@ -17,12 +17,16 @@ def supervised_fraud_results_page():
     rf_feature_importance = fetch_supabase_table("rf_feature_importances")
     rf_model_metrics = fetch_supabase_table("rf_model_metrics")
 
-    # Display the fetched results
-    st.subheader("Random Forest Confusion Matrix:")
-    plot_confusion_matrix(rf_confusion_matrix)
+    # Create two columns for the plots
+    col1, col2 = st.columns(2)
 
-    st.subheader("Random Forest Feature Importance:")
-    plot_feature_importance(rf_feature_importance)
+    with col1:
+        st.subheader("Random Forest Confusion Matrix:")
+        plot_confusion_matrix(rf_confusion_matrix)
+
+    with col2:
+        st.subheader("Random Forest Feature Importance:")
+        plot_feature_importance(rf_feature_importance)
 
     st.subheader("Random Forest Model Metrics:")
     plot_model_metrics(rf_model_metrics)
