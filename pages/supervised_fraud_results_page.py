@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.figure_factory as ff
-import plotly.express as px
 from supabase import create_client, Client
 
 # Initialize Supabase client using Streamlit secrets
@@ -29,15 +28,20 @@ def supervised_fraud_results_page():
 
 def plot_confusion_matrix(df):
     if not df.empty:
-        # Assuming your confusion matrix is in a DataFrame with appropriate labels
+        # Convert dataframe to matrix
+        matrix = df.values
         fig = ff.create_annotated_heatmap(
-            z=df.values,
-            x=list(df.columns),
-            y=list(df.index),
-            annotation_text=df.values,
+            z=matrix,
+            x=['Predicted Negative', 'Predicted Positive'],
+            y=['Actual Negative', 'Actual Positive'],
+            annotation_text=matrix.astype(str),
             colorscale='Viridis'
         )
-        fig.update_layout(title_text='Confusion Matrix', xaxis_title="Predicted", yaxis_title="Actual")
+        # Add title
+        fig.update_layout(title_text="<b>Confusion Matrix</b>")
+        # Add labels
+        fig.update_xaxes(side="top")
+        fig.update_yaxes(autorange="reversed")  # this is to show the actual negative at the top
         st.plotly_chart(fig)
     else:
         st.write("Confusion matrix data not available.")
@@ -54,16 +58,14 @@ def plot_feature_importance(df):
 def fetch_supabase_table(table_name):
     try:
         response = supabase.table(table_name).select('*').execute()
-        # Directly create a DataFrame from the response if it's successful
-        if response:
-            return pd.DataFrame(response)
+        if response.status_code == 200:
+            return pd.DataFrame(response.json())
         else:
-            st.error(f'Unexpected response format or empty data from {table_name}.')
+            st.error(f'Failed to retrieve data. Error: {response.status_code}')
             return pd.DataFrame()
     except Exception as e:
         st.error(f'An error occurred while fetching data from {table_name}: {e}')
         return pd.DataFrame()
-
 
 if __name__ == '__main__':
     supervised_fraud_results_page()
