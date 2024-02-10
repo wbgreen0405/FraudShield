@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.figure_factory as ff
+import plotly.express as px
 from supabase import create_client, Client
 
 # Initialize Supabase client using Streamlit secrets
