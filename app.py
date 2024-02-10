@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from pages import home, settings, transactions, approval_system, anomaly_detection, case_detail, test_and_learn_loop_page, help_documentation_page, audit_logs_history_page
+from pages import home, transactions, approval_system, anomaly_detection, case_detail, test_and_learn_loop_page, help_documentation_page, audit_logs_history_page
 # Define the navigation menu
 def main():
     with st.sidebar:
