@@ -1,7 +1,17 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from pages import home, transactions, approval_system, anomaly_detection, case_detail, test_and_learn_loop_page, help_documentation_page, audit_logs_history_page
-# Define the navigation menu
+from pages import (
+    home_app,
+    transactions_app,
+    approval_system_app,
+    anomaly_detection_app,
+    case_detail_app,
+    test_and_learn_loop_page_app,
+    help_documentation_page_app,
+    audit_logs_history_page_app,
+    supervised_fraud_results_page_app,
+)
+
 def main():
     with st.sidebar:
         selected = option_menu(
@@ -14,25 +24,26 @@ def main():
 
     # Page rendering based on the navigation choice
     if selected == "Home":
-        home.app()
+        home_app()
     elif selected == "Transaction Analysis":
-        transactions.app()
+        transactions_app()
     elif selected == "Approval System":
-        approval_system.app()
+        approval_system_app()
     elif selected == "Anomaly Detection":
-        anomaly_detection.app()
+        anomaly_detection_app()
     elif selected == "Case Detail":
-        case_detail.app()
+        case_detail_app()
     elif selected == "Test and Learn Loop":
-        test_and_learn_loop_page.app()
+        test_and_learn_loop_page_app()
     elif selected == "Supervised Fraud Results":
-        supervised_fraud_results_page.app()
+        supervised_fraud_results_page_app()
     elif selected == "Help / Documentation":
-        help_documentation_page.app()
+        help_documentation_page_app()
     elif selected == "Audit Logs / History":
-        audit_logs_history_page.app()
+        audit_logs_history_page_app()
 
 if __name__ == '__main__':
     main()
+
 
 
