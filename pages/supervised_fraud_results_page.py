@@ -49,11 +49,15 @@ def plot_confusion_matrix(df):
 
 def plot_feature_importance(df):
     if not df.empty:
+        # Sort the DataFrame based on the 'Importance' column in descending order
+        df_sorted = df.sort_values(by='Importance', ascending=False)
+        
         # Assuming your feature importance DataFrame has 'Feature' and 'Importance' columns
-        fig = px.bar(df, x='Importance', y='Feature', orientation='h', title="Feature Importance")
+        fig = px.bar(df_sorted, x='Importance', y='Feature', orientation='h', title="Feature Importance")
         st.plotly_chart(fig)
     else:
         st.write("Feature importance data not available.")
+
 
 # Helper function to fetch data from Supabase tables
 def fetch_supabase_table(table_name):
