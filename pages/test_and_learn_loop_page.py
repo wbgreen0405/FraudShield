@@ -11,7 +11,7 @@ def simulate_test_and_learn_loop(review_df):
     return true_positives, false_positives
 
 
-def test_and_learn_loop_page():
+def app():
     st.title("Test and Learn Feedback Loop (Demo)")
     st.write("""
     This page demonstrates how expert feedback refines the fraud detection models. 
@@ -37,4 +37,4 @@ def test_and_learn_loop_page():
         st.error("Expert review data is not available. Please complete the expert review process first.")
 
 if __name__ == '__main__':
-    test_and_learn_loop_page()
+    app()
