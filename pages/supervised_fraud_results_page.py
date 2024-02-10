@@ -25,7 +25,7 @@ def supervised_fraud_results_page():
     plot_feature_importance(rf_feature_importance)
 
     st.subheader("Random Forest Model Metrics:")
-    st.dataframe(rf_model_metrics)
+    plot_model_metrics(rf_model_metrics)
 
 def plot_confusion_matrix(df):
     if not df.empty:
@@ -58,6 +58,18 @@ def plot_feature_importance(df):
     else:
         st.write("Feature importance data not available.")
 
+def plot_model_metrics(df):
+    if not df.empty:
+        # Drop the 'metric_id' column if it exists
+        if 'metric_id' in df.columns:
+            df = df.drop(columns=['metric_id'])
+
+        # Reset the index of the DataFrame
+        df = df.reset_index(drop=True)
+        
+        st.dataframe(df)
+    else:
+        st.write("Model metrics data not available.")
 
 # Helper function to fetch data from Supabase tables
 def fetch_supabase_table(table_name):
@@ -78,3 +90,4 @@ def fetch_supabase_table(table_name):
 
 if __name__ == '__main__':
     supervised_fraud_results_page()
+
