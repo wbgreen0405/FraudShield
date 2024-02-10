@@ -1,7 +1,7 @@
 # Home page script
 import streamlit as st
 
-def home_page():
+def app():
     st.title('Welcome to FraudShield: The Fraud Detection System Demo.')
 
     # Placeholder for the pipeline image
@@ -26,4 +26,5 @@ def home_page():
 
 # Call the home_page function if this script is run
 if __name__ == '__main__':
-    home_page()
+    st.set_page_config(page_title="Home", layout="wide")
+    app()
