@@ -1,59 +1,39 @@
 import streamlit as st
-# Import pages for each section of your app
-from pages import (
-    transactions,
-    approval_system,
-    anomaly_detection,
-    case_detail,
-    test_and_learn_loop_page,
-    help_documentation_page,
-    audit_logs_history_page,
-    #supervised_fraud_results_page  # Import the new page here
-)
+from streamlit_option_menu import option_menu
+from pages import home, settings, transactions, approval_system, anomaly_detection, case_detail, test_and_learn_loop_page, help_documentation_page, audit_logs_history_page, supervised_fraud_results_page
 
-# Define a simple navigation structure using Streamlit sidebar
-st.sidebar.title('Navigation')
-# Updated to include new pages
-page = st.sidebar.selectbox(
-    "Choose a page", [
-        "Home",
-        "Transaction Analysis",
-        "Approval System",
-        "Anomaly Detection",
-        "Case Detail",
-        "Test and Learn Loop",
-        "Help / Documentation",
-        "Audit Logs / History",
-        #"Supervised Fraud Results"  # Add the new page to the dropdown
-    ]
-)
+# Define the navigation menu
+def main():
+    with st.sidebar:
+        selected = option_menu(
+            "Main Menu", 
+            ["Home", "Transaction Analysis", "Approval System", "Anomaly Detection", "Case Detail", "Test and Learn Loop", "Supervised Fraud Results", "Help / Documentation", "Audit Logs / History"],
+            icons=["house", "credit-card", "check2-circle", "eye", "file-earmark-text", "loop", "bar-chart-line", "book", "file-earmark-text"],
+            menu_icon="cast", 
+            default_index=0
+        )
 
-# Initialize session state for navigation if it doesn't exist
-if 'navigate_to_approval' not in st.session_state:
-    st.session_state['navigate_to_approval'] = False
+    # Page rendering based on the navigation choice
+    if selected == "Home":
+        home.app()
+    elif selected == "Transaction Analysis":
+        transactions.app()
+    elif selected == "Approval System":
+        approval_system.app()
+    elif selected == "Anomaly Detection":
+        anomaly_detection.app()
+    elif selected == "Case Detail":
+        case_detail.app()
+    elif selected == "Test and Learn Loop":
+        test_and_learn_loop_page.app()
+    elif selected == "Supervised Fraud Results":
+        supervised_fraud_results_page.app()
+    elif selected == "Help / Documentation":
+        help_documentation_page.app()
+    elif selected == "Audit Logs / History":
+        audit_logs_history_page.app()
 
-# Page rendering based on navigation state
-if page == "Home":
-    st.write("Welcome to the Home page. Select an option from the sidebar to get started.")
-elif page == "Transaction Analysis":
-    transactions.app()
-elif page == "Approval System":
-    approval_system.app()
-elif page == "Anomaly Detection":
-    anomaly_detection.app()
-elif page == "Case Detail":
-    case_detail.app()
-elif page == "Test and Learn Loop":
-    test_and_learn_loop_page.app()
-elif page == "Help / Documentation":
-    help_documentation_page.app()
-elif page == "Audit Logs / History":
-    audit_logs_history_page.app()
-#elif page == "Supervised Fraud Results":  # Add the rendering condition for the new page
-    #supervised_fraud_results_page.app()  # Make sure this matches the function name in your new page module
-
-
-
-
+if __name__ == '__main__':
+    main()
 
 
