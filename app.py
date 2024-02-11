@@ -1,15 +1,17 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+# Import page functions from the pages package
 from pages import (
-    home_app,
-    transactions_app,
-    approval_system_app,
-    anomaly_detection_app,
-    case_detail_app,
-    test_and_learn_loop_page_app,
-    help_documentation_page_app,
-    audit_logs_history_page_app,
+    home_app as home,
+    transactions_app as transactions,
+    approval_system_app as approval_system,
+    anomaly_detection_app as anomaly_detection,
+    case_detail_app as case_detail,
+    test_and_learn_loop_app as test_and_learn_loop,
+    help_documentation_app as help_documentation,
+    audit_logs_history_app as audit_logs_history
 )
+
 
 def main():
     with st.sidebar:
@@ -21,27 +23,28 @@ def main():
             default_index=0
         )
 
-    # Page rendering based on the navigation choice
+    # Call the appropriate page function based on the user's selection
     if selected == "Home":
-        home_app()
+        home()
     elif selected == "Transaction Analysis":
-        transactions_app()
+        transactions()
     elif selected == "Approval System":
-        approval_system_app()
+        approval_system()
     elif selected == "Anomaly Detection":
-        anomaly_detection_app()
+        anomaly_detection()
     elif selected == "Case Detail":
-        case_detail_app()
+        case_detail()
     elif selected == "Test and Learn Loop":
-        test_and_learn_loop_page_app()
+        test_and_learn_loop()
     elif selected == "Supervised Fraud Results":
-        supervised_fraud_results_page_app()
+        supervised_fraud_results()
     elif selected == "Help / Documentation":
-        help_documentation_page_app()
+        help_documentation()
     elif selected == "Audit Logs / History":
-        audit_logs_history_page_app()
+        audit_logs_history()
 
-if __name__ == '__main__':
+# Call the main function when the script is run
+if __name__ == "__main__":
     main()
 
 
