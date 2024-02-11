@@ -12,8 +12,8 @@ from pages import (
     audit_logs_history_app as audit_logs_history
 )
 
-st.set_page_config(initial_sidebar_state="hidden", page_title="Home", layout="wide")
-#t.set_page_config(initial_sidebar_state="hidden")
+#st.set_page_config(initial_sidebar_state="hidden", page_title="Home", layout="wide")
+st.set_page_config(initial_sidebar_state="hidden")
 
 def main():
     with st.sidebar:
