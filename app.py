@@ -18,7 +18,7 @@ def main():
     with st.sidebar:
         selected = option_menu(
             "Main Menu", 
-            ["Home", "Transaction Analysis", "Approval System", "Anomaly Detection", "Case Detail", "Test and Learn Loop", "Supervised Fraud Results", "Help / Documentation", "Audit Logs / History"],
+            ["Home", "Transaction Analysis", "Approval System", "Anomaly Detection", "Case Detail", "Test and Learn Loop", "Help / Documentation", "Audit Logs / History"],
             icons=["house", "credit-card", "check2-circle", "eye", "file-earmark-text", "bi bi-arrow-clockwise", "bar-chart-line", "book", "file-earmark-text"],
             menu_icon="cast", 
             default_index=0
