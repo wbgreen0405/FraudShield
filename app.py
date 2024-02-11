@@ -53,7 +53,6 @@ def main():
         "Anomaly Detection": anomaly_detection,
         "Case Detail": case_detail,
         "Test and Learn Loop": test_and_learn_loop,
-        "Supervised Fraud Results": supervised_fraud_results,
         "Help / Documentation": help_documentation,
         "Audit Logs / History": audit_logs_history
     }
