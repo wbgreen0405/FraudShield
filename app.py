@@ -12,9 +12,9 @@ from pages import (
     audit_logs_history_app as audit_logs_history
 )
 
-#st.set_page_config(page_title="Home", layout="wide")
+st.set_page_config(page_title="Home", layout="wide")
 #st.set_page_config(initial_sidebar_state="hidden")
-st.set_page_config(initial_sidebar_state="collapsed")
+#st.set_page_config(initial_sidebar_state="collapsed")
 
 def main():
     with st.sidebar:
