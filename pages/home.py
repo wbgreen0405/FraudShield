@@ -25,6 +25,6 @@ def app():
     """)
 
 # Call the home_page function if this script is run
-if __name__ == '__main__':
-    st.set_page_config(page_title="Home", layout="wide")
-    app()
+#if __name__ == '__main__':
+    #st.set_page_config(page_title="Home", layout="wide")
+app()
