@@ -14,7 +14,7 @@ from pages import (
 
 #st.set_page_config(page_title="Home", layout="wide")
 #st.set_page_config(initial_sidebar_state="hidden")
-st.set_page_config(initial_sidebar_state="hidden")
+st.set_page_config(initial_sidebar_state="collapsed")
 
 def main():
     with st.sidebar:
