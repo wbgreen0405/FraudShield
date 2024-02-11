@@ -25,29 +25,46 @@ def main():
         )
 
     # Call the appropriate page function based on the user's selection
-    if selected == "Home":
-        home()
-    elif selected == "Transaction Analysis":
-        transactions()
-    elif selected == "Approval System":
-        approval_system()
-    elif selected == "Anomaly Detection":
-        anomaly_detection()
-    elif selected == "Case Detail":
-        case_detail()
-    elif selected == "Test and Learn Loop":
-        test_and_learn_loop()
-    elif selected == "Supervised Fraud Results":
-        supervised_fraud_results()
-    elif selected == "Help / Documentation":
-        help_documentation()
-    elif selected == "Audit Logs / History":
-        audit_logs_history()
+     #if selected == "Home":
+         #home()
+     #elif selected == "Transaction Analysis":
+         #transactions()
+     #elif selected == "Approval System":
+         #approval_system()
+     #elif selected == "Anomaly Detection":
+         #anomaly_detection()
+    # elif selected == "Case Detail":
+         #case_detail()
+     #elif selected == "Test and Learn Loop":
+         #test_and_learn_loop()
+    # elif selected == "Supervised Fraud Results":
+         #supervised_fraud_results()
+     #elif selected == "Help / Documentation":
+         #help_documentation()
+     #elif selected == "Audit Logs / History":
+         #audit_logs_history()
+
+
+    # Define pages in a dictionary
+    pages = {
+        "Home": home,
+        "Transaction Analysis": transactions,
+        "Approval System": approval_system,
+        "Anomaly Detection": anomaly_detection,
+        "Case Detail": case_detail,
+        "Test and Learn Loop": test_and_learn_loop,
+        "Supervised Fraud Results": supervised_fraud_results,
+        "Help / Documentation": help_documentation,
+        "Audit Logs / History": audit_logs_history
+    }
+    
+    # Call the appropriate page function based on the user's selection
+    if selected in pages:
+        pages[selected]()
 
 # Call the main function when the script is run
-#if __name__ == '__main__':
-   
-main()
-
+# Make sure to call the main function
+if __name__ == "__main__":
+    main
 
 
