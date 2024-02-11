@@ -65,6 +65,6 @@ def main():
 # Call the main function when the script is run
 # Make sure to call the main function
 if __name__ == "__main__":
-    main
+    main()
 
 
