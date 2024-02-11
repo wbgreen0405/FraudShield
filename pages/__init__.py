@@ -10,3 +10,14 @@ from .audit_logs_history_page import app as audit_logs_history_page_app
 # Add other pages as necessary
 
 
+pages = {
+    "Home": home_app,
+    "Transaction Analysis": transactions_app,
+    "Approval System": approval_system_app,
+    "Anomaly Detection": anomaly_detection_app,
+    "Case Detail": case_detail_app,
+    "Test and Learn Loop": test_and_learn_loop_app,
+    "Help / Documentation": help_documentation_app,
+    "Audit Logs / History": audit_logs_history_app,
+  
+}
