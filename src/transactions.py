@@ -240,8 +240,8 @@ def app():
 
         else:
             st.error("No transactions found.")
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    #except Exception as e:
+        #st.error(f"An error occurred: {e}")
 
 
 app()
