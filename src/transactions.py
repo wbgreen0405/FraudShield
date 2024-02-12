@@ -167,14 +167,14 @@ def app():
                 st.write("LOF scores are missing in analyzed_df.")
             
             st.write("Analyzed Transactions:")
-            st.dataframe(analyzed_df)
+            #st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
 
             
             # Filter based on RF Approval Status and LOF Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
             st.write("### Approval System")
-            st.dataframe(supervised_df)
+            #st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
     
             #non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
