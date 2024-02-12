@@ -69,7 +69,6 @@ def app():
         st.error("No analyzed data available. Please run the analysis first.")
 
 #if __name__ == '__main__':
-    #st.set_page_config(page_title="Anomaly Detection System Dashboard", layout="wide")
 app()
 
 
