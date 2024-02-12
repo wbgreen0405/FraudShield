@@ -161,24 +161,24 @@ def app():
             analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
             
             # Check if there are values in the lof_scores column of analyzed_df
-            if analyzed_df['lof_scores'].notnull().any():
-                st.write("LOF scores are present in analyzed_df.")
-            else:
-                st.write("LOF scores are missing in analyzed_df.")
+            #if analyzed_df['lof_scores'].notnull().any():
+                #st.write("LOF scores are present in analyzed_df.")
+            #else:
+                #st.write("LOF scores are missing in analyzed_df.")
             
-            st.write("Analyzed Transactions:")
+            #st.write("Analyzed Transactions:")
             #st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
 
             
             # Filter based on RF Approval Status and LOF Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
-            st.write("### Approval System")
+            #st.write("### Approval System")
             #st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
     
             #non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
-            st.write("### Anomaly Detection System")
+            #st.write("### Anomaly Detection System")
             #st.dataframe(non_fraud_df)
             st.session_state['anomaly_df'] = non_fraud_df
 
@@ -193,11 +193,11 @@ def app():
             
             # Check for LOF scores in analyzed_df and display relevant data
             if 'lof_scores' in analyzed_df.columns:
-                st.write("LOF scores are present in analyzed_df.")
+                #st.write("LOF scores are present in analyzed_df.")
                 lof_scores_present = analyzed_df[analyzed_df['lof_scores'].notnull()]
                 #st.dataframe(lof_scores_present)
             else:
-                st.write("LOF scores are missing in analyzed_df.")
+                #st.write("LOF scores are missing in analyzed_df.")
             
             # Prepare Offline Review Detailed Transactions with merged flags
             # Note that we use 'LOF Status' without a suffix here, assuming that's the correct column
@@ -223,7 +223,7 @@ def app():
             # Reorder the columns in review_df according to cols_order
             review_df = review_df[cols_order]
             
-            st.write("### Offline Review Detailed Transactions")
+            #st.write("### Offline Review Detailed Transactions")
             #st.dataframe(review_df)
             st.session_state['review_df'] = review_df
 
