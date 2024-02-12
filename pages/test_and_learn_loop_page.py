@@ -36,5 +36,5 @@ def app():
     else:
         st.error("Expert review data is not available. Please complete the expert review process first.")
 
-#if __name__ == '__main__':
+
 app()
