@@ -33,7 +33,7 @@ def load_model_from_s3(bucket_name, model_key):
     model_str = response['Body'].read()
     with gzip.GzipFile(fileobj=io.BytesIO(model_str)) as file:
         model = pickle.load(file)
-    st.write(f"Model {model_key} loaded successfully.")  # Debugging message
+    #st.write(f"Model {model_key} loaded successfully.")  # Debugging message
     return model
 
 def fetch_transactions():
@@ -195,7 +195,7 @@ def app():
             if 'lof_scores' in analyzed_df.columns:
                 st.write("LOF scores are present in analyzed_df.")
                 lof_scores_present = analyzed_df[analyzed_df['lof_scores'].notnull()]
-                st.dataframe(lof_scores_present)
+                #st.dataframe(lof_scores_present)
             else:
                 st.write("LOF scores are missing in analyzed_df.")
             
@@ -224,7 +224,7 @@ def app():
             review_df = review_df[cols_order]
             
             st.write("### Offline Review Detailed Transactions")
-            st.dataframe(review_df)
+            #st.dataframe(review_df)
             st.session_state['review_df'] = review_df
 
 
