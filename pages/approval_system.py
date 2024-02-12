@@ -49,8 +49,7 @@ def app():
     else:
         st.error("No transaction data available. Please run the analysis first.")
 
-#if __name__ == '__main__':
-    #st.set_page_config(page_title="Approval System Dashboard", layout="wide")
+
 app()
 
 
