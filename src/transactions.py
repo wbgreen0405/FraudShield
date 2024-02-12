@@ -167,7 +167,7 @@ def app():
                 st.write("LOF scores are missing in analyzed_df.")
             
             st.write("Analyzed Transactions:")
-            st.dataframe(analyzed_df)
+            #st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
 
             
@@ -179,7 +179,7 @@ def app():
     
             #non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
             st.write("### Anomaly Detection System")
-            st.dataframe(non_fraud_df)
+            #st.dataframe(non_fraud_df)
             st.session_state['anomaly_df'] = non_fraud_df
 
             # Prepare Offline Review Detailed Transactions with merged flags
