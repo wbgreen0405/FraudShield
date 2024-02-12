@@ -174,7 +174,7 @@ def app():
             # Filter based on RF Approval Status and LOF Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
             st.write("### Approval System")
-            x#st.dataframe(supervised_df)
+            #st.dataframe(supervised_df)
             st.session_state['supervised_df'] = supervised_df
     
             #non_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
