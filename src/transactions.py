@@ -108,7 +108,7 @@ def perform_inference(transactions_df, rf_model, lof_model):
         X_lof = non_fraud_df.drop(columns=['fraud_bool', 'rf_predicted_fraud', 'rf_prob_scores', 'RF Approval Status', 'ref_id', 'LOF Status'], errors='ignore')
         lof_predictions = lof_model.fit_predict(X_lof)
         lof_scores = -lof_model.negative_outlier_factor_
-        st.write("LOF scores generated:", lof_scores[:5])  # Print first 5 scores for inspection
+        #st.write("LOF scores generated:", lof_scores[:5])  # Print first 5 scores for inspection
 
         # Map LOF predictions and scores back to non_fraud_df
         non_fraud_df['LOF Status'] = pd.Series(lof_predictions, index=non_fraud_df.index).map({-1: 'Suspected Fraud', 1: 'Non-Fraud'})
