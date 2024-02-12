@@ -1,13 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-# CSS to hide Streamlit's default sidebar
-no_sidebar_style = """
-    <style>
-        div[data-testid="stSidebarNav"] {display: none;}
-    </style>
-"""
-st.markdown(no_sidebar_style, unsafe_allow_html=True)
 
 # Import page functions from the pages package
 from pages import (
