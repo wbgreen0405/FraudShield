@@ -170,12 +170,6 @@ def app():
             st.dataframe(analyzed_df)
             st.session_state['analyzed_df'] = analyzed_df
 
-            # Debugging: Check unique values in the 'RF Approval Status' and 'LOF Status' columns
-             #st.write("Unique RF Approval Status values:", analyzed_df['RF Approval Status'].unique())
-             #st.write("Unique LOF Status values:", analyzed_df['LOF Status'].unique())
-
-            # Debugging: Check DataFrame after calculating LOF scores
-             #st.write("DataFrame after LOF score calculation:", non_fraud_df.head())
             
             # Filter based on RF Approval Status and LOF Status
             supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
