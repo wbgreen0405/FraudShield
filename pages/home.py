@@ -24,7 +24,5 @@ def app():
     Inspired by innovative methodologies in fraud detection, this app offers an in-depth look at how data science can be leveraged to protect financial assets and maintain transactional integrity.
     """)
 
-# Call the home_page function if this script is run
-#if __name__ == '__main__':
-    #st.set_page_config(page_title="Home", layout="wide")
+
 app()
