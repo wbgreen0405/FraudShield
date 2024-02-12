@@ -232,11 +232,11 @@ def app():
             with col1:
                 st.metric("Total Transactions Analyzed", len(analyzed_df))
             with col2:
-                st.metric("Transactions Identified as Possible Fraud", len(analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']))
+                st.metric("Transactions Flagged for Review by RF", len(analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']))
             with col3:
                 st.metric("Transactions Flagged for Review by LOF", len(non_fraud_df[non_fraud_df['LOF Status'] == 'Suspected Fraud']))
             with col4:
-                st.metric("Transactions Flagged for Review by Random Forest", len(analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']))
+                st.metric("Transactions Flagged for Offline Review", len(analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud'])+ len(non_fraud_df[non_fraud_df['LOF Status'] == 'Suspected Fraud']))
 
         else:
             st.error("No transactions found.")
