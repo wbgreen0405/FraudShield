@@ -55,6 +55,5 @@ def app():
     else:
         st.info("No change history available.")
 
-#if __name__ == "__main__":
-    #3st.set_page_config(page_title="Audit Logs / History", layout="wide")
+
 app()
