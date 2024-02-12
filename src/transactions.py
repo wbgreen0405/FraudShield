@@ -197,7 +197,7 @@ def app():
                 lof_scores_present = analyzed_df[analyzed_df['lof_scores'].notnull()]
                 #st.dataframe(lof_scores_present)
             else:
-                #st.write("LOF scores are missing in analyzed_df.")
+                st.write("LOF scores are missing in analyzed_df.")
             
             # Prepare Offline Review Detailed Transactions with merged flags
             # Note that we use 'LOF Status' without a suffix here, assuming that's the correct column
