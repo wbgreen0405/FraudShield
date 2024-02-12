@@ -228,7 +228,7 @@ def app():
             st.session_state['review_df'] = review_df
 
             # Display dashboard metrics
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(3)
             with col1:
                 st.metric("Total Transactions Analyzed", len(analyzed_df))
             with col2:
