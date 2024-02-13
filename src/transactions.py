@@ -179,6 +179,8 @@ def app():
 
             # Set analysis performed flag
             st.session_state['analysis_performed'] = True
+            # Indicate that transaction analysis is completed successfully
+            st.session_state['transaction_analysis_completed'] = True
 
         except Exception as e:
             st.error(f"Failed to load models or process transactions: {e}")
@@ -195,11 +197,10 @@ def app():
             st.metric("Transactions Flagged for Review by LOF", len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
         with col4:
             st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
-        
-        # Optional: Additional logic to display or interact with the analyzed data
-        # This is where you can add any additional UI elements to work with the analysis results
+        # This ensures that the final statement aligns with the block it's supposed to be part of
 
-     st.session_state['transaction_analysis_completed'] = True
+# Make sure to call the app function under the correct conditional check if it's meant to be used directly
+if __name__ == "__main__":
+    app()
 
-app()
 
