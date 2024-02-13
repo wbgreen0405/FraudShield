@@ -139,20 +139,13 @@ def app():
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
     
-    #try:
-        # Load the Random Forest and LOF models from S3
-        #rf_model = load_model_from_s3(bucket_name, rf_model_key)
-        #lof_model = load_model_from_s3(bucket_name, lof_model_key)
-    #except Exception as e:
-        #st.error(f"Failed to load models: {e}")
-        #return
-
+    # Only attempt to load models and fetch transactions if analysis hasn't been performed
     if 'analysis_performed' not in st.session_state:
         try:
             # Load the Random Forest and LOF models from S3
             rf_model = load_model_from_s3(bucket_name, rf_model_key)
             lof_model = load_model_from_s3(bucket_name, lof_model_key)
-            
+
             # Fetch transactions and perform analysis
             transactions_df = fetch_transactions()
             if transactions_df.empty:
@@ -164,54 +157,47 @@ def app():
                 st.error("LOF scores are missing in non_fraud_df.")
                 return
 
-        analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
-        
-        st.session_state['analyzed_df'] = analyzed_df
-        
-        supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
-        st.session_state['supervised_df'] = supervised_df
+            # Merge non_fraud_df information into analyzed_df
+            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
 
-        st.session_state['anomaly_df'] = non_fraud_df
+            st.session_state['analyzed_df'] = analyzed_df
 
-        analyzed_df = analyzed_df.merge(
-            non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']],
-            on='ref_id',
-            how='left',
-            suffixes=('', '_y')
-        )
-        
-        if 'lof_scores' in analyzed_df.columns:
-            lof_scores_present = analyzed_df[analyzed_df['lof_scores'].notnull()]
-        else:
-            st.write("LOF scores are missing in analyzed_df.")
-        
-        analyzed_df['Flagged By'] = np.where(
-            analyzed_df['RF Approval Status'] == 'Marked as Fraud',
-            'RF Model',
-            np.where(analyzed_df['LOF Status'] == 'Suspected Fraud', 'LOF Model', 'None')
-        )
-        review_df = analyzed_df[
-            (analyzed_df['RF Approval Status'] == 'Marked as Fraud') |
-            (analyzed_df['LOF Status'] == 'Suspected Fraud')
-        ]
-        
-        cols_order = ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores'] + [col for col in analyzed_df.columns if col not in ['ref_id', 'Flagged By', 'RF Approval Status', 'LOF Status', 'lof_scores', 'rf_prob_scores']]
-        
-        review_df = review_df[cols_order]
-        
-        st.session_state['review_df'] = review_df
+            supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
+            st.session_state['supervised_df'] = supervised_df
 
+            st.session_state['anomaly_df'] = non_fraud_df
+
+            # Update 'analyzed_df' with merged information
+            analyzed_df = analyzed_df.merge(
+                non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']],
+                on='ref_id',
+                how='left',
+                suffixes=('', '_y')
+            )
+
+            st.session_state['review_df'] = analyzed_df
+
+            # Set analysis performed flag
+            st.session_state['analysis_performed'] = True
+
+        except Exception as e:
+            st.error(f"Failed to load models or process transactions: {e}")
+            return
+
+    if 'analysis_performed' in st.session_state and st.session_state['analysis_performed']:
+        # Display results or further actions if analysis has been performed
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Total Transactions Analyzed", len(analyzed_df))
+            st.metric("Total Transactions Analyzed", len(st.session_state['analyzed_df']))
         with col2:
-            st.metric("Transactions Flagged for Review by RF", len(analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']))
+            st.metric("Transactions Flagged for Review by RF", len(st.session_state['analyzed_df'][st.session_state['analyzed_df']['RF Approval Status'] == 'Marked as Fraud']))
         with col3:
-            st.metric("Transactions Flagged for Review by LOF", len(non_fraud_df[non_fraud_df['LOF Status'] == 'Suspected Fraud']))
+            st.metric("Transactions Flagged for Review by LOF", len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
         with col4:
-            st.metric("Transactions Flagged for Offline Review", len(analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']) + len(non_fraud_df[non_fraud_df['LOF Status'] == 'Suspected Fraud']))
-
-    else:
-        st.error("No transactions found.")
+            st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
+        
+        # Optional: Additional logic to display or interact with the analyzed data
+        # This is where you can add any additional UI elements to work with the analysis results
 
 app()
+
