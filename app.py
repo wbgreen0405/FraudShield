@@ -27,43 +27,26 @@ def main():
             default_index=0
         )
 
-    # Call the appropriate page function based on the user's selection
-     #if selected == "Home":
-         #home()
-     #elif selected == "Transaction Analysis":
-         #transactions()
-     #elif selected == "Approval System":
-         #approval_system()
-     #elif selected == "Anomaly Detection":
-         #anomaly_detection()
-    # elif selected == "Case Detail":
-         #case_detail()
-     #elif selected == "Test and Learn Loop":
-         #test_and_learn_loop()
-    # elif selected == "Supervised Fraud Results":
-         #supervised_fraud_results()
-     #elif selected == "Help / Documentation":
-         #help_documentation()
-     #elif selected == "Audit Logs / History":
-         #audit_logs_history()
 
 
-    # Define pages in a dictionary
-    pages = {
-        "Home": home,
-        "Transaction Analysis": transactions,
-        "Approval System": approval_system,
-        "Anomaly Detection": anomaly_detection,
-        "Case Detail": case_detail,
-        "Test and Learn Loop": test_and_learn_loop,
-        "Help / Documentation": help_documentation,
-        "Audit Logs / History": audit_logs_history
-    }
-    
-    # Call the appropriate page function based on the user's selection
-    # Call the appropriate page function based on the user's selection with a spinner
-    if selected in pages:
-        with st.spinner(f"Loading {selected}..."):
+
+    # Automatically start Transaction Analysis when the app is first initiated or when selected from the menu
+    if 'analysis_performed' not in st.session_state or selected == "Transaction Analysis":
+        transactions_app.app()  # Run Transaction Analysis
+    else:
+        # Define pages in a dictionary
+        pages = {
+            "Home": home,
+            "Approval System": approval_system,
+            "Anomaly Detection": anomaly_detection,
+            "Case Detail": case_detail,
+            "Test and Learn Loop": test_and_learn_loop,
+            "Help / Documentation": help_documentation,
+            "Audit Logs / History": audit_logs_history
+        }
+        
+        # Call the appropriate page function based on the user's selection
+        if selected in pages:
             pages[selected]()
 
 # Call the main function when the script is run
