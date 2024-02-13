@@ -147,15 +147,22 @@ def app():
         #st.error(f"Failed to load models: {e}")
         #return
 
-    # Check if the analysis has already been performed using a flag in st.session_state
     if 'analysis_performed' not in st.session_state:
         try:
             # Load the Random Forest and LOF models from S3
             rf_model = load_model_from_s3(bucket_name, rf_model_key)
             lof_model = load_model_from_s3(bucket_name, lof_model_key)
-        except Exception as e:
-            st.error(f"Failed to load models: {e}")
-            return
+            
+            # Fetch transactions and perform analysis
+            transactions_df = fetch_transactions()
+            if transactions_df.empty:
+                st.error("No transactions found.")
+                return
+
+            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
+            if 'lof_scores' not in non_fraud_df.columns:
+                st.error("LOF scores are missing in non_fraud_df.")
+                return
 
         analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
         
