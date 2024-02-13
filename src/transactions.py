@@ -199,5 +199,7 @@ def app():
         # Optional: Additional logic to display or interact with the analyzed data
         # This is where you can add any additional UI elements to work with the analysis results
 
+     st.session_state['transaction_analysis_completed'] = True
+
 app()
 
