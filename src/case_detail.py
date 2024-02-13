@@ -57,39 +57,41 @@ def show_case_detail(review_df, case_id):
         st.error("Case not found!")
 
 def app():
-    
     st.title("Expert Review Dashboard")
     
-    # Check if the transaction analysis has been completed
-    if 'transaction_analysis_completed' in st.session_state and st.session_state['transaction_analysis_completed']:
-        if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
-            review_df = st.session_state['review_df']
-
-            # Drop unnecessary columns
-            columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-            review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
-
-            # Automatically simulate offline review if not done yet
-            if 'offline_review_simulated' not in st.session_state:
-                review_df = simulate_offline_review(review_df)
-                st.session_state['review_df'] = review_df  # Update review_df in session state
-                st.session_state['offline_review_simulated'] = True  # Mark simulation as done
-                st.success("Offline review simulation complete. Expert decisions have been added.")
-
-            # Visualization and detailed review sections
-            col1, col2 = st.columns(2)
-            with col1:
-                plot_workflow_diagram(review_df)
-            with col2:
-                plot_case_resolution_timeline(review_df)
-            case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
-            show_case_detail(review_df, case_id_option)
-            st.subheader("Updated Transactions after Expert Review")
-            st.dataframe(review_df)
-        else:
-            st.error("No transaction data available for review. Please analyze transactions first.")
-    else:
+    # Early check for transaction analysis completion
+    if 'transaction_analysis_completed' not in st.session_state or not st.session_state['transaction_analysis_completed']:
         st.error("Please complete the transaction analysis before proceeding to the expert review dashboard.")
+        return  # Prevent further execution if transaction analysis hasn't been completed
+    
+    # Proceed if the transaction analysis has been completed and review_df exists
+    if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
+        review_df = st.session_state['review_df']
+
+        # Drop unnecessary columns
+        columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
+        review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
+
+        # Automatically simulate offline review if not done yet
+        if 'offline_review_simulated' not in st.session_state:
+            review_df = simulate_offline_review(review_df)
+            st.session_state['review_df'] = review_df  # Update review_df in session state
+            st.session_state['offline_review_simulated'] = True  # Mark simulation as done
+            st.success("Offline review simulation complete. Expert decisions have been added.")
+
+        # Visualization and detailed review sections
+        col1, col2 = st.columns(2)
+        with col1:
+            plot_workflow_diagram(review_df)
+        with col2:
+            plot_case_resolution_timeline(review_df)
+        case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
+        show_case_detail(review_df, case_id_option)
+        st.subheader("Updated Transactions after Expert Review")
+        st.dataframe(review_df)
+    else:
+        st.error("No transaction data available for review. Please analyze transactions first.")
+
 
 app()
 
