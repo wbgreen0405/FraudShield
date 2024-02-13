@@ -12,10 +12,7 @@ from src import (
     audit_logs_history_app as audit_logs_history
 )
 
-
-
 st.set_page_config(page_title="Fraud Detection", page_icon="🛡️", layout="wide", initial_sidebar_state="expanded")
-
 
 def main():
     with st.sidebar:
@@ -27,23 +24,22 @@ def main():
             default_index=0
         )
 
-
     # Define pages in a dictionary
-        pages = {
-            "Home": home,
-            "Approval System": approval_system,
-            "Anomaly Detection": anomaly_detection,
-            "Case Detail": case_detail,
-            "Test and Learn Loop": test_and_learn_loop,
-            "Help / Documentation": help_documentation,
-            "Audit Logs / History": audit_logs_history
-        }
-        
-        # Call the appropriate page function based on the user's selection
-        if selected in pages:
+    pages = {
+        "Home": home,
+        "Transaction Analysis": transactions,
+        "Approval System": approval_system,
+        "Anomaly Detection": anomaly_detection,
+        "Case Detail": case_detail,
+        "Test and Learn Loop": test_and_learn_loop,
+        "Help / Documentation": help_documentation,
+        "Audit Logs / History": audit_logs_history
+    }
+    
+    # Call the appropriate page function based on the user's selection with a spinner
+    if selected in pages:
+        with st.spinner(f"Loading {selected}..."):
             pages[selected]()
 
-# Call the main function when the script is run
-# Make sure to call the main function
 if __name__ == "__main__":
     main()
