@@ -28,13 +28,7 @@ def main():
         )
 
 
-
-
-    # Automatically start Transaction Analysis when the app is first initiated or when selected from the menu
-    if 'analysis_performed' not in st.session_state or selected == "Transaction Analysis":
-        transactions_app.app()  # Run Transaction Analysis
-    else:
-        # Define pages in a dictionary
+    # Define pages in a dictionary
         pages = {
             "Home": home,
             "Approval System": approval_system,
