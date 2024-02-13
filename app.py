@@ -61,8 +61,10 @@ def main():
     }
     
     # Call the appropriate page function based on the user's selection
+    # Call the appropriate page function based on the user's selection with a spinner
     if selected in pages:
-        pages[selected]()
+        with st.spinner(f"Loading {selected}..."):
+            pages[selected]()
 
 # Call the main function when the script is run
 # Make sure to call the main function
