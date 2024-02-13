@@ -139,13 +139,13 @@ def app():
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
     
-    try:
+    #try:
         # Load the Random Forest and LOF models from S3
-        rf_model = load_model_from_s3(bucket_name, rf_model_key)
-        lof_model = load_model_from_s3(bucket_name, lof_model_key)
-    except Exception as e:
-        st.error(f"Failed to load models: {e}")
-        return
+        #rf_model = load_model_from_s3(bucket_name, rf_model_key)
+        #lof_model = load_model_from_s3(bucket_name, lof_model_key)
+    #except Exception as e:
+        #st.error(f"Failed to load models: {e}")
+        #return
 
     # Check if the analysis has already been performed using a flag in st.session_state
     if 'analysis_performed' not in st.session_state:
