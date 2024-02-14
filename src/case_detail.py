@@ -4,16 +4,48 @@ import plotly.express as px
 import random
 from datetime import datetime, timedelta
 
+def apply_fraud_detection_rules(df):
+    # Initialize a column for flagging potentially fraudulent transactions
+    df['flagged_fraud'] = False
+
+    # Rule 1: Low income and high proposed credit limit
+    df.loc[(df['income'] < 0.3) & (df['proposed_credit_limit'] > 1500), 'flagged_fraud'] = True
+
+    # Rule 2: Low similarity between name and email
+    df.loc[df['name_email_similarity'] < 0.2, 'flagged_fraud'] = True
+
+    # Rule 3: Short durations at both previous and current addresses
+    df.loc[(df['prev_address_months_count'] < 6) & (df['current_address_months_count'] < 6), 'flagged_fraud'] = True
+
+    # Rule 4: High velocity of applications in the last 24 hours or 4 weeks
+    df.loc[(df['velocity_24h'] > 5000) | (df['velocity_4w'] > 5000), 'flagged_fraud'] = True
+
+    # Rule 5: Negative credit risk score
+    df.loc[df['credit_risk_score'] < 0, 'flagged_fraud'] = True
+
+    # Rule 6: Use of free email domain and invalid mobile phone
+    df.loc[(df['email_is_free'] == True) & (df['phone_mobile_valid'] == False), 'flagged_fraud'] = True
+
+    # Rule 7: Foreign request with specific device OS
+    df.loc[(df['foreign_request'] == True) & (df['device_os'] == 'other'), 'flagged_fraud'] = True
+
+    # Rule 8: Previous fraudulent activity associated with the device
+    df.loc[df['device_fraud_count'] > 0, 'flagged_fraud'] = True
+
+    # Additional fraud detection rules can be added here following the same pattern:
+    # df.loc[<condition>, 'flagged_fraud'] = True
+
+    return df
+
+
 
 def simulate_offline_review(review_df):
-    # Ensure review_df is not None
     if review_df is None:
         return None
 
-    # Simulate review dates if not already present
+    # Simulate review dates
     if 'review_start' not in review_df.columns or 'review_end' not in review_df.columns:
-        review_start_dates = []
-        review_end_dates = []
+        review_start_dates, review_end_dates = [], []
         for _ in range(len(review_df)):
             start_date = datetime.now() - timedelta(days=random.randint(1, 30))
             end_date = start_date + timedelta(hours=random.randint(1, 48))
@@ -22,12 +54,18 @@ def simulate_offline_review(review_df):
         review_df['review_start'] = review_start_dates
         review_df['review_end'] = review_end_dates
 
-    # Simulate expert decisions if not already present
+    # Simulate expert decisions considering flagged_fraud
     if 'expert_decision' not in review_df.columns:
-        decisions = ['Confirmed Fraud', 'Confirmed Legitimate']
-        review_df['expert_decision'] = [random.choice(decisions) for _ in review_df.index]
+        review_df['expert_decision'] = review_df['flagged_fraud'].apply(
+            lambda flagged: random.choices(
+                ['Confirmed Fraud', 'Misclassified'] if flagged else ['Confirmed Legitimate', 'Misclassified'],
+                weights=[0.8, 0.2] if flagged else [0.95, 0.05],
+                k=1
+            )[0]
+        )
 
     return review_df
+
 
 
 def plot_workflow_diagram(review_df):
@@ -59,39 +97,40 @@ def show_case_detail(review_df, case_id):
 def app():
     st.title("Expert Review Dashboard")
     
-    # Early check for transaction analysis completion
     if 'transaction_analysis_completed' not in st.session_state or not st.session_state['transaction_analysis_completed']:
         st.error("Please complete the transaction analysis before proceeding to the expert review dashboard.")
-        return  # Prevent further execution if transaction analysis hasn't been completed
+        return
     
-    # Proceed if the transaction analysis has been completed and review_df exists
     if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
         review_df = st.session_state['review_df']
 
         # Drop unnecessary columns
         columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-        review_df = review_df.drop(columns=columns_to_drop, errors='ignore')
+        review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
-        # Automatically simulate offline review if not done yet
+        # Apply fraud detection rules
+        review_df = apply_fraud_detection_rules(review_df)
+
+        # Simulate offline review considering flagged_fraud
         if 'offline_review_simulated' not in st.session_state:
             review_df = simulate_offline_review(review_df)
-            st.session_state['review_df'] = review_df  # Update review_df in session state
-            st.session_state['offline_review_simulated'] = True  # Mark simulation as done
+            st.session_state['review_df'] = review_df
+            st.session_state['offline_review_simulated'] = True
             st.success("Offline review simulation complete. Expert decisions have been added.")
 
-        # Visualization and detailed review sections
         col1, col2 = st.columns(2)
         with col1:
             plot_workflow_diagram(review_df)
         with col2:
             plot_case_resolution_timeline(review_df)
+        
         case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
         show_case_detail(review_df, case_id_option)
+        
         st.subheader("Updated Transactions after Expert Review")
         st.dataframe(review_df)
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
-
 
 app()
 
