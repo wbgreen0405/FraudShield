@@ -43,7 +43,7 @@ def simulate_offline_review(review_df):
     if review_df is None:
         return None
 
-    # Simulate review dates
+    # Simulate review dates if not already present
     if 'review_start' not in review_df.columns or 'review_end' not in review_df.columns:
         review_start_dates, review_end_dates = [], []
         for _ in range(len(review_df)):
@@ -56,17 +56,12 @@ def simulate_offline_review(review_df):
 
     # Simulate expert decisions considering flagged_fraud
     if 'expert_decision' not in review_df.columns:
+        # Adjust decision-making to account for misclassification
         review_df['expert_decision'] = review_df['flagged_fraud'].apply(
-            lambda flagged: random.choices(
-                ['Confirmed Fraud', 'Misclassified'] if flagged else ['Confirmed Legitimate', 'Misclassified'],
-                weights=[0.8, 0.2] if flagged else [0.95, 0.05],
-                k=1
-            )[0]
+            lambda flagged: 'Confirmed Fraud' if flagged else 'Confirmed Legitimate'
         )
 
     return review_df
-
-
 
 def plot_workflow_diagram(review_df):
     if 'expert_decision' in review_df.columns:
