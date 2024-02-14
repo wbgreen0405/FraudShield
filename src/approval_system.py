@@ -12,7 +12,7 @@ def app():
         supervised_df['Flagged as Fraud'] = supervised_df['rf_predicted_fraud'].map({1: 'Yes', 0: 'No'})
         
         # Drop 'lof_predicted_fraud' and 'Approval Status' if present
-        columns_to_drop = ['lof_predicted_fraud', 'Approval Status','lof_scores', 'lof_scores_normalized']
+        columns_to_drop = ['lof_predicted_fraud', 'Approval Status','lof_scores', 'lof_scores_normalized','LOF_Status_x', 'LOF_Status_y']
         for col in columns_to_drop:
             if col in supervised_df.columns:
                 supervised_df = supervised_df.drop(columns=[col])
