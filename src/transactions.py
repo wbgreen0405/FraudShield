@@ -180,48 +180,37 @@ def create_visualizations(fraud_df):
     # Add additional visualizations as needed based on the provided data points and definitions
 
 
+# Main app function
 def app():
     st.title("Transaction Analysis")
 
-    # Using specified bucket name and keys
+    # Your initialization of Supabase client and setting up bucket and model keys
+    supabase_url = st.secrets["supabase"]["url"]
+    supabase_key = st.secrets["supabase"]["key"]
+    supabase = create_client(supabase_url, supabase_key)
     bucket_name = 'frauddetectpred'
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
-    
+
+    # Load models and perform analysis if not done already
     if 'analysis_performed' not in st.session_state:
         try:
-            # Load the Random Forest and LOF models from S3
             rf_model = load_model_from_s3(bucket_name, rf_model_key)
             lof_model = load_model_from_s3(bucket_name, lof_model_key)
-
-            # Fetch transactions and perform analysis
             transactions_df = fetch_transactions()
             if transactions_df.empty:
                 st.error("No transactions found.")
                 return
-
             analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
-            if 'lof_scores' not in non_fraud_df.columns:
-                st.error("LOF scores are missing in non_fraud_df.")
-                return
-            # Preprocess and analyze transactions
-            analyzed_df, non_fraud_df = analyze_transactions(transactions_df, rf_model, lof_model)
-            
-            # Store results in session state
             st.session_state['analyzed_df'] = analyzed_df
             st.session_state['analysis_performed'] = True
-            
-            # Optionally, display initial analysis results
-            display_analysis_results(analyzed_df)
         except Exception as e:
             st.error(f"Error in analysis: {e}")
             return
 
+    # Display results and visualizations if analysis has been performed
     if 'analysis_performed' in st.session_state:
-        # Filter for transactions flagged as fraud by either RF model or LOF analysis
         fraud_df = st.session_state['analyzed_df'][(st.session_state['analyzed_df']['RF Approval Status'] == 'Marked as Fraud') | (st.session_state['analyzed_df']['LOF Status'] == 'Suspected Fraud')]
-        
-        # Display visualizations for confirmed fraud cases
         if not fraud_df.empty:
             create_visualizations(fraud_df)
         else:
@@ -229,5 +218,4 @@ def app():
 
 if __name__ == "__main__":
     app()
-
 
