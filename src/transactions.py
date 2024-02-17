@@ -175,7 +175,7 @@ def app():
                 suffixes=('', '_y')
             )
 
-            st.session_state['review_df'] = analyzed_df
+            st.session_state['review_df'] = analyzed_df[(analyzed_df['LOF Status'] == 'Suspected Fraud') & (analyzed_df['RF Approval Status'] == 'Marked as Fraud')]
 
             # Set analysis performed flag
             st.session_state['analysis_performed'] = True
