@@ -206,6 +206,7 @@ def app():
             st.session_state['analyzed_df'] = analyzed_df
             st.session_state['supervised_df'] = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')]
             st.session_state['anomaly_df'] = non_fraud_df
+            st.session_state['review_df'] = analyzed_df
             st.session_state['analysis_performed'] = True
         except Exception as e:
             st.error(f"Error in analysis: {e}")
