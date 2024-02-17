@@ -190,12 +190,20 @@ def app():
     
     if 'analysis_performed' not in st.session_state:
         try:
-            rf_model, lof_model = load_models()  # This should include your logic to load RF and LOF models
+            # Load the Random Forest and LOF models from S3
+            rf_model = load_model_from_s3(bucket_name, rf_model_key)
+            lof_model = load_model_from_s3(bucket_name, lof_model_key)
+
+            # Fetch transactions and perform analysis
             transactions_df = fetch_transactions()
             if transactions_df.empty:
                 st.error("No transactions found.")
                 return
-            
+
+            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
+            if 'lof_scores' not in non_fraud_df.columns:
+                st.error("LOF scores are missing in non_fraud_df.")
+                return
             # Preprocess and analyze transactions
             analyzed_df, non_fraud_df = analyze_transactions(transactions_df, rf_model, lof_model)
             
