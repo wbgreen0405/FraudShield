@@ -99,35 +99,45 @@ def app():
     if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
         review_df = st.session_state['review_df']
 
-        # Filter for transactions flagged as fraud by both RF and LOF before dropping columns
-        fraud_review_df = review_df[(review_df['LOF Status'] == 'Suspected Fraud') & (review_df['RF Approval Status'] == 'Marked as Fraud')]
+        # Initially filter for suspected fraud before any processing
+        suspected_fraud_df = review_df[(review_df['LOF Status'] == 'Suspected Fraud') & (review_df['RF Approval Status'] == 'Marked as Fraud')]
 
-        # Drop unnecessary columns from the filtered fraud_review_df
+        if suspected_fraud_df.empty:
+            st.error("No suspected fraud cases found. Please ensure the transaction analysis is performed correctly.")
+            return
+
+        # Drop unnecessary columns from suspected_fraud_df for clarity in review
         columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-        fraud_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
+        suspected_fraud_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
         # Apply fraud detection rules on the filtered dataset
-        fraud_review_df = apply_fraud_detection_rules(fraud_review_df)
+        suspected_fraud_df = apply_fraud_detection_rules(suspected_fraud_df)
 
         # Simulate offline review considering flagged_fraud on the filtered dataset
         if 'offline_review_simulated' not in st.session_state:
-            fraud_review_df = simulate_offline_review(fraud_review_df)
-            st.session_state['fraud_review_df'] = fraud_review_df  # Store the fraud-focused review_df in session_state
+            suspected_fraud_df = simulate_offline_review(suspected_fraud_df)
+            st.session_state['suspected_fraud_df'] = suspected_fraud_df
             st.session_state['offline_review_simulated'] = True
             st.success("Offline review simulation complete. Expert decisions have been added to fraud-focused records.")
 
         col1, col2 = st.columns(2)
         with col1:
-            plot_workflow_diagram(fraud_review_df)
+            plot_workflow_diagram(suspected_fraud_df)
         with col2:
-            plot_case_resolution_timeline(fraud_review_df)
+            plot_case_resolution_timeline(suspected_fraud_df)
         
-        case_id_option = st.selectbox("Select a case to review in detail:", fraud_review_df['ref_id'].unique())
-        show_case_detail(fraud_review_df, case_id_option)
+        # Ensure that the dropdown only shows IDs present in the filtered DF
+        if not suspected_fraud_df.empty:
+            case_id_option = st.selectbox("Select a case to review in detail:", suspected_fraud_df['ref_id'].unique())
+            show_case_detail(suspected_fraud_df, case_id_option)
+        else:
+            st.write("No fraud cases to review.")
         
         st.subheader("Updated Transactions after Expert Review (Focused on Fraud Records)")
-        st.dataframe(fraud_review_df)
+        st.dataframe(suspected_fraud_df)
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
+
+app()
 
 app()
