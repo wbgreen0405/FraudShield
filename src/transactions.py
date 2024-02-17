@@ -130,6 +130,55 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     return transactions_df, non_fraud_df
 
+def create_visualizations(fraud_df):
+    """
+    Create visualizations for the confirmed fraudulent transactions.
+    """
+
+    # Payment Type and Credit Limit Analysis
+    col1, col2 = st.columns(2)
+    with col1:
+        # Fraudulent Transactions by Payment Type
+        fig_payment_type = px.histogram(fraud_df, x='payment_type', title='Fraudulent Transactions by Payment Type')
+        st.plotly_chart(fig_payment_type)
+    
+    with col2:
+        # Credit Limit Requests in Confirmed Fraudulent Transactions
+        fig_credit_limit = px.box(fraud_df, y='proposed_credit_limit', title='Credit Limit Requests in Confirmed Fraudulent Transactions')
+        st.plotly_chart(fig_credit_limit)
+
+    # Customer Demographics and Application Details
+    col3, col4, col5 = st.columns([1, 1, 1])
+    with col3:
+        # Age and Employment Status Distribution
+        fig_age_employment = px.histogram(fraud_df, x='customer_age', color='employment_status', title='Age and Employment Status in Fraudulent Transactions')
+        st.plotly_chart(fig_age_employment)
+
+    with col4:
+        # Housing Status Comparison
+        fig_housing_status = px.histogram(fraud_df, x='housing_status', title='Housing Status in Fraudulent Transactions')
+        st.plotly_chart(fig_housing_status)
+
+    # Assuming 'email_is_free' and 'phone_mobile_valid' as binary represented as True/False
+    with col5:
+        # Email and Phone Number Validity
+        fig_contact_info = px.histogram(fraud_df, x=['email_is_free', 'phone_mobile_valid'], title='Contact Information Validity')
+        st.plotly_chart(fig_contact_info)
+
+    # Bank Branch and Zip Code Activity
+    col6, col7 = st.columns(2)
+    with col6:
+        # Applications per Bank Branch
+        fig_bank_branch = px.histogram(fraud_df, x='bank_branch_count_8w', title='Applications per Bank Branch in Fraudulent Transactions')
+        st.plotly_chart(fig_bank_branch)
+
+    with col7:
+        # Zip Code Application Density
+        fig_zip_code_density = px.histogram(fraud_df, x='zip_count_4w', title='Zip Code Application Density in Fraudulent Transactions')
+        st.plotly_chart(fig_zip_code_density)
+
+    # Add additional visualizations as needed based on the provided data points and definitions
+
 
 def app():
     st.title("Transaction Analysis")
@@ -141,82 +190,35 @@ def app():
     
     if 'analysis_performed' not in st.session_state:
         try:
-            # Load models, fetch and preprocess data, perform analysis
-            rf_model = load_model_from_s3(bucket_name, rf_model_key)
-            lof_model = load_model_from_s3(bucket_name, lof_model_key)
+            rf_model, lof_model = load_models()  # This should include your logic to load RF and LOF models
             transactions_df = fetch_transactions()
             if transactions_df.empty:
                 st.error("No transactions found.")
                 return
-
-            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
-            if 'lof_scores' not in non_fraud_df.columns:
-                st.error("LOF scores are missing in non_fraud_df.")
-                return
-
-            # Merge non_fraud_df information into analyzed_df for further analysis
-            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
+            
+            # Preprocess and analyze transactions
+            analyzed_df, non_fraud_df = analyze_transactions(transactions_df, rf_model, lof_model)
+            
+            # Store results in session state
             st.session_state['analyzed_df'] = analyzed_df
-            st.session_state['supervised_df'] = analyzed_df
-            st.session_state['anomaly_df'] = non_fraud_df
-            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left', suffixes=('', '_y'))
-
-            # Set flag indicating analysis is complete
             st.session_state['analysis_performed'] = True
+            
+            # Optionally, display initial analysis results
+            display_analysis_results(analyzed_df)
         except Exception as e:
-            st.error(f"Failed to load models or process transactions: {e}")
+            st.error(f"Error in analysis: {e}")
             return
 
-    if st.session_state['analysis_performed']:
-        display_analysis_results(st.session_state['analyzed_df'])
-
+    if 'analysis_performed' in st.session_state:
         # Filter for transactions flagged as fraud by either RF model or LOF analysis
         fraud_df = st.session_state['analyzed_df'][(st.session_state['analyzed_df']['RF Approval Status'] == 'Marked as Fraud') | (st.session_state['analyzed_df']['LOF Status'] == 'Suspected Fraud')]
-        st.session_state['review_df'] = fraud_df
-
+        
         # Display visualizations for confirmed fraud cases
         if not fraud_df.empty:
             create_visualizations(fraud_df)
         else:
             st.write("No confirmed fraud cases to display.")
 
-def display_analysis_results(df):
-    """
-    Display initial analysis results, metrics, etc.
-    """
-    # Example: Display total transactions and the number of confirmed frauds
-    total_transactions = len(df)
-    total_confirmed_frauds = df['fraud_confirmed'].sum()  # Assuming fraud_confirmed is a boolean or binary column
-
-    st.metric(label="Total Transactions Analyzed", value=total_transactions)
-    st.metric(label="Confirmed Fraudulent Transactions", value=total_confirmed_frauds)
-
-    # Any additional metrics or results you want to display can go here
-
-def create_visualizations(df):
-    """
-    Implement visualizations for the filtered fraud_df as needed.
-    """
-    # Example visualization: Payment Type Distribution in Confirmed Fraudulent Transactions
-    fraud_df = df[df['fraud_confirmed']]  # Filter for confirmed fraud cases
-    fig_payment_type = px.histogram(fraud_df, x='payment_type', title='Payment Type Distribution in Confirmed Fraudulent Transactions')
-    st.plotly_chart(fig_payment_type)
-
-    # Example visualization: Credit Limit Distribution
-    fig_credit_limit = px.box(fraud_df, x='fraud_confirmed', y='proposed_credit_limit', title='Credit Limit Distribution in Confirmed Fraudulent Transactions')
-    st.plotly_chart(fig_credit_limit)
-
-    # Further visualizations can include customer demographics, application details, etc., similar to the examples provided
-    # Example: Age Distribution among Confirmed Fraudulent Transactions
-    fig_age_distribution = px.histogram(fraud_df, x='customer_age', title='Age Distribution among Confirmed Fraudulent Transactions')
-    st.plotly_chart(fig_age_distribution)
-
-    # Example: Email and Phone Validity
-    fig_contact_info = px.histogram(fraud_df, x=['email_is_free', 'phone_mobile_valid'], title='Contact Information Validity in Confirmed Fraudulent Transactions')
-    st.plotly_chart(fig_contact_info)
-
-
-# Make sure to call the app function under the correct conditional check if it's meant to be used directly
 if __name__ == "__main__":
     app()
 
