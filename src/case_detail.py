@@ -104,7 +104,7 @@ def app():
         review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
         # Apply fraud detection rules
-        review_df = apply_fraud_detection_rules(review_df)
+        #review_df = apply_fraud_detection_rules(review_df)
 
         # Simulate offline review considering flagged_fraud
         if 'offline_review_simulated' not in st.session_state:
