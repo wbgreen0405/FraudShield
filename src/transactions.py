@@ -220,6 +220,20 @@ def app():
         else:
             st.write("No confirmed fraud cases to display.")
 
+    if 'analysis_performed' in st.session_state and st.session_state['analysis_performed']:
+        # Display results or further actions if analysis has been performed
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Total Transactions Analyzed", len(st.session_state['analyzed_df']))
+        with col2:
+            st.metric("Transactions Flagged for Review by RF", len(st.session_state['analyzed_df'][st.session_state['analyzed_df']['RF Approval Status'] == 'Marked as Fraud']))
+        with col3:
+            st.metric("Transactions Flagged for Review by LOF", len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
+        with col4:
+            st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
+        # This ensures that the final statement aligns with the block it's supposed to be part of
+
+
 if __name__ == "__main__":
     app()
 
