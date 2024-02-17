@@ -98,8 +98,6 @@ def app():
     if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
         review_df = st.session_state['review_df']
 
-        # Filter for records that are both 'Suspected Fraud' by LOF and 'Marked as Fraud' by RF
-        review_df = review_df[(review_df['LOF Status'] == 'Suspected Fraud') & (review_df['RF Approval Status'] == 'Marked as Fraud')]
 
         # Drop unnecessary columns
         columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
