@@ -131,94 +131,60 @@ def perform_inference(transactions_df, rf_model, lof_model):
 
     return transactions_df, non_fraud_df
 
-def create_visualizations(fraud_df):
-    """
-    Create visualizations for the confirmed fraudulent transactions.
-    """
-
-    # Payment Type and Credit Limit Analysis
-    col1, col2 = st.columns(2)
-    with col1:
-        # Fraudulent Transactions by Payment Type
-        fig_payment_type = px.histogram(fraud_df, x='payment_type', title='Fraudulent Transactions by Payment Type')
-        st.plotly_chart(fig_payment_type)
-    
-    with col2:
-        # Credit Limit Requests in Confirmed Fraudulent Transactions
-        fig_credit_limit = px.box(fraud_df, y='proposed_credit_limit', title='Credit Limit Requests in Confirmed Fraudulent Transactions')
-        st.plotly_chart(fig_credit_limit)
-
-    # Customer Demographics and Application Details
-    col3, col4, col5 = st.columns([1, 1, 1])
-    with col3:
-        # Age and Employment Status Distribution
-        fig_age_employment = px.histogram(fraud_df, x='customer_age', color='employment_status', title='Age and Employment Status in Fraudulent Transactions')
-        st.plotly_chart(fig_age_employment)
-
-    with col4:
-        # Housing Status Comparison
-        fig_housing_status = px.histogram(fraud_df, x='housing_status', title='Housing Status in Fraudulent Transactions')
-        st.plotly_chart(fig_housing_status)
-
-    # Assuming 'email_is_free' and 'phone_mobile_valid' as binary represented as True/False
-    with col5:
-        # Email and Phone Number Validity
-        fig_contact_info = px.histogram(fraud_df, x=['email_is_free', 'phone_mobile_valid'], title='Contact Information Validity')
-        st.plotly_chart(fig_contact_info)
-
-    # Bank Branch and Zip Code Activity
-    col6, col7 = st.columns(2)
-    with col6:
-        # Applications per Bank Branch
-        fig_bank_branch = px.histogram(fraud_df, x='bank_branch_count_8w', title='Applications per Bank Branch in Fraudulent Transactions')
-        st.plotly_chart(fig_bank_branch)
-
-    with col7:
-        # Zip Code Application Density
-        fig_zip_code_density = px.histogram(fraud_df, x='zip_count_4w', title='Zip Code Application Density in Fraudulent Transactions')
-        st.plotly_chart(fig_zip_code_density)
-
-    # Add additional visualizations as needed based on the provided data points and definitions
-
-
-# Main app function
 def app():
     st.title("Transaction Analysis")
 
-    # Your initialization of Supabase client and setting up bucket and model keys
-    supabase_url = st.secrets["supabase"]["url"]
-    supabase_key = st.secrets["supabase"]["key"]
-    supabase = create_client(supabase_url, supabase_key)
+    # Using specified bucket name and keys
     bucket_name = 'frauddetectpred'
     rf_model_key = 'random_forest_model.pkl.gz'
     lof_model_key = 'lof_nonfraud.pkl.gz'
-
-    # Load models and perform analysis if not done already
+    
+    # Only attempt to load models and fetch transactions if analysis hasn't been performed
     if 'analysis_performed' not in st.session_state:
         try:
+            # Load the Random Forest and LOF models from S3
             rf_model = load_model_from_s3(bucket_name, rf_model_key)
             lof_model = load_model_from_s3(bucket_name, lof_model_key)
+
+            # Fetch transactions and perform analysis
             transactions_df = fetch_transactions()
             if transactions_df.empty:
                 st.error("No transactions found.")
                 return
-            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
-            st.session_state['analyzed_df'] = analyzed_df
-            st.session_state['supervised_df'] = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')]
-            st.session_state['anomaly_df'] = non_fraud_df
-            st.session_state['review_df'] = analyzed_df
-            st.session_state['analysis_performed'] = True
-        except Exception as e:
-            st.error(f"Error in analysis: {e}")
-            return
 
-    # Display results and visualizations if analysis has been performed
-    if 'analysis_performed' in st.session_state:
-        fraud_df = st.session_state['analyzed_df'][(st.session_state['analyzed_df']['RF Approval Status'] == 'Marked as Fraud') | (st.session_state['analyzed_df']['LOF Status'] == 'Suspected Fraud')]
-        if not fraud_df.empty:
-            create_visualizations(fraud_df)
-        else:
-            st.write("No confirmed fraud cases to display.")
+            analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
+            if 'lof_scores' not in non_fraud_df.columns:
+                st.error("LOF scores are missing in non_fraud_df.")
+                return
+
+            # Merge non_fraud_df information into analyzed_df
+            analyzed_df = analyzed_df.merge(non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']], on='ref_id', how='left')
+
+            st.session_state['analyzed_df'] = analyzed_df
+
+            supervised_df = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['RF Approval Status'] == 'Marked as Approve')]
+            st.session_state['supervised_df'] = supervised_df
+
+            st.session_state['anomaly_df'] = non_fraud_df
+
+            # Update 'analyzed_df' with merged information
+            analyzed_df = analyzed_df.merge(
+                non_fraud_df[['ref_id', 'lof_scores', 'LOF Status']],
+                on='ref_id',
+                how='left',
+                suffixes=('', '_y')
+            )
+
+            st.session_state['review_df'] = analyzed_df
+
+            # Set analysis performed flag
+            st.session_state['analysis_performed'] = True
+            # Indicate that transaction analysis is completed successfully
+            st.session_state['transaction_analysis_completed'] = True
+
+        except Exception as e:
+            st.error(f"Failed to load models or process transactions: {e}")
+            return
 
     if 'analysis_performed' in st.session_state and st.session_state['analysis_performed']:
         # Display results or further actions if analysis has been performed
@@ -233,7 +199,7 @@ def app():
             st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
         # This ensures that the final statement aligns with the block it's supposed to be part of
 
-
+# Make sure to call the app function under the correct conditional check if it's meant to be used directly
 if __name__ == "__main__":
     app()
 
