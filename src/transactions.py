@@ -205,6 +205,10 @@ def app():
             analyzed_df, non_fraud_df = perform_inference(transactions_df, rf_model, lof_model)
             st.session_state['analyzed_df'] = analyzed_df
             st.session_state['analysis_performed'] = True
+            st.session_state['analyzed_df'] = analyzed_df
+            st.session_state['supervised_df'] = analyzed_df[(analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')]
+            st.session_state['anomaly_df'] = non_fraud_df
+            st.session_state['analysis_performed'] = True
         except Exception as e:
             st.error(f"Error in analysis: {e}")
             return
