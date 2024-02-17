@@ -99,33 +99,35 @@ def app():
     if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
         review_df = st.session_state['review_df']
 
-        # Drop unnecessary columns
+        # Filter for transactions flagged as fraud by both RF and LOF before dropping columns
+        fraud_review_df = review_df[(review_df['LOF Status'] == 'Suspected Fraud') & (review_df['RF Approval Status'] == 'Marked as Fraud')]
+
+        # Drop unnecessary columns from the filtered fraud_review_df
         columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-        review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
+        fraud_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
-        # Apply fraud detection rules
-        review_df = apply_fraud_detection_rules(review_df)
+        # Apply fraud detection rules on the filtered dataset
+        fraud_review_df = apply_fraud_detection_rules(fraud_review_df)
 
-        # Simulate offline review considering flagged_fraud
+        # Simulate offline review considering flagged_fraud on the filtered dataset
         if 'offline_review_simulated' not in st.session_state:
-            review_df = simulate_offline_review(review_df)
-            st.session_state['review_df'] = review_df
+            fraud_review_df = simulate_offline_review(fraud_review_df)
+            st.session_state['fraud_review_df'] = fraud_review_df  # Store the fraud-focused review_df in session_state
             st.session_state['offline_review_simulated'] = True
-            st.success("Offline review simulation complete. Expert decisions have been added.")
+            st.success("Offline review simulation complete. Expert decisions have been added to fraud-focused records.")
 
         col1, col2 = st.columns(2)
         with col1:
-            plot_workflow_diagram(review_df)
+            plot_workflow_diagram(fraud_review_df)
         with col2:
-            plot_case_resolution_timeline(review_df)
+            plot_case_resolution_timeline(fraud_review_df)
         
-        case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
-        show_case_detail(review_df, case_id_option)
+        case_id_option = st.selectbox("Select a case to review in detail:", fraud_review_df['ref_id'].unique())
+        show_case_detail(fraud_review_df, case_id_option)
         
-        st.subheader("Updated Transactions after Expert Review")
-        st.dataframe(review_df)
+        st.subheader("Updated Transactions after Expert Review (Focused on Fraud Records)")
+        st.dataframe(fraud_review_df)
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
 
 app()
-
