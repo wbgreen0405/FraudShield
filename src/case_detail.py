@@ -90,25 +90,25 @@ def show_case_detail(case_review_df, case_id):
         st.error("Case not found!")
 def app():
     st.title("Expert Review Dashboard")
-    
+
     if 'transaction_analysis_completed' not in st.session_state or not st.session_state['transaction_analysis_completed']:
         st.error("Please complete the transaction analysis before proceeding to the expert review dashboard.")
         return
-    
-    if 'case_review_df' in st.session_state and st.session_state['case_review_df'] is not None:
-        review_df = st.session_state['case_review_df']
 
+    # Ensure 'case_review_df' is correctly initialized from the session state
+    if 'case_review_df' in st.session_state and st.session_state['case_review_df'] is not None:
+        case_review_df = st.session_state['case_review_df']  # Corrected variable initialization
 
         # Drop unnecessary columns
-        #columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-        #case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
+        columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
+        case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
         # Apply fraud detection rules
         case_review_df = apply_fraud_detection_rules(case_review_df)
 
         # Simulate offline review considering flagged_fraud
         if 'offline_review_simulated' not in st.session_state:
-            review_df = simulate_offline_review(case_review_df)
+            case_review_df = simulate_offline_review(case_review_df)  # Use the corrected variable
             st.session_state['case_review_df'] = case_review_df
             st.session_state['offline_review_simulated'] = True
             st.success("Offline review simulation complete. Expert decisions have been added.")
@@ -118,10 +118,10 @@ def app():
             plot_workflow_diagram(case_review_df)
         with col2:
             plot_case_resolution_timeline(case_review_df)
-        
+
         case_id_option = st.selectbox("Select a case to review in detail:", case_review_df['ref_id'].unique())
         show_case_detail(case_review_df, case_id_option)
-        
+
         st.subheader("Updated Transactions after Expert Review")
         st.dataframe(case_review_df)
     else:
