@@ -175,7 +175,7 @@ def app():
                 suffixes=('', '_y')
             )
 
-            #st.session_state['review_df'] = analyzed_df[(analyzed_df['LOF Status'] == 'Suspected Fraud') & (analyzed_df['RF Approval Status'] == 'Marked as Fraud')]
+            st.session_state['review_df'] = analyzed_df
             #st.session_state['review_df']  = analyzed_df
             #mask = np.logical_and(analyzed_df['LOF Status'] == 'Suspected Fraud',analyzed_df['RF Approval Status'] == 'Marked as Fraud')
             #review_df = analyzed_df[mask]
@@ -187,10 +187,10 @@ def app():
 
             # Merge the two DataFrames on 'ref_id' to get transactions flagged by both
             # Ensure 'ref_id' is set correctly in your DataFrame
-            review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
+            case_review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
 
             # Save the merged DataFrame for case review
-            st.session_state['review_df'] = review_df
+            st.session_state[' case_review_df'] =  case_review_df
 
 
             # Set analysis performed flag
