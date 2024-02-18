@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import random
 from datetime import datetime, timedelta
@@ -40,7 +41,7 @@ def apply_fraud_detection_rules(df):
 
 
 def simulate_offline_review(case_review_df):
-    if case_review_df is None:
+    if case_review_df is None or case_review_df.empty:
         return None
 
     # Simulate review dates if not already present
@@ -54,14 +55,12 @@ def simulate_offline_review(case_review_df):
         case_review_df['review_start'] = review_start_dates
         case_review_df['review_end'] = review_end_dates
 
-    # Simulate expert decisions considering flagged_fraud
-    if 'expert_decision' not in case_review_df.columns:
-        # Adjust decision-making to account for misclassification
-        case_review_df['expert_decision'] = case_review_df['flagged_fraud'].apply(
-            lambda flagged: 'Confirmed Fraud' if flagged else 'Confirmed Legitimate'
-        )
+    # Directly simulate expert decisions without checking 'flagged_fraud'
+    # This is assuming all transactions in review_df are considered for review
+    case_review_df['expert_decision'] = np.random.choice(['Confirmed Fraud', 'Confirmed Legitimate'], size=len(case_review_df))
 
     return case_review_df
+
 
 def plot_workflow_diagram(case_review_df):
     if 'expert_decision' in case_review_df.columns:
