@@ -190,13 +190,22 @@ def app():
             #case_review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
 
             # Flag transactions for review if they are marked as fraud by RF or suspected fraud by LOF
-            analyzed_df['flag_for_review'] = (analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')
+            # analyzed_df['flag_for_review'] = (analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')
             
             # Create a DataFrame for case review based on the flag
-            case_review_df = analyzed_df[analyzed_df['flag_for_review']]
+            # case_review_df = analyzed_df[analyzed_df['flag_for_review']]
             
             # Save the DataFrame for case review
-            st.session_state['case_review_df'] = case_review_df
+            # st.session_state['case_review_df'] = case_review_df
+
+            # Flag transactions for review based on RF Approval Status and LOF Status
+            analyzed_df['flag_for_review'] = (
+                (analyzed_df['RF Approval Status'] == 'Marked as Fraud') | 
+                (analyzed_df['LOF Status'] == 'Suspected Fraud')
+            )
+            
+            # Filter the DataFrame to include only transactions flagged for review
+            case_review_df = analyzed_df[analyzed_df['flag_for_review']]
 
 
             # Save the merged DataFrame for case review
