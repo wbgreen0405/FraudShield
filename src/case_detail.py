@@ -88,6 +88,7 @@ def show_case_detail(case_review_df, case_id):
         st.write(case_data)
     else:
         st.error("Case not found!")
+
 def app():
     st.title("Expert Review Dashboard")
 
@@ -102,9 +103,6 @@ def app():
         # Drop unnecessary columns
         columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
         case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
-
-        # Apply fraud detection rules
-        case_review_df = apply_fraud_detection_rules(case_review_df)
 
         # Simulate offline review considering flagged_fraud
         if 'offline_review_simulated' not in st.session_state:
@@ -128,4 +126,5 @@ def app():
         st.error("No transaction data available for review. Please analyze transactions first.")
 
 app()
+
 
