@@ -176,7 +176,7 @@ def app():
             )
 
             #st.session_state['review_df'] = analyzed_df[(analyzed_df['LOF Status'] == 'Suspected Fraud') & (analyzed_df['RF Approval Status'] == 'Marked as Fraud')]
-            #st.session_state['review_df']  = analyzed_df
+            st.session_state['review_df']  = analyzed_df
             mask = np.logical_and(analyzed_df['LOF Status'] == 'Suspected Fraud',analyzed_df['RF Approval Status'] == 'Marked as Fraud')
             review_df = analyzed_df[mask]
             st.session_state['review_df']
