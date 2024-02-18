@@ -8,7 +8,6 @@ import numpy as np
 # Assuming other necessary imports and function definitions (load_model_from_s3, fetch_transactions, etc.) are already in place
 
 def simulate_offline_review(review_df):
-    # Check if review dates are already present; if not, simulate them
     if 'review_start' not in review_df.columns or 'review_end' not in review_df.columns:
         review_start_dates, review_end_dates = [], []
         for _ in range(len(review_df)):
@@ -19,9 +18,12 @@ def simulate_offline_review(review_df):
         review_df['review_start'] = review_start_dates
         review_df['review_end'] = review_end_dates
 
-    # Simulate expert decisions
     if 'expert_decision' not in review_df.columns:
-        review_df['expert_decision'] = np.random.choice(['Confirmed Fraud', 'Confirmed Legitimate'], size=len(review_df))
+        # Set 2% of the decisions to "Confirmed Legitimate"
+        probabilities = [0.98, 0.02]  # 98% fraud, 2% legitimate
+        choices = ['Confirmed Fraud', 'Confirmed Legitimate']
+        decisions = np.random.choice(choices, size=len(review_df), p=probabilities)
+        review_df['expert_decision'] = decisions
 
     return review_df
 
