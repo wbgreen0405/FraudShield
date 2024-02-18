@@ -100,8 +100,8 @@ def app():
 
 
         # Drop unnecessary columns
-        columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-        case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
+        #columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
+        #case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
         # Apply fraud detection rules
         case_review_df = apply_fraud_detection_rules(case_review_df)
