@@ -64,15 +64,15 @@ def simulate_offline_review(case_review_df):
     return review_df
 
 def plot_workflow_diagram(case_review_df):
-    if 'expert_decision' in review_df.columns:
-        fig = px.pie(review_df, names='expert_decision', title='Review Cases Status')
+    if 'expert_decision' in case_review_df.columns:
+        fig = px.pie(case_review_df, names='expert_decision', title='Review Cases Status')
         st.plotly_chart(fig)
     else:
         st.warning("Run the simulation to generate expert decisions.")
 
 def plot_case_resolution_timeline(case_review_df):
     required_cols = ['review_start', 'review_end', 'ref_id', 'expert_decision']
-    if all(col in review_df.columns for col in required_cols):
+    if all(col in case_review_df.columns for col in required_cols):
         case_review_df['review_start'] = pd.to_datetime(case_review_df['review_start'], errors='coerce')
         case_review_df['review_end'] = pd.to_datetime(case_review_df['review_end'], errors='coerce')
         fig = px.timeline(case_review_df, x_start='review_start', x_end='review_end', y='ref_id', color='expert_decision', labels={'ref_id': 'Case ID', 'expert_decision': 'Decision'})
@@ -82,8 +82,8 @@ def plot_case_resolution_timeline(case_review_df):
     else:
         st.warning("Review data does not contain the required columns for plotting the timeline.")
 
-def show_case_detail(review_df, case_id):
-    case_data = review_df[review_df['ref_id'] == case_id]
+def show_case_detail(case_review_df, case_id):
+    case_data = case_review_df[case_review_df['ref_id'] == case_id]
     if not case_data.empty:
         st.write(case_data)
     else:
@@ -95,7 +95,7 @@ def app():
         st.error("Please complete the transaction analysis before proceeding to the expert review dashboard.")
         return
     
-    if 'case_review_d' in st.session_state and st.session_state['case_review_df'] is not None:
+    if 'case_review_df' in st.session_state and st.session_state['case_review_df'] is not None:
         review_df = st.session_state['case_review_df']
 
 
@@ -104,26 +104,26 @@ def app():
         case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
         # Apply fraud detection rules
-        review_df = apply_fraud_detection_rules(review_df)
+        case_review_df = apply_fraud_detection_rules(case_review_df)
 
         # Simulate offline review considering flagged_fraud
         if 'offline_review_simulated' not in st.session_state:
             review_df = simulate_offline_review(case_review_df)
-            st.session_state['case_review_df'] = review_df
+            st.session_state['case_review_df'] = case_review_df
             st.session_state['offline_review_simulated'] = True
             st.success("Offline review simulation complete. Expert decisions have been added.")
 
         col1, col2 = st.columns(2)
         with col1:
-            plot_workflow_diagram(review_df)
+            plot_workflow_diagram(case_review_df)
         with col2:
-            plot_case_resolution_timeline(review_df)
+            plot_case_resolution_timeline(case_review_df)
         
-        case_id_option = st.selectbox("Select a case to review in detail:", review_df['ref_id'].unique())
-        show_case_detail(review_df, case_id_option)
+        case_id_option = st.selectbox("Select a case to review in detail:", case_review_df['ref_id'].unique())
+        show_case_detail(case_review_df, case_id_option)
         
         st.subheader("Updated Transactions after Expert Review")
-        st.dataframe(review_df)
+        st.dataframe(case_review_df)
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
 
