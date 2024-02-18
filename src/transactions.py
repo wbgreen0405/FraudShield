@@ -190,7 +190,7 @@ def app():
             case_review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
 
             # Save the merged DataFrame for case review
-            st.session_state[' case_review_df'] =  case_review_df
+            st.session_state['case_review_df'] =  case_review_df
 
 
             # Set analysis performed flag
