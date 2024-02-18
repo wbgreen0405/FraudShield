@@ -46,7 +46,7 @@ def simulate_offline_review(case_review_df):
     # Simulate review dates if not already present
     if 'review_start' not in case_review_df.columns or 'review_end' not in case_review_df.columns:
         review_start_dates, review_end_dates = [], []
-        for _ in range(len(review_df)):
+        for _ in range(len(case_review_df)):
             start_date = datetime.now() - timedelta(days=random.randint(1, 30))
             end_date = start_date + timedelta(hours=random.randint(1, 48))
             review_start_dates.append(start_date)
@@ -61,7 +61,7 @@ def simulate_offline_review(case_review_df):
             lambda flagged: 'Confirmed Fraud' if flagged else 'Confirmed Legitimate'
         )
 
-    return review_df
+    return case_review_df
 
 def plot_workflow_diagram(case_review_df):
     if 'expert_decision' in case_review_df.columns:
