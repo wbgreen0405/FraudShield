@@ -39,43 +39,43 @@ def apply_fraud_detection_rules(df):
 
 
 
-def simulate_offline_review(review_df):
-    if review_df is None:
+def simulate_offline_review(case_review_df):
+    if case_review_df is None:
         return None
 
     # Simulate review dates if not already present
-    if 'review_start' not in review_df.columns or 'review_end' not in review_df.columns:
+    if 'review_start' not in case_review_df.columns or 'review_end' not in case_review_df.columns:
         review_start_dates, review_end_dates = [], []
         for _ in range(len(review_df)):
             start_date = datetime.now() - timedelta(days=random.randint(1, 30))
             end_date = start_date + timedelta(hours=random.randint(1, 48))
             review_start_dates.append(start_date)
             review_end_dates.append(end_date)
-        review_df['review_start'] = review_start_dates
-        review_df['review_end'] = review_end_dates
+        case_review_df['review_start'] = review_start_dates
+        case_review_df['review_end'] = review_end_dates
 
     # Simulate expert decisions considering flagged_fraud
-    if 'expert_decision' not in review_df.columns:
+    if 'expert_decision' not in case_review_df.columns:
         # Adjust decision-making to account for misclassification
-        review_df['expert_decision'] = review_df['flagged_fraud'].apply(
+        case_review_df['expert_decision'] = case_review_df['flagged_fraud'].apply(
             lambda flagged: 'Confirmed Fraud' if flagged else 'Confirmed Legitimate'
         )
 
     return review_df
 
-def plot_workflow_diagram(review_df):
+def plot_workflow_diagram(case_review_df):
     if 'expert_decision' in review_df.columns:
         fig = px.pie(review_df, names='expert_decision', title='Review Cases Status')
         st.plotly_chart(fig)
     else:
         st.warning("Run the simulation to generate expert decisions.")
 
-def plot_case_resolution_timeline(review_df):
+def plot_case_resolution_timeline(case_review_df):
     required_cols = ['review_start', 'review_end', 'ref_id', 'expert_decision']
     if all(col in review_df.columns for col in required_cols):
-        review_df['review_start'] = pd.to_datetime(review_df['review_start'], errors='coerce')
-        review_df['review_end'] = pd.to_datetime(review_df['review_end'], errors='coerce')
-        fig = px.timeline(review_df, x_start='review_start', x_end='review_end', y='ref_id', color='expert_decision', labels={'ref_id': 'Case ID', 'expert_decision': 'Decision'})
+        case_review_df['review_start'] = pd.to_datetime(case_review_df['review_start'], errors='coerce')
+        case_review_df['review_end'] = pd.to_datetime(case_review_df['review_end'], errors='coerce')
+        fig = px.timeline(case_review_df, x_start='review_start', x_end='review_end', y='ref_id', color='expert_decision', labels={'ref_id': 'Case ID', 'expert_decision': 'Decision'})
         fig.update_layout(xaxis_title='Time', yaxis_title='Case ID', title='Case Resolution Timeline')
         fig.update_yaxes(categoryorder='total ascending')
         st.plotly_chart(fig)
@@ -95,21 +95,21 @@ def app():
         st.error("Please complete the transaction analysis before proceeding to the expert review dashboard.")
         return
     
-    if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
-        review_df = st.session_state['review_df']
+    if 'case_review_d' in st.session_state and st.session_state['case_review_df'] is not None:
+        review_df = st.session_state['case_review_df']
 
 
         # Drop unnecessary columns
         columns_to_drop = ['RF Approval Status', 'LOF Status', 'LOF Status_x', 'rf_predicted_fraud', 'LOF Status_y', 'lof_scores_y']
-        review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
+        case_review_df.drop(columns=columns_to_drop, errors='ignore', inplace=True)
 
         # Apply fraud detection rules
         review_df = apply_fraud_detection_rules(review_df)
 
         # Simulate offline review considering flagged_fraud
         if 'offline_review_simulated' not in st.session_state:
-            review_df = simulate_offline_review(review_df)
-            st.session_state['review_df'] = review_df
+            review_df = simulate_offline_review(case_review_df)
+            st.session_state['case_review_df'] = review_df
             st.session_state['offline_review_simulated'] = True
             st.success("Offline review simulation complete. Expert decisions have been added.")
 
