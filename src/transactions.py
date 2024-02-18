@@ -183,7 +183,7 @@ def app():
 
             # Create two separate DataFrames based on the conditions
             rf_fraud_df = analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']
-            lof_fraud_df = analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud']
+            lof_fraud_df = analyzed_df[analyzed_df['LOF Status_y'] == 'Suspected Fraud']
 
             # Merge the two DataFrames on 'ref_id' to get transactions flagged by both
             # Ensure 'ref_id' is set correctly in your DataFrame
