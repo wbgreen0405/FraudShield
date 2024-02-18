@@ -182,12 +182,22 @@ def app():
             #st.session_state['review_df']
 
             # Create two separate DataFrames based on the conditions
-            rf_fraud_df = analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']
-            lof_fraud_df = analyzed_df[analyzed_df['LOF Status_y'] == 'Suspected Fraud']
+            #rf_fraud_df = analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']
+            #lof_fraud_df = analyzed_df[analyzed_df['LOF Status_y'] == 'Suspected Fraud']
 
             # Merge the two DataFrames on 'ref_id' to get transactions flagged by both
             # Ensure 'ref_id' is set correctly in your DataFrame
-            case_review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
+            #case_review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
+
+            # Flag transactions for review if they are marked as fraud by RF or suspected fraud by LOF
+            analyzed_df['flag_for_review'] = (analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')
+            
+            # Create a DataFrame for case review based on the flag
+            case_review_df = analyzed_df[analyzed_df['flag_for_review']]
+            
+            # Save the DataFrame for case review
+            st.session_state['case_review_df'] = case_review_df
+
 
             # Save the merged DataFrame for case review
             st.session_state['case_review_df'] =  case_review_df
