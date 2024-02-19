@@ -19,14 +19,14 @@ def app():
     """)
     
     # Check if the review dataframe is available
-    if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
-        review_df = st.session_state['review_df']
+    if 'outcome_df' in st.session_state and st.session_state['outcome_df'] is not None:
+        outcome_df = st.session_state['outcome_df']
         
         st.subheader("Outcomes of Expert Review")
         st.dataframe(review_df)
 
         # Automatically show outcomes based on expert feedback without waiting for a button press
-        true_positives, false_positives = simulate_test_and_learn_loop(review_df)
+        true_positives, false_positives = simulate_test_and_learn_loop(outcome_df)
         
         st.write("Based on the expert feedback, the model would experience:")
         st.write(f"- {true_positives} true positives.")
