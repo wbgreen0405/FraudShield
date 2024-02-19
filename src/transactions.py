@@ -176,27 +176,6 @@ def app():
             )
 
             st.session_state['review_df'] = analyzed_df
-            #st.session_state['review_df']  = analyzed_df
-            #mask = np.logical_and(analyzed_df['LOF Status'] == 'Suspected Fraud',analyzed_df['RF Approval Status'] == 'Marked as Fraud')
-            #review_df = analyzed_df[mask]
-            #st.session_state['review_df']
-
-            # Create two separate DataFrames based on the conditions
-            #rf_fraud_df = analyzed_df[analyzed_df['RF Approval Status'] == 'Marked as Fraud']
-            #lof_fraud_df = analyzed_df[analyzed_df['LOF Status_y'] == 'Suspected Fraud']
-
-            # Merge the two DataFrames on 'ref_id' to get transactions flagged by both
-            # Ensure 'ref_id' is set correctly in your DataFrame
-            #case_review_df = pd.merge(rf_fraud_df, lof_fraud_df, on='ref_id', how='inner')
-
-            # Flag transactions for review if they are marked as fraud by RF or suspected fraud by LOF
-            # analyzed_df['flag_for_review'] = (analyzed_df['RF Approval Status'] == 'Marked as Fraud') | (analyzed_df['LOF Status'] == 'Suspected Fraud')
-            
-            # Create a DataFrame for case review based on the flag
-            # case_review_df = analyzed_df[analyzed_df['flag_for_review']]
-            
-            # Save the DataFrame for case review
-            # st.session_state['case_review_df'] = case_review_df
 
             # Flag transactions for review based on RF Approval Status and LOF Status
             analyzed_df['flag_for_review'] = (
@@ -232,28 +211,6 @@ def app():
             st.metric("Transactions Flagged for Review by LOF", len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
         with col_metrics4:
             st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
-
-        # Begin adding visualizations in columns
-        col_viz1, col_viz2 = st.columns(2)
-
-        with col_viz1:  # First column for visualizations
-            st.subheader("Credit Risk Score Distribution")
-            fig_credit_risk = px.histogram(st.session_state['analyzed_df'], x='credit_risk_score', title='Credit Risk Score Distribution')
-            st.plotly_chart(fig_credit_risk)
-
-            st.subheader("Applications by Payment Type")
-            fig_payment_type = px.histogram(st.session_state['analyzed_df'], x='payment_type', title='Applications by Payment Type')
-            st.plotly_chart(fig_payment_type)
-
-        with col_viz2:  # Second column for visualizations
-            st.subheader("Applications by Employment Status")
-            fig_employment_status = px.histogram(st.session_state['analyzed_df'], x='employment_status', title='Applications by Employment Status')
-            st.plotly_chart(fig_employment_status)
-
-            st.subheader("Housing Status Distribution")
-            fig_housing_status = px.histogram(st.session_state['analyzed_df'], x='housing_status', title='Housing Status Distribution')
-            st.plotly_chart(fig_housing_status)
-
 
 # Make sure to call the app function under the correct conditional check if it's meant to be used directly
 if __name__ == "__main__":
