@@ -23,7 +23,7 @@ def app():
         outcome_df = st.session_state['outcome_df']
         
         st.subheader("Outcomes of Expert Review")
-        st.dataframe(review_df)
+        st.dataframe(outcome_df)
 
         # Automatically show outcomes based on expert feedback without waiting for a button press
         true_positives, false_positives = simulate_test_and_learn_loop(outcome_df)
