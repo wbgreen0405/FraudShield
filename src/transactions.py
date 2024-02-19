@@ -223,16 +223,41 @@ def app():
 
     if 'analysis_performed' in st.session_state and st.session_state['analysis_performed']:
         # Display results or further actions if analysis has been performed
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
+        col_metrics1, col_metrics2, col_metrics3, col_metrics4 = st.columns(4)
+        with col_metrics1:
             st.metric("Total Transactions Analyzed", len(st.session_state['analyzed_df']))
-        with col2:
+        with col_metrics2:
             st.metric("Transactions Flagged for Review by RF", len(st.session_state['analyzed_df'][st.session_state['analyzed_df']['RF Approval Status'] == 'Marked as Fraud']))
-        with col3:
+        with col_metrics3:
             st.metric("Transactions Flagged for Review by LOF", len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
-        with col4:
+        with col_metrics4:
             st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
-        # This ensures that the final statement aligns with the block it's supposed to be part of
+
+        # Begin adding visualizations in columns
+        col_viz1, col_viz2 = st.columns(2)
+
+        with col_viz1:  # First column for visualizations
+            st.subheader("Transaction Volume Over Time")
+            # Replace with your actual data
+            fig_volume = px.line(analyzed_df, x='transaction_date', y='volume', title='Transaction Volume Over Time')
+            st.plotly_chart(fig_volume)
+
+            st.subheader("Credit Risk Score Distribution")
+            # Replace with your actual data
+            fig_credit_risk = px.histogram(analyzed_df, x='credit_risk_score', title='Credit Risk Score Distribution')
+            st.plotly_chart(fig_credit_risk)
+
+        with col_viz2:  # Second column for visualizations
+            st.subheader("Fraudulent Transactions by Payment Type")
+            # Replace with your actual data
+            fig_payment_type = px.histogram(analyzed_df[analyzed_df['flag_for_review']], x='payment_type', title='Fraudulent Transactions by Payment Type')
+            st.plotly_chart(fig_payment_type)
+
+            st.subheader("Transactions Flagged for Review by LOF")
+            # Replace with your actual data
+            fig_lof_review = px.histogram(analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud'], x='LOF Status', title='Transactions Flagged for Review by LOF')
+            st.plotly_chart(fig_lof_review)
+
 
 # Make sure to call the app function under the correct conditional check if it's meant to be used directly
 if __name__ == "__main__":
