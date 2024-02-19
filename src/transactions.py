@@ -237,26 +237,22 @@ def app():
         col_viz1, col_viz2 = st.columns(2)
 
         with col_viz1:  # First column for visualizations
-            st.subheader("Transaction Volume Over Time")
-            # Replace with your actual data
-            fig_volume = px.line(analyzed_df, x='transaction_date', y='volume', title='Transaction Volume Over Time')
-            st.plotly_chart(fig_volume)
-
             st.subheader("Credit Risk Score Distribution")
-            # Replace with your actual data
-            fig_credit_risk = px.histogram(analyzed_df, x='credit_risk_score', title='Credit Risk Score Distribution')
+            fig_credit_risk = px.histogram(st.session_state['analyzed_df'], x='credit_risk_score', title='Credit Risk Score Distribution')
             st.plotly_chart(fig_credit_risk)
 
-        with col_viz2:  # Second column for visualizations
-            st.subheader("Fraudulent Transactions by Payment Type")
-            # Replace with your actual data
-            fig_payment_type = px.histogram(analyzed_df[analyzed_df['flag_for_review']], x='payment_type', title='Fraudulent Transactions by Payment Type')
+            st.subheader("Applications by Payment Type")
+            fig_payment_type = px.histogram(st.session_state['analyzed_df'], x='payment_type', title='Applications by Payment Type')
             st.plotly_chart(fig_payment_type)
 
-            st.subheader("Transactions Flagged for Review by LOF")
-            # Replace with your actual data
-            fig_lof_review = px.histogram(analyzed_df[analyzed_df['LOF Status'] == 'Suspected Fraud'], x='LOF Status', title='Transactions Flagged for Review by LOF')
-            st.plotly_chart(fig_lof_review)
+        with col_viz2:  # Second column for visualizations
+            st.subheader("Applications by Employment Status")
+            fig_employment_status = px.histogram(st.session_state['analyzed_df'], x='employment_status', title='Applications by Employment Status')
+            st.plotly_chart(fig_employment_status)
+
+            st.subheader("Housing Status Distribution")
+            fig_housing_status = px.histogram(st.session_state['analyzed_df'], x='housing_status', title='Housing Status Distribution')
+            st.plotly_chart(fig_housing_status)
 
 
 # Make sure to call the app function under the correct conditional check if it's meant to be used directly
