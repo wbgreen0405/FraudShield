@@ -75,7 +75,7 @@ def app():
 
         st.subheader("Updated Transactions after Expert Review")
         st.dataframe(case_review_df)
-       st.session_state['outcome_df'] = case_review_df
+        st.session_state['outcome_df'] = case_review_df
     else:
         st.error("No transaction data available for review. Please analyze transactions first.")
 
