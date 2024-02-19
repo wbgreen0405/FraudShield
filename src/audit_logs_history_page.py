@@ -31,9 +31,9 @@ def app():
     if 'audit_logs' not in st.session_state:
         st.session_state['audit_logs'] = []
     
-    if 'review_df' in st.session_state and st.session_state['review_df'] is not None:
-        review_df = st.session_state['review_df']
-        for _, row in review_df.iterrows():
+    if 'outcome_df' in st.session_state and st.session_state['outcome_df'] is not None:
+        outcome_dff = st.session_state['outcome_df']
+        for _, row in outcome_df.iterrows():
             log_audit_entry(
                 transaction_id=row['ref_id'],
                 reviewer_id="Expert Reviewer",
