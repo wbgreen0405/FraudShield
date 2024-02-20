@@ -44,14 +44,6 @@ def app():
     ```
     """)
 
-    # Optional: Add a button to download the dataset information as a PDF
-    with open('/mnt/data/datasheet.pdf', 'rb') as file:
-        btn = st.download_button(
-            label="Download Dataset Information PDF",
-            data=file,
-            file_name="datasheet.pdf",
-            mime="application/octet-stream"
-        )
 
 # Run the app function
 app()
