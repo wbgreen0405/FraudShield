@@ -5,7 +5,7 @@ def app():
     st.title('Welcome to the Fraud Detection System Demo.')
 
     # Display the pipeline image
-    pipeline_image_path = '/assets/Fraud Detection.png'  # Path to the image file
+    pipeline_image_path = 'assets/Fraud Detection.png'  # Path to the image file
     pipeline_image = Image.open(pipeline_image_path)
     st.image(pipeline_image, caption="Fraud Detection Pipeline Visualization")
 
