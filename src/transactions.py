@@ -224,9 +224,8 @@ def app():
 
         with col_viz1:
             st.subheader("Applications by Payment Type")
-            fig_payment_type = px.bar(data, x='payment_type', color='payment_type', title='Applications by Payment Type',
-                                      labels={'payment_type': 'Payment Type'}, 
-                                      category_orders={"payment_type": sorted(data['payment_type'].unique())})
+            fig_payment_type = px.bar(data, x='payment_type', title='Applications by Payment Type',
+                                      labels={'payment_type': 'Payment Type'})
             st.plotly_chart(fig_payment_type)
 
             st.subheader("Credit Risk Score Distribution")
@@ -235,15 +234,13 @@ def app():
 
         with col_viz2:
             st.subheader("Employment Status Distribution")
-            fig_employment_status = px.bar(data, x='employment_status', color='employment_status', title='Employment Status Distribution',
-                                           labels={'employment_status': 'Employment Status'},
-                                           category_orders={"employment_status": sorted(data['employment_status'].unique())})
+            fig_employment_status = px.bar(data, x='employment_status',  title='Employment Status Distribution',
+                                           labels={'employment_status': 'Employment Status'})
             st.plotly_chart(fig_employment_status)
 
             st.subheader("Housing Status Distribution")
-            fig_housing_status = px.bar(data, x='housing_status', color='housing_status', title='Housing Status Distribution',
-                                        labels={'housing_status': 'Housing Status'},
-                                        category_orders={"housing_status": sorted(data['housing_status'].unique())})
+            fig_housing_status = px.bar(data, x='housing_status', title='Housing Status Distribution',
+                                        labels={'housing_status': 'Housing Status'})
             st.plotly_chart(fig_housing_status)
 if __name__ == "__main__":
     app()
