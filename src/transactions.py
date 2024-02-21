@@ -56,19 +56,14 @@ def preprocess_data(df):
     """
     Preprocess transaction data for model inference.
     """
-    if 'mappings' not in st.session_state:
-        st.session_state['mappings'] = {}
-    
+    # Drop 'ref_id' column if it exists to avoid errors during processing
+    #df = df.drop(columns=['ref_id'], errors='ignore')
     categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
     for col in categorical_cols:
         if col in df.columns:
             encoder = LabelEncoder()
             df[col] = encoder.fit_transform(df[col].astype(str))
-            # Save the mapping from class to label for later use
-            st.session_state['mappings'][col] = {i: label for i, label in enumerate(encoder.classes_)}
-    
-    return df
-
+    return df   
 
 
 # Example function to preprocess data and save mappings
@@ -225,42 +220,31 @@ def app():
 
         # Begin adding visualizations in columns after your existing code
         data = st.session_state['case_review_df']  # Load case review data
-
-            
         col_viz1, col_viz2 = st.columns(2)  # Create two columns for visualizations
 
         with col_viz1:
-            # Reverse mapping for 'payment_type'
-            if 'payment_type' in st.session_state['mappings']:
-                reverse_mapping_payment_type = {v: k for k, v in st.session_state['mappings']['payment_type'].items()}
-                data['payment_type'] = data['payment_type'].map(reverse_mapping_payment_type)
-            
-            fig_payment_type = px.bar(data, x='payment_type', title='Applications by Payment Type',
-                                      color='payment_type', 
-                                      labels={'payment_type': 'Payment Type'})
+            st.subheader("Applications by Payment Type")
+            fig_payment_type = px.bar(data, x='payment_type', color='payment_type', title='Applications by Payment Type',
+                                      labels={'payment_type': 'Payment Type'}, 
+                                      category_orders={"payment_type": sorted(data['payment_type'].unique())})
             st.plotly_chart(fig_payment_type)
 
+            st.subheader("Credit Risk Score Distribution")
+            fig_credit_risk = px.histogram(data, x='credit_risk_score', title='Credit Risk Score Distribution')
+            st.plotly_chart(fig_credit_risk)
+
         with col_viz2:
-            # Reverse mapping for 'employment_status'
-            if 'employment_status' in st.session_state['mappings']:
-                reverse_mapping_employment_status = {v: k for k, v in st.session_state['mappings']['employment_status'].items()}
-                data['employment_status'] = data['employment_status'].map(reverse_mapping_employment_status)
-            
-            fig_employment_status = px.bar(data, x='employment_status', title='Employment Status Distribution',
-                                           color='employment_status', 
-                                           labels={'employment_status': 'Employment Status'})
+            st.subheader("Employment Status Distribution")
+            fig_employment_status = px.bar(data, x='employment_status', color='employment_status', title='Employment Status Distribution',
+                                           labels={'employment_status': 'Employment Status'},
+                                           category_orders={"employment_status": sorted(data['employment_status'].unique())})
             st.plotly_chart(fig_employment_status)
 
-            # Reverse mapping for 'housing_status'
-            if 'housing_status' in st.session_state['mappings']:
-                reverse_mapping_housing_status = {v: k for k, v in st.session_state['mappings']['housing_status'].items()}
-                data['housing_status'] = data['housing_status'].map(reverse_mapping_housing_status)
-            
-            fig_housing_status = px.bar(data, x='housing_status', title='Housing Status Distribution',
-                                        color='housing_status', 
-                                        labels={'housing_status': 'Housing Status'})
+            st.subheader("Housing Status Distribution")
+            fig_housing_status = px.bar(data, x='housing_status', color='housing_status', title='Housing Status Distribution',
+                                        labels={'housing_status': 'Housing Status'},
+                                        category_orders={"housing_status": sorted(data['housing_status'].unique())})
             st.plotly_chart(fig_housing_status)
-
 if __name__ == "__main__":
     app()
 
