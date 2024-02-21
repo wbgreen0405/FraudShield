@@ -224,9 +224,10 @@ def app():
 
         with col_viz1:
             st.subheader("Applications by Payment Type")
-            fig_payment_type = px.bar(data, x='payment_type', title='Applications by Payment Type',
-                                      labels={'payment_type': 'Payment Type'})
-            st.plotly_chart(fig_payment_type)
+            payment_type_counts = data['payment_type'].value_counts().reset_index()
+            payment_type_counts.columns = ['payment_type', 'count']
+            fig_payment_type = px.bar(payment_type_counts, x='payment_type', y='count', title='Applications by Payment Type')
+            st.plotly_chart(fig_payment_type))
 
             st.subheader("Credit Risk Score Distribution")
             fig_credit_risk = px.histogram(data, x='credit_risk_score', title='Credit Risk Score Distribution')
