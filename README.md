@@ -16,6 +16,10 @@ FraudShield is a Streamlit-powered demonstration app showcasing the semi-supervi
 
 The BAF Dataset Suite from Kaggle, developed by Feedzai and the University of Porto, serves as the foundation for the fraud detection models in FraudShield. This dataset is a synthetic, feature-engineered collection, ideal for testing ML fairness and performance in dynamic scenarios.
 
+### Video Demo 🎬
+
+Replace VIDEO_ID in the URL above with the actual ID of your YouTube video.
+
 ### Getting Started 🚀
 
 **Prerequisites**
@@ -42,4 +46,4 @@ Your ideas and contributions are welcome! Please fork the repo and submit a pull
 FraudShield is under the MIT License. See the LICENSE for more details.
 
 ### Contact 📬
-Have questions or suggestions? Open an issue or shoot us an email at support@fraudshield.com.
+Have questions or suggestions? Open an issue or shoot us an email at william.green@explainableai2021.com.
