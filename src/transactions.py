@@ -212,6 +212,32 @@ def app():
         with col_metrics4:
             st.metric("Transactions Flagged for Offline Review", len(st.session_state['review_df'][st.session_state['review_df']['RF Approval Status'] == 'Marked as Fraud']) + len(st.session_state['anomaly_df'][st.session_state['anomaly_df']['LOF Status'] == 'Suspected Fraud']))
 
+        # Begin adding visualizations in columns after your existing code
+        data = st.session_state['case_review_df']  # Load case review data
+        col_viz1, col_viz2 = st.columns(2)  # Create two columns for visualizations
+
+        with col_viz1:  # First column for visualizations
+            st.subheader("Income Distribution")
+            fig_income = px.histogram(data, x='income', title='Income Distribution')
+            st.plotly_chart(fig_income)
+
+            st.subheader("Credit Risk Score Distribution")
+            fig_credit_risk = px.histogram(data, x='credit_risk_score', title='Credit Risk Score Distribution')
+            st.plotly_chart(fig_credit_risk)
+
+            st.subheader("Applications by Payment Type")
+            fig_payment_type = px.histogram(data, x='payment_type', title='Applications by Payment Type')
+            st.plotly_chart(fig_payment_type)
+
+        with col_viz2:  # Second column for visualizations
+            st.subheader("Employment Status Distribution")
+            fig_employment_status = px.histogram(data, x='employment_status', title='Employment Status Distribution')
+            st.plotly_chart(fig_employment_status)
+
+            st.subheader("Housing Status Distribution")
+            fig_housing_status = px.histogram(data, x='housing_status', title='Housing Status Distribution')
+            st.plotly_chart(fig_housing_status)
+
 # Make sure to call the app function under the correct conditional check if it's meant to be used directly
 if __name__ == "__main__":
     app()
