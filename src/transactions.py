@@ -86,19 +86,7 @@ def preprocess_data_and_save_mappings(df):
     st.session_state['mappings'] = mappings
     return df
 
-# Assuming you call this function somewhere in your app to preprocess the data
-if 'data_preprocessed' not in st.session_state:
-    # Example: assuming `your_dataframe` is your DataFrame that needs preprocessing
-    your_dataframe = preprocess_data_and_save_mappings(your_dataframe)
-    st.session_state['data_preprocessed'] = True
 
-# Then, when you need to reverse the encoding:
-if 'mappings' in st.session_state and 'payment_type' in st.session_state['mappings']:
-    reverse_mapping_payment_type = st.session_state['mappings']['payment_type']
-    # Assuming `data` is the DataFrame you want to reverse the encoding on
-    data['payment_type'] = data['payment_type'].map(reverse_mapping_payment_type)
-
-# Note: Repeat the reverse mapping process for other categorical columns as needed
 
 
 def perform_inference(transactions_df, rf_model, lof_model):
