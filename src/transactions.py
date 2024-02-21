@@ -69,18 +69,37 @@ def preprocess_data(df):
     
     return df
 
-def preprocess_data(df):
-    """
-    Placeholder for the actual preprocessing steps.
-    Adjust according to your actual preprocessing requirements.
-    """
-    # Example preprocessing steps
+
+
+# Example function to preprocess data and save mappings
+def preprocess_data_and_save_mappings(df):
     categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
+    mappings = {}
     for col in categorical_cols:
         if col in df.columns:
             encoder = LabelEncoder()
+            # Fit and transform the data
             df[col] = encoder.fit_transform(df[col].astype(str))
+            # Save the mapping from labels to integers
+            mappings[col] = {index: label for index, label in enumerate(encoder.classes_)}
+    # Save mappings to session state
+    st.session_state['mappings'] = mappings
     return df
+
+# Assuming you call this function somewhere in your app to preprocess the data
+if 'data_preprocessed' not in st.session_state:
+    # Example: assuming `your_dataframe` is your DataFrame that needs preprocessing
+    your_dataframe = preprocess_data_and_save_mappings(your_dataframe)
+    st.session_state['data_preprocessed'] = True
+
+# Then, when you need to reverse the encoding:
+if 'mappings' in st.session_state and 'payment_type' in st.session_state['mappings']:
+    reverse_mapping_payment_type = st.session_state['mappings']['payment_type']
+    # Assuming `data` is the DataFrame you want to reverse the encoding on
+    data['payment_type'] = data['payment_type'].map(reverse_mapping_payment_type)
+
+# Note: Repeat the reverse mapping process for other categorical columns as needed
+
 
 def perform_inference(transactions_df, rf_model, lof_model):
     # Initialize 'LOF Status' column to ensure it's always present
@@ -218,37 +237,42 @@ def app():
 
         # Begin adding visualizations in columns after your existing code
         data = st.session_state['case_review_df']  # Load case review data
-        # Reverse mappings for 'payment_type', 'employment_status', 'housing_status'
-        for column, mapping in st.session_state['mappings'].items():
-            reverse_mapping = {v: k for k, v in mapping.items()}
-            data[column] = data[column].map(reverse_mapping)
+
             
         col_viz1, col_viz2 = st.columns(2)  # Create two columns for visualizations
 
         with col_viz1:
-            st.subheader("Applications by Payment Type")
-            fig_payment_type = px.bar(data, x='payment_type', color='payment_type', title='Applications by Payment Type',
-                                      labels={'payment_type': 'Payment Type'}, 
-                                      category_orders={"payment_type": sorted(data['payment_type'].unique())})
+            # Reverse mapping for 'payment_type'
+            if 'payment_type' in st.session_state['mappings']:
+                reverse_mapping_payment_type = {v: k for k, v in st.session_state['mappings']['payment_type'].items()}
+                data['payment_type'] = data['payment_type'].map(reverse_mapping_payment_type)
+            
+            fig_payment_type = px.bar(data, x='payment_type', title='Applications by Payment Type',
+                                      color='payment_type', 
+                                      labels={'payment_type': 'Payment Type'})
             st.plotly_chart(fig_payment_type)
 
-            st.subheader("Credit Risk Score Distribution")
-            fig_credit_risk = px.histogram(data, x='credit_risk_score', title='Credit Risk Score Distribution')
-            st.plotly_chart(fig_credit_risk)
-
         with col_viz2:
-            st.subheader("Employment Status Distribution")
-            fig_employment_status = px.bar(data, x='employment_status', color='employment_status', title='Employment Status Distribution',
-                                           labels={'employment_status': 'Employment Status'},
-                                           category_orders={"employment_status": sorted(data['employment_status'].unique())})
+            # Reverse mapping for 'employment_status'
+            if 'employment_status' in st.session_state['mappings']:
+                reverse_mapping_employment_status = {v: k for k, v in st.session_state['mappings']['employment_status'].items()}
+                data['employment_status'] = data['employment_status'].map(reverse_mapping_employment_status)
+            
+            fig_employment_status = px.bar(data, x='employment_status', title='Employment Status Distribution',
+                                           color='employment_status', 
+                                           labels={'employment_status': 'Employment Status'})
             st.plotly_chart(fig_employment_status)
 
-            st.subheader("Housing Status Distribution")
-            fig_housing_status = px.bar(data, x='housing_status', color='housing_status', title='Housing Status Distribution',
-                                        labels={'housing_status': 'Housing Status'},
-                                        category_orders={"housing_status": sorted(data['housing_status'].unique())})
+            # Reverse mapping for 'housing_status'
+            if 'housing_status' in st.session_state['mappings']:
+                reverse_mapping_housing_status = {v: k for k, v in st.session_state['mappings']['housing_status'].items()}
+                data['housing_status'] = data['housing_status'].map(reverse_mapping_housing_status)
+            
+            fig_housing_status = px.bar(data, x='housing_status', title='Housing Status Distribution',
+                                        color='housing_status', 
+                                        labels={'housing_status': 'Housing Status'})
             st.plotly_chart(fig_housing_status)
-# Make sure to call the app function under the correct conditional check if it's meant to be used directly
+
 if __name__ == "__main__":
     app()
 
