@@ -234,14 +234,18 @@ def app():
             st.plotly_chart(fig_credit_risk)
 
         with col_viz2:
+            # Employment Status Distribution
             st.subheader("Employment Status Distribution")
-            fig_employment_status = px.bar(data, x='employment_status',  title='Employment Status Distribution',
-                                           labels={'employment_status': 'Employment Status'})
+            employment_status_counts = data['employment_status'].value_counts().reset_index()
+            employment_status_counts.columns = ['employment_status', 'count']
+            fig_employment_status = px.bar(employment_status_counts, x='employment_status', y='count', title='Employment Status Distribution')
             st.plotly_chart(fig_employment_status)
 
+            # Housing Status Distribution
             st.subheader("Housing Status Distribution")
-            fig_housing_status = px.bar(data, x='housing_status', title='Housing Status Distribution',
-                                        labels={'housing_status': 'Housing Status'})
+            housing_status_counts = data['housing_status'].value_counts().reset_index()
+            housing_status_counts.columns = ['housing_status', 'count']
+            fig_housing_status = px.bar(housing_status_counts, x='housing_status', y='count', title='Housing Status Distribution')
             st.plotly_chart(fig_housing_status)
 if __name__ == "__main__":
     app()
