@@ -56,13 +56,17 @@ def preprocess_data(df):
     """
     Preprocess transaction data for model inference.
     """
-    # Drop 'ref_id' column if it exists to avoid errors during processing
-    #df = df.drop(columns=['ref_id'], errors='ignore')
+    if 'mappings' not in st.session_state:
+        st.session_state['mappings'] = {}
+    
     categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
     for col in categorical_cols:
         if col in df.columns:
             encoder = LabelEncoder()
             df[col] = encoder.fit_transform(df[col].astype(str))
+            # Save the mapping from class to label for later use
+            st.session_state['mappings'][col] = {i: label for i, label in enumerate(encoder.classes_)}
+    
     return df
 
 def preprocess_data(df):
@@ -214,30 +218,36 @@ def app():
 
         # Begin adding visualizations in columns after your existing code
         data = st.session_state['case_review_df']  # Load case review data
+        # Reverse mappings for 'payment_type', 'employment_status', 'housing_status'
+        for column, mapping in st.session_state['mappings'].items():
+            reverse_mapping = {v: k for k, v in mapping.items()}
+            data[column] = data[column].map(reverse_mapping)
+            
         col_viz1, col_viz2 = st.columns(2)  # Create two columns for visualizations
 
-        with col_viz1:  # First column for visualizations
-            st.subheader("Income Distribution")
-            fig_income = px.histogram(data, x='income', title='Income Distribution')
-            st.plotly_chart(fig_income)
+        with col_viz1:
+            st.subheader("Applications by Payment Type")
+            fig_payment_type = px.bar(data, x='payment_type', color='payment_type', title='Applications by Payment Type',
+                                      labels={'payment_type': 'Payment Type'}, 
+                                      category_orders={"payment_type": sorted(data['payment_type'].unique())})
+            st.plotly_chart(fig_payment_type)
 
             st.subheader("Credit Risk Score Distribution")
             fig_credit_risk = px.histogram(data, x='credit_risk_score', title='Credit Risk Score Distribution')
             st.plotly_chart(fig_credit_risk)
 
-            st.subheader("Applications by Payment Type")
-            fig_payment_type = px.histogram(data, x='payment_type', title='Applications by Payment Type')
-            st.plotly_chart(fig_payment_type)
-
-        with col_viz2:  # Second column for visualizations
+        with col_viz2:
             st.subheader("Employment Status Distribution")
-            fig_employment_status = px.histogram(data, x='employment_status', title='Employment Status Distribution')
+            fig_employment_status = px.bar(data, x='employment_status', color='employment_status', title='Employment Status Distribution',
+                                           labels={'employment_status': 'Employment Status'},
+                                           category_orders={"employment_status": sorted(data['employment_status'].unique())})
             st.plotly_chart(fig_employment_status)
 
             st.subheader("Housing Status Distribution")
-            fig_housing_status = px.histogram(data, x='housing_status', title='Housing Status Distribution')
+            fig_housing_status = px.bar(data, x='housing_status', color='housing_status', title='Housing Status Distribution',
+                                        labels={'housing_status': 'Housing Status'},
+                                        category_orders={"housing_status": sorted(data['housing_status'].unique())})
             st.plotly_chart(fig_housing_status)
-
 # Make sure to call the app function under the correct conditional check if it's meant to be used directly
 if __name__ == "__main__":
     app()
