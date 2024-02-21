@@ -65,25 +65,6 @@ def preprocess_data(df):
             df[col] = encoder.fit_transform(df[col].astype(str))
     return df   
 
-
-# Example function to preprocess data and save mappings
-def preprocess_data_and_save_mappings(df):
-    categorical_cols = ['payment_type', 'employment_status', 'housing_status', 'source', 'device_os']
-    mappings = {}
-    for col in categorical_cols:
-        if col in df.columns:
-            encoder = LabelEncoder()
-            # Fit and transform the data
-            df[col] = encoder.fit_transform(df[col].astype(str))
-            # Save the mapping from labels to integers
-            mappings[col] = {index: label for index, label in enumerate(encoder.classes_)}
-    # Save mappings to session state
-    st.session_state['mappings'] = mappings
-    return df
-
-
-
-
 def perform_inference(transactions_df, rf_model, lof_model):
     # Initialize 'LOF Status' column to ensure it's always present
     transactions_df['LOF Status'] = 'Not Evaluated'
