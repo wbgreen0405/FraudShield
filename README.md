@@ -20,7 +20,7 @@ The BAF Dataset Suite from Kaggle, developed by Feedzai and the University of Po
 
 Watch the FraudShield demo video here:
 
-[![FraudShield Demo](https://img.youtube.com/vi/2l1l6DA52LA/0.jpg)](https://youtu.be/2l1l6DA52LA "FraudShield Demo")
+[![Fraud Detection](https://res.cloudinary.com/marcomontalbano/image/upload/v1708575083/video_to_markdown/images/youtube--2l1l6DA52LA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=2l1l6DA52LA "Fraud Detection")
 
 ### Getting Started 🚀
 
